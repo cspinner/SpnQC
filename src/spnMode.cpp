@@ -7,13 +7,13 @@
 
 #include "spnQC.h"
 
-const char* MODE_STRINGS[MODE_COUNT_E] =
+const char* GBL_MODE_STRINGS[MODE_COUNT_E] =
 {
 		//MODE_INIT_E:
 		"INITIALIZATION MODE",
 
-		//MODE_TEST_E:
-		"TEST MODE",
+		//MODE_STANDBY_E:
+		"STANDBY MODE",
 
 		//MODE_RUN_E:
 		"RUN MODE",
@@ -29,7 +29,7 @@ static System_Mode_Type spnGlobalMode = MODE_INIT_E;
 
 const char* spnModeGetString(void)
 {
-	return MODE_STRINGS[spnGlobalMode];
+	return GBL_MODE_STRINGS[spnGlobalMode];
 }
 
 System_Mode_Type spnModeGet(void)
@@ -37,25 +37,39 @@ System_Mode_Type spnModeGet(void)
 	return spnGlobalMode;
 }
 
-void spnModeSet(System_Mode_Type mode)
+void spnModeUpdate(void)
 {
-	// Restrict mode transitions
+	char userInput = spnUserInputCharGet(false);
+
+	// Manage mode transitions
 	switch(spnGlobalMode)
 	{
 		case MODE_INIT_E:
-			spnGlobalMode = mode;
+			spnGlobalMode = MODE_STANDBY_E;
 			break;
 
-		// Do not allow transition to any mode other than stop
-		case MODE_CALIBRATE_E:
-		case MODE_TEST_E:
-		case MODE_STOP_E:
-		case MODE_RUN_E:
-		default:
-			if(mode == MODE_STOP_E)
+		case MODE_STANDBY_E:
+			if((spnSchedulerGetFrameCount()*MINOR_FRAME_TIME_USEC)/1000000 > 10)
 			{
-				spnGlobalMode = mode;
+				spnGlobalMode = MODE_RUN_E;
 			}
+			else if((userInput == 'z' ) || (userInput == 'Z'))
+			{
+				spnGlobalMode = MODE_CALIBRATE_E;
+			}
+			break;
+
+		case MODE_RUN_E:
+		case MODE_CALIBRATE_E:
+			if((userInput == 's' ) || (userInput == 'S'))
+			{
+				spnGlobalMode = MODE_STOP_E;
+			}
+			break;
+
+		case MODE_STOP_E:
+		default:
+			spnGlobalMode = MODE_STOP_E;
 			break;
 	}
 

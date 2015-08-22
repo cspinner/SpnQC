@@ -4,13 +4,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/CONTROL/spnPID.cpp 
+../src/CONTROL/spnMotors.cpp \
+../src/CONTROL/spnPID.cpp \
+../src/CONTROL/spnServoblaster.cpp 
 
 OBJS += \
-./src/CONTROL/spnPID.o 
+./src/CONTROL/spnMotors.o \
+./src/CONTROL/spnPID.o \
+./src/CONTROL/spnServoblaster.o 
 
 CPP_DEPS += \
-./src/CONTROL/spnPID.d 
+./src/CONTROL/spnMotors.d \
+./src/CONTROL/spnPID.d \
+./src/CONTROL/spnServoblaster.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

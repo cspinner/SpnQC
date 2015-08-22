@@ -20,8 +20,9 @@
 #define FAIL false
 #define MINOR_FRAME_TIME_USEC 30000
 
+//#define OUTPUT_PIN_PWM_0 27
 #define OUTPUT_PIN_STATUS_LED 27
-#define INPUT_PIN_TEST_MODE 17
+#define INPUT_PIN_TEST_MODE 4
 
 #define PI 3.1415926538
 
@@ -31,12 +32,13 @@
 typedef enum
 {
 	MODE_INIT_E,
-	MODE_TEST_E,
+	MODE_STANDBY_E,
 	MODE_RUN_E,
 	MODE_STOP_E,
 	MODE_CALIBRATE_E,
 	MODE_COUNT_E
 } System_Mode_Type;
+
 
 //
 // DATA
@@ -69,15 +71,16 @@ void spnSensorManagerUpdate(void);
 void spnSensorGetPrincipalAxes(float* pPitch, float* pRoll, float* pYaw);
 float spnSensorGetTemperature(void);
 
-bool spnMotorManagerInit(void);
-void spnMotorManagerUpdate(void);
+bool spnCommandInit(void);
+void spnCommandUpdate(void);
+const char* spnCommandGetModeString(void);
 
 bool spnStatusGet(void);
 void spnStatusSet(bool);
 
 const char* spnModeGetString(void);
 System_Mode_Type spnModeGet(void);
-void spnModeSet(System_Mode_Type mode);
+void spnModeUpdate(void);
 
 void spnUtilsWaitUsec(unsigned int delayUsec);
 void spnUtilsMarkTimestamp(void);
@@ -93,9 +96,14 @@ void spnUtilsCloseFile(FILE *pFile);
 bool spnUserOutputInit(void);
 void spnUserOutputUpdate(void);
 
+bool spnUserInputInit(void);
+void spnUserInputUpdate(void);
+char spnUserInputCharGet(bool consume);
 
+void spnMotorsInit(void);
+void spnMotorsSet(int motorNum, float cmdPct);
 
-
+void spnServoblasterSet(int index, int pulseWidthUsec);
 
 
 #endif /* SPNQC_H_ */

@@ -42,7 +42,7 @@ bool spnUserOutputInit(void)
 
 		// write all headings
 		spnUtilsWriteToFile(pOutputFile,
-				"MODE,FRAME,YAW,PITCH,ROLL,TEMP_F,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US\n");
+				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,TEMP_F,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US\n");
 
 		return SUCCESS;
 	}
@@ -72,8 +72,7 @@ static void userOutputConsole(void)
 	// Clear screen
 	for(int i = 0; i < 200; i++) printf("\n");
 
-	//printf ("Compass value: %f\n", SpnCompassData);
-	printf("Mode: %s\n", spnModeGetString());
+	printf("System Mode: %s - Command Mode: %s\n", spnModeGetString(), spnCommandGetModeString());
 	printf("Frame count: %i\n", spnSchedulerGetFrameCount());
 	printf("Frame time: %u sec, %u msec, %u usec\n", fgElapsedSec, fgElapsedMSec, fgElapsedUSec);
 	printf("Max Frame time: %u sec, %u msec, %u usec\n", fgElapsedMaxSec, fgElapsedMaxMSec, fgElapsedMaxUSec);
@@ -83,7 +82,6 @@ static void userOutputConsole(void)
 	printf("\n");
 
 	printf("Temperature (F): %f\n", Temperature);
-
 	printf("%-5s: Yaw: %10f, Pitch: %10f, Roll: %10f\n", "Pos", Yaw, Pitch, Roll);
 }
 
@@ -91,8 +89,9 @@ static void userOutputFile(void)
 {
 	// write data to file
 	char buf[1024];
-	sprintf(buf, "%s,%i,%.5f,%.5f,%.5f,%.5f,%u,%u,%u,%u,%u,%u\n",
+	sprintf(buf, "%s,%s,%i,%.5f,%.5f,%.5f,%.5f,%u,%u,%u,%u,%u,%u\n",
 			spnModeGetString(),
+			spnCommandGetModeString(),
 			spnSchedulerGetFrameCount(),
 			Yaw,
 			Pitch,
@@ -110,6 +109,7 @@ static void userOutputFile(void)
 
 static void userOutputOnExit(void)
 {
+	printf("Closing Output File...\n");
 	spnUtilsCloseFile(pOutputFile);
 }
 

@@ -5,37 +5,40 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/main.cpp \
+../src/spnCommand.cpp \
 ../src/spnHandlers.cpp \
 ../src/spnInit.cpp \
 ../src/spnMode.cpp \
-../src/spnMotorManager.cpp \
 ../src/spnScheduler.cpp \
 ../src/spnSensorManager.cpp \
 ../src/spnStatus.cpp \
+../src/spnUserInput.cpp \
 ../src/spnUserOutput.cpp \
 ../src/spnUtils.cpp 
 
 OBJS += \
 ./src/main.o \
+./src/spnCommand.o \
 ./src/spnHandlers.o \
 ./src/spnInit.o \
 ./src/spnMode.o \
-./src/spnMotorManager.o \
 ./src/spnScheduler.o \
 ./src/spnSensorManager.o \
 ./src/spnStatus.o \
+./src/spnUserInput.o \
 ./src/spnUserOutput.o \
 ./src/spnUtils.o 
 
 CPP_DEPS += \
 ./src/main.d \
+./src/spnCommand.d \
 ./src/spnHandlers.d \
 ./src/spnInit.d \
 ./src/spnMode.d \
-./src/spnMotorManager.d \
 ./src/spnScheduler.d \
 ./src/spnSensorManager.d \
 ./src/spnStatus.d \
+./src/spnUserInput.d \
 ./src/spnUserOutput.d \
 ./src/spnUtils.d 
 

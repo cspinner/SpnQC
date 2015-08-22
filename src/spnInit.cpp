@@ -15,9 +15,6 @@ bool spnInit(void)
 {
 	bool status = FAIL;
 
-	// Enter initialization mode
-	spnModeSet(MODE_INIT_E);
-
 	// Attempt to increase program's scheduling priority
 	if(piHiPri(99) == 0)
 	{
@@ -29,10 +26,10 @@ bool spnInit(void)
 
 		// Configure sensors, motors
 		if( (spnSensorManagerInit() == SUCCESS) &&
-			(spnMotorManagerInit() == SUCCESS))
+			(spnCommandInit() == SUCCESS))
 		{
 			// Configure console/file output
-			status = spnUserOutputInit();
+			status = spnUserOutputInit() && spnUserInputInit();
 		}
 	}
 	else

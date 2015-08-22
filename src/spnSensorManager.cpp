@@ -102,18 +102,9 @@ static bool initMPU9250(void)
 
 		// close the file
 		spnUtilsCloseFile(pInputFile);
-
-		// Enter calibration if data was not completely read
-		if(status != SUCCESS)
-		{
-			spnModeSet(MODE_CALIBRATE_E);
-		}
 	}
 	else
 	{
-		// Otherwise, enter calibration mode
-		spnModeSet(MODE_CALIBRATE_E);
-
 		// Cal data was not read. Default to no calibration
 		cal_mpu9250.accel.x_bias = 0;
 		cal_mpu9250.accel.y_bias = 0;

@@ -24,7 +24,7 @@ const int LED_STATUS_PATTERN[MODE_COUNT_E][LED_STATUS_STEP_COUNT] =
 	//MODE_INIT_E:
 	{1,0,0,0,0,0,0,0,0,0},
 
-	//MODE_TEST_E:
+	//MODE_STANDBY_E:
 	{1,0,0,0,0,1,0,0,0,0},
 
 	//MODE_RUN_E:
@@ -53,6 +53,9 @@ void spnSchedulerForeground(void)
 	// Start of frame time stamp
 	spnUtilsMarkTimestamp();
 
+	spnUserInputUpdate();
+	spnModeUpdate();
+
 	// Flash LED - 2 second cycle time for entire LED pattern.
 	//             And each pattern has LED_STATUS_STEP_COUNT positions.
 	if(spnMinorFrameCount %
@@ -64,11 +67,10 @@ void spnSchedulerForeground(void)
 	}
 
 	spnSensorManagerUpdate();
+	spnCommandUpdate();
 
-	if(spnModeGet() == MODE_RUN_E)
-	{
-		spnMotorManagerUpdate();
-	}
+	// consume the input character
+	spnUserInputCharGet(true);
 
 	// get elapsed time since start of frame
 	tsFgElapsed = spnUtilsGetElapsedTime();
@@ -77,7 +79,7 @@ void spnSchedulerForeground(void)
 		tsFgElapsedMax = tsFgElapsed;
 	}
 
-	// Print output
+	// Print outputs
 	spnUserOutputUpdate();
 
 	spnMinorFrameCount++;
