@@ -6,6 +6,7 @@
 CPP_SRCS += \
 ../src/main.cpp \
 ../src/spnCommand.cpp \
+../src/spnConfig.cpp \
 ../src/spnHandlers.cpp \
 ../src/spnInit.cpp \
 ../src/spnMode.cpp \
@@ -19,6 +20,7 @@ CPP_SRCS += \
 OBJS += \
 ./src/main.o \
 ./src/spnCommand.o \
+./src/spnConfig.o \
 ./src/spnHandlers.o \
 ./src/spnInit.o \
 ./src/spnMode.o \
@@ -32,6 +34,7 @@ OBJS += \
 CPP_DEPS += \
 ./src/main.d \
 ./src/spnCommand.d \
+./src/spnConfig.d \
 ./src/spnHandlers.d \
 ./src/spnInit.d \
 ./src/spnMode.d \
@@ -47,7 +50,7 @@ CPP_DEPS += \
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross G++ Compiler'
-	arm-none-linux-gnueabi-g++ -I"/Users/cspinner/Documents/workspace/wiringPi/wiringPi/include" -I"/Users/cspinner/Documents/workspace/SpnQC/src/MADGWICK" -I"/Users/cspinner/Documents/workspace/SpnQC/src/SENSE" -I"/Users/cspinner/Documents/workspace/SpnQC/src/CONTROL" -I"/Users/cspinner/Documents/workspace/SpnQC/src" -I/Volumes/xtools/arm-none-linux-gnueabi/arm-none-linux-gnueabi/include/c++/4.8.2 -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	arm-none-linux-gnueabi-g++ -I"/Users/cspinner/Documents/workspace/pigpio" -I"/Users/cspinner/Documents/workspace/wiringPi/wiringPi/include" -I"/Users/cspinner/Documents/workspace/SpnQC/src/MADGWICK" -I"/Users/cspinner/Documents/workspace/SpnQC/src/SENSE" -I"/Users/cspinner/Documents/workspace/SpnQC/src/CONTROL" -I"/Users/cspinner/Documents/workspace/SpnQC/src" -I/Volumes/xtools/arm-none-linux-gnueabi/arm-none-linux-gnueabi/include/c++/4.8.2 -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

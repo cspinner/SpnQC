@@ -105,6 +105,52 @@ size_t spnUtilsReadLine(FILE *pFile, char* pDest, size_t destSizeBytes)
 	return bytesRead;
 }
 
+// assumes one floating point value per line
+bool spnUtilsReadNextFloatFromFile(FILE* pFile, float* pDest)
+{
+	size_t bytesRead;
+	char readBytes[128];
+
+	// Read the line
+	bytesRead = spnUtilsReadLine(pFile, readBytes, sizeof(readBytes));
+
+	if(bytesRead > 0)
+	{
+		// Parse the float value
+		sscanf(readBytes, "%f", pDest);
+
+		return SUCCESS;
+	}
+	else
+	{
+		// some error or EOF
+		return FAIL;
+	}
+}
+
+// assumes one integer point value per line
+bool spnUtilsReadNextIntFromFile(FILE* pFile, int* pDest)
+{
+	size_t bytesRead;
+	char readBytes[128];
+
+	// Read the line
+	bytesRead = spnUtilsReadLine(pFile, readBytes, sizeof(readBytes));
+
+	if(bytesRead > 0)
+	{
+		// Parse the float value
+		sscanf(readBytes, "%i", pDest);
+
+		return SUCCESS;
+	}
+	else
+	{
+		// some error or EOF
+		return FAIL;
+	}
+}
+
 void spnUtilsOpenFileForAppend(FILE **pFile, const char *pPathname)
 {
 	*pFile = fopen(pPathname, "a");

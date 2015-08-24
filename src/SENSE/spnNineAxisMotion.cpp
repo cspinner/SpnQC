@@ -20,9 +20,6 @@ using namespace std;
 #define MPU9250_IDENTIFIER 0x71u // Expected value of WHOAMI
 #define AK8963_IDENTIFIER 0x48u // Expected value of WIA
 
-#define MPU9250_FS_SEL_GYRO 0 //full scale = 250DPS
-#define MPU9250_FS_SEL_ACCEL 0 //full scale = 2G
-
 typedef enum
 {
 	WRITE = 0x00,
@@ -172,6 +169,8 @@ const float ACCEL_SENSITIVITY[4] =
 int spi_fd;
 int chipSelect;
 int speed;
+int accFsSel;
+int gyroFsSel;
 
 SpnNineAxisMotion_Calibration_Type calData;
 
@@ -286,6 +285,8 @@ SpnNineAxisMotion::SpnNineAxisMotion(void)
 	speed = 0;
 	rollingAvgCount = 0;
 	rawDataCount = 0;
+	accFsSel = 0;
+	gyroFsSel = 0;
 
 	memset(&calData, 0, sizeof(calData));
 	memset(&rawData, 0, sizeof(rawData));
@@ -312,10 +313,10 @@ bool SpnNineAxisMotion::configure(void* cfg)
 
 		rollingAvgCount = mpu9250_config->rollingAvgCount;
 		magOutlierThresh = mpu9250_config->magOutlierThresh;
+		accFsSel = mpu9250_config->accFsSel;
+		gyroFsSel = mpu9250_config->gyroFsSel;
+		calData = mpu9250_config->calibration;
 		rawDataCount = 0;
-
-		// Configure calibration
-		calData = *mpu9250_config->pCal;
 
 		// First reset the MPU9250
 		writeRegisterMask(MPU9250_PWR_MGMT_1_ADDR, 0x80, 0x1);
@@ -339,21 +340,21 @@ bool SpnNineAxisMotion::configure(void* cfg)
 		else
 		{
 			// configure gyro and accel
-			writeRegisterMask(MPU9250_GYRO_CONFIG_ADDR, 0x18, MPU9250_FS_SEL_GYRO);
-			writeRegisterMask(MPU9250_ACCEL_CONFIG_ADDR, 0x18, MPU9250_FS_SEL_ACCEL);
+			writeRegisterMask(MPU9250_GYRO_CONFIG_ADDR, 0x18, gyroFsSel);
+			writeRegisterMask(MPU9250_ACCEL_CONFIG_ADDR, 0x18, accFsSel);
 			writeRegisterMask(MPU9250_CONFIG_ADDR, 0x07, 0x6); //DLPF_CFG = 6
 
 			//
 			// Apply GYRO user offset
 			//
 			short gyroOffsetX, gyroOffsetY, gyroOffsetZ;
-			float gyroSensitivity = GYRO_SENSITIVITY[MPU9250_FS_SEL_GYRO];
+			float gyroSensitivity = GYRO_SENSITIVITY[gyroFsSel];
 
 			// Convert offset into format required by the register. Divide by 4 to get 32.9 LSB per deg/s
 			//  to conform to expected bias input format
-			gyroOffsetX = (short)((calData.gyro.x_bias * gyroSensitivity * pow(2, MPU9250_FS_SEL_GYRO)) / 4.0);
-			gyroOffsetY = (short)((calData.gyro.y_bias * gyroSensitivity * pow(2, MPU9250_FS_SEL_GYRO)) / 4.0);
-			gyroOffsetZ = (short)((calData.gyro.z_bias * gyroSensitivity * pow(2, MPU9250_FS_SEL_GYRO)) / 4.0);
+			gyroOffsetX = (short)((calData.gyro.x_bias * gyroSensitivity * pow(2, gyroFsSel)) / 4.0);
+			gyroOffsetY = (short)((calData.gyro.y_bias * gyroSensitivity * pow(2, gyroFsSel)) / 4.0);
+			gyroOffsetZ = (short)((calData.gyro.z_bias * gyroSensitivity * pow(2, gyroFsSel)) / 4.0);
 
 			writeRegisterMask(MPU9250_GYRO_X_OFFS_USR_H_ADDR, 0xFFu, ((gyroOffsetX>>8) & 0xFFu));
 			writeRegisterMask(MPU9250_GYRO_X_OFFS_USR_L_ADDR, 0xFFu, (gyroOffsetX & 0xFFu));
@@ -367,7 +368,7 @@ bool SpnNineAxisMotion::configure(void* cfg)
 			//
 			short accelOffsetRegX, accelOffsetRegY, accelOffsetRegZ;
 			short accelOffsetX, accelOffsetY, accelOffsetZ;
-			float accelSensitivity = ACCEL_SENSITIVITY[MPU9250_FS_SEL_ACCEL];
+			float accelSensitivity = ACCEL_SENSITIVITY[accFsSel];
 
 			// Apparently there is factory bias already loaded into the accel registers.
 			//  We will need to add our bias to it.
@@ -377,9 +378,9 @@ bool SpnNineAxisMotion::configure(void* cfg)
 
 			// Convert offset into format required by the register. Divide by 8 to get 2048 LSB per g
 			//  to conform to expected bias input format. Mask LSB since it must be preserved.
-			accelOffsetX = accelOffsetRegX + ((short)(calData.accel.x_bias * accelSensitivity * pow(2, MPU9250_FS_SEL_ACCEL) / 8.0) & ~1);
-			accelOffsetY = accelOffsetRegY + ((short)(calData.accel.y_bias * accelSensitivity * pow(2, MPU9250_FS_SEL_ACCEL) / 8.0) & ~1);
-			accelOffsetZ = accelOffsetRegZ + ((short)(calData.accel.z_bias * accelSensitivity * pow(2, MPU9250_FS_SEL_ACCEL) / 8.0) & ~1);
+			accelOffsetX = accelOffsetRegX + ((short)(calData.accel.x_bias * accelSensitivity * pow(2, accFsSel) / 8.0) & ~1);
+			accelOffsetY = accelOffsetRegY + ((short)(calData.accel.y_bias * accelSensitivity * pow(2, accFsSel) / 8.0) & ~1);
+			accelOffsetZ = accelOffsetRegZ + ((short)(calData.accel.z_bias * accelSensitivity * pow(2, accFsSel) / 8.0) & ~1);
 
 			writeRegister(MPU9250_ACCEL_X_OFFS_USR_H_ADDR, ((accelOffsetX>>8) & 0xFFu));
 			writeRegister(MPU9250_ACCEL_X_OFFS_USR_L_ADDR, (accelOffsetX & 0xFFu));
@@ -538,14 +539,14 @@ bool SpnNineAxisMotion::retrieveData(int* size, void* data)
 		output.temperature = output.temperature*1.8 + 32;
 
 		// Converts raw accelerometer data into g
-		output.accel.x = filtData.accel.x_raw / ACCEL_SENSITIVITY[MPU9250_FS_SEL_ACCEL];
-		output.accel.y = filtData.accel.y_raw / ACCEL_SENSITIVITY[MPU9250_FS_SEL_ACCEL];
-		output.accel.z = filtData.accel.z_raw / ACCEL_SENSITIVITY[MPU9250_FS_SEL_ACCEL];
+		output.accel.x = filtData.accel.x_raw / ACCEL_SENSITIVITY[accFsSel];
+		output.accel.y = filtData.accel.y_raw / ACCEL_SENSITIVITY[accFsSel];
+		output.accel.z = filtData.accel.z_raw / ACCEL_SENSITIVITY[accFsSel];
 
 		// Converts raw gyroscope data into º/s
-		output.gyro.x = filtData.gyro.x_raw / GYRO_SENSITIVITY[MPU9250_FS_SEL_GYRO];
-		output.gyro.y = filtData.gyro.y_raw / GYRO_SENSITIVITY[MPU9250_FS_SEL_GYRO];
-		output.gyro.z = filtData.gyro.z_raw / GYRO_SENSITIVITY[MPU9250_FS_SEL_GYRO];
+		output.gyro.x = filtData.gyro.x_raw / GYRO_SENSITIVITY[gyroFsSel];
+		output.gyro.y = filtData.gyro.y_raw / GYRO_SENSITIVITY[gyroFsSel];
+		output.gyro.z = filtData.gyro.z_raw / GYRO_SENSITIVITY[gyroFsSel];
 
 		// Convert uT to mG
 		output.mag.x = filtData.mag.x_raw * 10.0;

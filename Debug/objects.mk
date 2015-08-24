@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -lwiringPi -lpthread
+LIBS := -lwiringPi -lpigpiod_if -lpthread
 

@@ -40,9 +40,11 @@ bool spnUserOutputInit(void)
 	{
 		atexit(&userOutputOnExit);
 
-		// write all headings
+		// write all headings and units
 		spnUtilsWriteToFile(pOutputFile,
-				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,TEMP_F,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US\n");
+				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,TEMP_F,INPW0,MOTCMD0,MOTCMD1,MOTCMD2,MOTCMD3,THROT,ELEV,AILER,RUDD,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US\n");
+		spnUtilsWriteToFile(pOutputFile,
+				",,,DEGREES,DEGREES,DEGREES,DEG_F,USEC,PCT,PCT,PCT,PCT,PCT,DEGREES,DEGREES,DEGREES,SEC,MSEC,USEC,SEC,MSEC,USEC,\n");
 
 		return SUCCESS;
 	}
@@ -83,13 +85,19 @@ static void userOutputConsole(void)
 
 	printf("Temperature (F): %f\n", Temperature);
 	printf("%-5s: Yaw: %10f, Pitch: %10f, Roll: %10f\n", "Pos", Yaw, Pitch, Roll);
+	printf("Input Pulse 0: %u\n", spnServoGetPulseWidth(0));
+
+	for(int i = 0; i < 4; i++)
+	{
+		printf("Motor Cmd %i: %.1f\n", i, spnMotorsGet(i));
+	}
 }
 
 static void userOutputFile(void)
 {
 	// write data to file
 	char buf[1024];
-	sprintf(buf, "%s,%s,%i,%.5f,%.5f,%.5f,%.5f,%u,%u,%u,%u,%u,%u\n",
+	sprintf(buf, "%s,%s,%i,%.1f,%.1f,%.1f,%.1f,%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%u,%u,%u,%u,%u,%u\n",
 			spnModeGetString(),
 			spnCommandGetModeString(),
 			spnSchedulerGetFrameCount(),
@@ -97,6 +105,15 @@ static void userOutputFile(void)
 			Pitch,
 			Roll,
 			Temperature,
+			spnServoGetPulseWidth(0),
+			spnMotorsGet(0),
+			spnMotorsGet(1),
+			spnMotorsGet(2),
+			spnMotorsGet(3),
+			spnTransceiverGetThrottlePct(),
+			spnTransceiverGetElevatorAngle(),
+			spnTransceiverGetAileronAngle(),
+			spnTransceiverGetRudderAngle(),
 			fgElapsedSec,
 			fgElapsedMSec,
 			fgElapsedUSec,

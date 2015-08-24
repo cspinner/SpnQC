@@ -65,6 +65,10 @@ void spnModeUpdate(void)
 			{
 				spnGlobalMode = MODE_STOP_E;
 			}
+			if((userInput == 'r' ) || (userInput == 'R'))
+			{
+				spnGlobalMode = MODE_RUN_E;
+			}
 			break;
 
 		case MODE_STOP_E:

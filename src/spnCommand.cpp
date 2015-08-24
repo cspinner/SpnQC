@@ -8,9 +8,6 @@
 #include "spnQC.h"
 #include "spnPID.h"
 
-#define PR_RATE_MIN_DEGPS -5.0
-#define PR_RATE_MAX_DEGPS  5.0
-
 typedef enum
 {
 	CMD_MODE_STANDBY_E,
@@ -52,19 +49,34 @@ static SpnPID pitchRatePID;
 static SpnPID pitchAnglePID;
 static SpnPID rollRatePID;
 static SpnPID rollAnglePID;
+static SpnPID yawRatePID;
+static SpnPID yawAnglePID;
+
+static void setCommandMode(void);
+static void processCommandMode(void);
 
 bool spnCommandInit(void)
 {
 	float pid_interval = MINOR_FRAME_TIME_USEC/1000000.0;
 
-	// Configure controller PIDs
-	if( (pitchRatePID.configure(PR_RATE_MIN_DEGPS, PR_RATE_MAX_DEGPS, pid_interval) == SUCCESS) &&
-	    (pitchAnglePID.configure(PR_RATE_MIN_DEGPS, PR_RATE_MAX_DEGPS, pid_interval) == SUCCESS) &&
-		(rollRatePID.configure(PR_RATE_MIN_DEGPS, PR_RATE_MAX_DEGPS, pid_interval) == SUCCESS) &&
-		(rollAnglePID.configure(PR_RATE_MIN_DEGPS, PR_RATE_MAX_DEGPS, pid_interval) == SUCCESS))
-	{
-		spnMotorsInit();
+	const SpnQC_Config_Type* const pCfg = spnConfigGet();
 
+	// Configure controller PIDs, Motor Outputs, Transceiver Inputs
+	if( (pitchRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+			pCfg->command.pidPitchKp, pCfg->command.pidPitchKi, pCfg->command.pidPitchKd) == SUCCESS) &&
+	    (pitchAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+	    		pCfg->command.pidPitchKp, pCfg->command.pidPitchKi, pCfg->command.pidPitchKd) == SUCCESS) &&
+		(rollRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+				pCfg->command.pidRollKp, pCfg->command.pidRollKi, pCfg->command.pidRollKd) == SUCCESS) &&
+		(rollAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+				pCfg->command.pidRollKp, pCfg->command.pidRollKi, pCfg->command.pidRollKd) == SUCCESS) &&
+		(yawRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+				pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == SUCCESS) &&
+		(yawAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+				pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == SUCCESS) &&
+		(spnMotorsInit() == SUCCESS) &&
+		(spnTransceiverInit() == SUCCESS))
+	{
 		return SUCCESS;
 	}
 	else
@@ -75,10 +87,21 @@ bool spnCommandInit(void)
 
 void spnCommandUpdate(void)
 {
+	setCommandMode();
+	processCommandMode();
+}
+
+const char* spnCommandGetModeString(void)
+{
+	return CMD_MODE_STRINGS[commandMode];
+}
+
+static void setCommandMode(void)
+{
 	static System_Mode_Type previousMode = MODE_INIT_E;
 
-	System_Mode_Type currentMode = spnModeGet();
 	char userInput = spnUserInputCharGet(false);
+	System_Mode_Type currentMode = spnModeGet();
 
 	// Set command mode based on system mode
 	switch(currentMode)
@@ -137,77 +160,74 @@ void spnCommandUpdate(void)
 			commandMode = CMD_MODE_STOP_E;
 			break;
 	}
-	static int width=1060;
-	static bool up = true;
-
-	// Process command mode
-	switch(commandMode)
-	{
-		case CMD_MODE_OPEN_LOOP_E:
-			break;
-
-		case CMD_MODE_CLOSED_LOOP_E:
-//	float pitchRateCommand = PitchAnglePID.update(0.0, SpnPitchAngleSense);
-//	float motorCommand = PitchRatePID.update(pitchRateCommand, SpnPitchRateSense);
-			break;
-
-		case CMD_MODE_CALIBRATE_HIGH_E:
-//			printf("Command motors high\n");
-//			spnMotorsSet(0, 100.0);
-//			spnServoblasterSet(2,1860);
-			spnServoblasterSet(2,width);
-
-			if(width >= 1460)
-			{
-				up = false;
-			}
-			else if(width <= 1160)
-			{
-				up = true;
-			}
-
-			if(up) width+=10;
-			else width-=10;
-
-
-//			spnMotorsSet(1, 100.0);
-//			spnMotorsSet(2, 100.0);
-//			spnMotorsSet(3, 100.0);
-			break;
-
-		case CMD_MODE_CALIBRATE_LOW_E:
-//			printf("Command motors low\n");
-//			spnMotorsSet(0, 1.0);
-			spnServoblasterSet(2,1060);
-//			spnMotorsSet(1, 1.0);
-//			spnMotorsSet(2, 1.0);
-//			spnMotorsSet(3, 1.0);
-			break;
-
-		case CMD_MODE_CALIBRATE_CENTER_E:
-//			printf("Command motors low\n");
-//			spnMotorsSet(0, 1.0);
-			spnServoblasterSet(2,1460);
-//			spnMotorsSet(1, 1.0);
-//			spnMotorsSet(2, 1.0);
-//			spnMotorsSet(3, 1.0);
-			break;
-
-		case CMD_MODE_STANDBY_E:
-		case CMD_MODE_STOP_E:
-		default:
-			// tbd - issue motor stop command
-			break;
-	}
 
 	// Save current mode
 	previousMode = currentMode;
 }
 
-const char* spnCommandGetModeString(void)
+static void processCommandMode(void)
 {
-	return CMD_MODE_STRINGS[commandMode];
-}
+	float throttlePct = spnTransceiverGetThrottlePct();
+	float elevatorAngle = spnTransceiverGetElevatorAngle();
+	float aileronAngle = spnTransceiverGetAileronAngle();
+	float rudderAngle = spnTransceiverGetRudderAngle();
 
+	float rollPidOut = 0.0;
+	float pitchPidOut = 0.0;
+	float yawPidOut = 0.0;
+
+	float yaw;
+	float pitch;
+	float roll;
+
+	// retrieve IMU data
+	spnSensorGetPrincipalAxes(&pitch, &roll, &yaw);
+
+	// Process command mode
+	switch(commandMode)
+	{
+		case CMD_MODE_OPEN_LOOP_E:
+			// No PID
+			break;
+
+		case CMD_MODE_CLOSED_LOOP_E:
+			if(throttlePct > 0.0)
+			{
+				pitchPidOut = pitchAnglePID.update(elevatorAngle, pitch);
+				rollPidOut = rollAnglePID.update(aileronAngle, roll);
+				yawPidOut = yawAnglePID.update(rudderAngle, yaw);
+			}
+			break;
+
+		case CMD_MODE_CALIBRATE_HIGH_E:
+			spnMotorsCalibrateDrive(0);
+			break;
+
+		case CMD_MODE_CALIBRATE_LOW_E:
+			spnMotorsCalibrateDrive(2);
+			break;
+
+		case CMD_MODE_CALIBRATE_CENTER_E:
+			spnMotorsCalibrateDrive(1);
+			break;
+
+		case CMD_MODE_STANDBY_E:
+		case CMD_MODE_STOP_E:
+		default:
+			spnMotorsStopAll();
+			break;
+	}
+
+	if((CMD_MODE_OPEN_LOOP_E == commandMode) ||
+       (CMD_MODE_CLOSED_LOOP_E == commandMode))
+	{
+		// Set output
+		yawPidOut = 0; // tbd
+		spnMotorsSet(0, clamp(throttlePct - pitchPidOut + yawPidOut, 0.0, 100.0));
+		spnMotorsSet(1, clamp(throttlePct + rollPidOut - yawPidOut, 0.0, 100.0));
+		spnMotorsSet(2, clamp(throttlePct + pitchPidOut + yawPidOut, 0.0, 100.0));
+		spnMotorsSet(3, clamp(throttlePct - rollPidOut - yawPidOut, 0.0, 100.0));
+	}
+}
 
 

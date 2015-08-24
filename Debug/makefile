@@ -47,7 +47,7 @@ all: SpnQC
 SpnQC: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross G++ Linker'
-	arm-none-linux-gnueabi-g++ -L"/Users/cspinner/Documents/workspace/wiringPi/wiringPi/lib" -o "SpnQC" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-linux-gnueabi-g++ -L"/Users/cspinner/Documents/workspace/wiringPi/wiringPi/lib" -L"/Users/cspinner/Documents/workspace/pigpio" -o "SpnQC" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build

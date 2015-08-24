@@ -21,104 +21,33 @@ static SpnNineAxisMotion MPU9250;
 static SpnNineAxisMotion_Data_Type SpnNineAxisMotionData;
 static float Pitch, Yaw, Roll;
 
-// assumes one floating point value per line
-static bool readNextFloatFromFile(FILE* pFile, float* pDest)
-{
-	size_t bytesRead;
-	char readBytes[128];
-
-	// Read the line
-	bytesRead = spnUtilsReadLine(pFile, readBytes, sizeof(readBytes));
-
-	if(bytesRead > 0)
-	{
-		// Parse the float value
-		sscanf(readBytes, "%f", pDest);
-
-		return SUCCESS;
-	}
-	else
-	{
-		// some error or EOF
-		return FAIL;
-	}
-}
-
 static bool initMPU9250(void)
 {
+	const SpnQC_Config_Type* const pCfg = spnConfigGet();
+
 	SpnNineAxisMotion_Cfg_Type cfg_mpu9250;
-	SpnNineAxisMotion_Calibration_Type cal_mpu9250;
-	FILE* pInputFile = NULL; // input file descriptor
 
-	// Set configuration data
-	cfg_mpu9250.chipSelect = 0;
-	cfg_mpu9250.speed = 500000;
-	cfg_mpu9250.rollingAvgCount = 5;
-	cfg_mpu9250.magOutlierThresh = 50.0;
-	cfg_mpu9250.pCal = &cal_mpu9250;
+	// Copy config data
+	cfg_mpu9250.chipSelect = pCfg->spi.chipSelect;
+	cfg_mpu9250.speed = pCfg->spi.speed;
+	cfg_mpu9250.accFsSel = pCfg->mpu9250.accFsSel;
+	cfg_mpu9250.gyroFsSel = pCfg->mpu9250.gyroFsSel;
+	cfg_mpu9250.magOutlierThresh = pCfg->mpu9250.magOutlierThresh;
+	cfg_mpu9250.rollingAvgCount = pCfg->mpu9250.rollingAvgCount;
+	cfg_mpu9250.calibration.accel.x_bias = pCfg->mpu9250.accel.x_bias;
+	cfg_mpu9250.calibration.accel.y_bias = pCfg->mpu9250.accel.y_bias;
+	cfg_mpu9250.calibration.accel.z_bias = pCfg->mpu9250.accel.z_bias;
+	cfg_mpu9250.calibration.gyro.x_bias = pCfg->mpu9250.gyro.x_bias;
+	cfg_mpu9250.calibration.gyro.y_bias = pCfg->mpu9250.gyro.y_bias;
+	cfg_mpu9250.calibration.gyro.z_bias = pCfg->mpu9250.gyro.z_bias;
+	cfg_mpu9250.calibration.mag.x_bias = pCfg->mpu9250.mag.x_bias;
+	cfg_mpu9250.calibration.mag.y_bias = pCfg->mpu9250.mag.y_bias;
+	cfg_mpu9250.calibration.mag.z_bias = pCfg->mpu9250.mag.z_bias;
+	cfg_mpu9250.calibration.mag.x_scale = pCfg->mpu9250.mag.x_scale;
+	cfg_mpu9250.calibration.mag.y_scale = pCfg->mpu9250.mag.y_scale;
+	cfg_mpu9250.calibration.mag.z_scale = pCfg->mpu9250.mag.z_scale;
 
-	//
-	// ATTEMPT TO READ CALIBRATION FILE
-	//
-
-	// open the file
-	spnUtilsOpenFileForRead(&pInputFile, "calibration");
-
-	// If file exists, parse the data and populate cal_mpu9250
-	if(pInputFile != NULL)
-	{
-		// "calibration" has the format (all floats, one per line):
-		//   accel x bias
-		//   accel y bias
-		//   accel z bias
-		//   gyro x bias
-		//   gyro y bias
-		//   gyro z bias
-		//   mag x bias
-		//   mag y bias
-		//   mag z bias
-		//   mag x scale
-		//   mag y scale
-		//   mag z scale
-		bool status = SUCCESS;
-
-		// accel
-		status = (readNextFloatFromFile(pInputFile, &cal_mpu9250.accel.x_bias) == SUCCESS) ? status : FAIL;
-		status = (readNextFloatFromFile(pInputFile, &cal_mpu9250.accel.y_bias) == SUCCESS) ? status : FAIL;
-		status = (readNextFloatFromFile(pInputFile, &cal_mpu9250.accel.z_bias) == SUCCESS) ? status : FAIL;
-
-		// gyro
-		status = (readNextFloatFromFile(pInputFile, &cal_mpu9250.gyro.x_bias) == SUCCESS) ? status : FAIL;
-		status = (readNextFloatFromFile(pInputFile, &cal_mpu9250.gyro.y_bias) == SUCCESS) ? status : FAIL;
-		status = (readNextFloatFromFile(pInputFile, &cal_mpu9250.gyro.z_bias) == SUCCESS) ? status : FAIL;
-
-		// mag
-		status = (readNextFloatFromFile(pInputFile, &cal_mpu9250.mag.x_bias) == SUCCESS) ? status : FAIL;
-		status = (readNextFloatFromFile(pInputFile, &cal_mpu9250.mag.y_bias) == SUCCESS) ? status : FAIL;
-		status = (readNextFloatFromFile(pInputFile, &cal_mpu9250.mag.z_bias) == SUCCESS) ? status : FAIL;
-		status = (readNextFloatFromFile(pInputFile, &cal_mpu9250.mag.x_scale) == SUCCESS) ? status : FAIL;
-		status = (readNextFloatFromFile(pInputFile, &cal_mpu9250.mag.y_scale) == SUCCESS) ? status : FAIL;
-		status = (readNextFloatFromFile(pInputFile, &cal_mpu9250.mag.z_scale) == SUCCESS) ? status : FAIL;
-
-		// close the file
-		spnUtilsCloseFile(pInputFile);
-	}
-	else
-	{
-		// Cal data was not read. Default to no calibration
-		cal_mpu9250.accel.x_bias = 0;
-		cal_mpu9250.accel.y_bias = 0;
-		cal_mpu9250.accel.z_bias = 0;
-		cal_mpu9250.gyro.x_bias  = 0;
-		cal_mpu9250.gyro.y_bias  = 0;
-		cal_mpu9250.gyro.z_bias  = 0;
-		cal_mpu9250.mag.x_bias = 0;
-		cal_mpu9250.mag.y_bias = 0;
-		cal_mpu9250.mag.z_bias = 0;
-		cal_mpu9250.mag.x_scale = 1;
-		cal_mpu9250.mag.y_scale = 1;
-		cal_mpu9250.mag.z_scale = 1;
-	}
+	beta = pCfg->mpu9250.beta;
 
 	return MPU9250.configure(&cfg_mpu9250);
 }
@@ -144,11 +73,7 @@ bool spnSensorManagerInit(void)
 	bool status = FAIL;
 
 	// Configure sensors
-	printf("Initialize MPU9250...");
 	status = initMPU9250();
-
-	// Madgwick AHRS coefficient
-	beta = 1000;
 
 	return status;
 }
@@ -190,13 +115,15 @@ void spnSensorManagerUpdate(void)
 	// Radians to Degrees
 	Pitch = pitchRad * 180.0 / PI;
 	Yaw   = yawRad * 180.0 / PI;
-	Yaw   += 7.62; // Declination at Charlotte, NC is 7° 37' W on 2015-08-05
 	Roll  = rollRad * 180.0 / PI;
 
 	// In this installation, roll is situated at exactly 180 degrees at rest which causes the
 	// reading to jump around between ~180 and ~-180. Compensate for this:
 	if(Roll < 0) Roll += 180.0;
 	else if(Roll > 0) Roll -= 180.0;
+//
+//	// In this installation, yaw progresses from 0 to 180, then -180 to 0. Compensate for this:
+//	Yaw = (Yaw + 180.0)/2.0;
 }
 
 void spnSensorGetPrincipalAxes(float* pPitch, float* pRoll, float* pYaw)

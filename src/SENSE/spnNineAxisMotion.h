@@ -52,8 +52,12 @@ typedef struct
 	int rollingAvgCount;
 	float magOutlierThresh;
 
+	// Sensor scale
+	int accFsSel;
+	int gyroFsSel;
+
 	// Calibration
-	SpnNineAxisMotion_Calibration_Type* pCal;
+	SpnNineAxisMotion_Calibration_Type calibration;
 } SpnNineAxisMotion_Cfg_Type;
 
 typedef struct

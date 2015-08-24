@@ -1,0 +1,41 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          pigpiod
+# Required-Start:    hostname $local_fs
+# Required-Stop:
+# Should-Start:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start/stop pigpiod.
+# Description:       This script starts/stops pigpiod.
+### END INIT INFO
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+. /lib/init/vars.sh
+
+OPTS="-a 1"
+
+res=0
+
+case "$1" in
+  start)
+	/usr/local/bin/pigpiod $OPTS >/dev/null
+	;;
+  restart|reload|force-reload)
+	killall pigpiod
+	/usr/local/bin/pigpiod $OPTS >/dev/null
+	;;
+  stop)
+	killall pigpiod
+	;;
+  status)
+	[ -e /dev/pigpiod ] || res=4
+	;;
+  *)
+	echo "Usage: pigpiod [start|stop|status]" >&2
+	res=3
+	;;
+esac
+
+exit $res
+

@@ -8,56 +8,62 @@
 #include "SpnQC.h"
 #include <stdlib.h>
 
-#define DC_MINIMUM_COMMAND 100.0 //tbd
-#define DC_MAXIMUM_COMMAND 1000.0 //tbd
-#define PWM_SUBCYCLE_TIME_USEC 500000
-#define MOTOR_COUNT 4
+#define MOTORS_COUNT 4
 
-typedef struct
+// List of output pins using BCM number (list ends with -1)
+const int outputPins[] = { 4, 17, 22, 27, -1 };
+
+// List of input pins using BCM number (list ends with -1)
+const int inputPins[] = { 23, -1 };
+
+bool spnMotorsInit(void)
 {
-	int motorIndex; // 0 <= motorNum < MOTOR_COUNT
-	int dmaChan; // 0-14
-	int gpio; // BCM pin numbering
-} SpnMotor_Type;
-
-static SpnMotor_Type spnMotorDefs[MOTOR_COUNT] =
-{
-	{
-		0,
-		0,
-		24 // BCM 24, wiring pi 5
-	},
-	{
-		1,
-		1,
-		24 // BCM 24, wiring pi 5
-	},
-	{
-		2,
-		2,
-		24 // BCM 24, wiring pi 5
-	},
-	{
-		3,
-		3,
-		24 // BCM 24, wiring pi 5
-	},
-};
-
-
-static void spnMotorsOnExit(void)
-{
-
-}
-
-void spnMotorsInit(void)
-{
-
+	return spnServoInit(&inputPins[0], &outputPins[0]);
 }
 
 void spnMotorsSet(int motorNum, float cmdPct)
 {
+	// 1050 to 2050
+	int pulseWidthUsec = (int)(10.0*cmdPct + 1050.0);
 
+	cmdPct = clamp(cmdPct, 0.0, 100.0);
+
+	// command the servo driver
+	spnServoSetPulseWidth(motorNum, pulseWidthUsec);
+}
+
+// Get motor pct 0-100%
+float spnMotorsGet(int motorNum)
+{
+	int pulseWidthUsec = spnServoGetCommandedPulseWidth(motorNum);
+	float cmdPct = (((float)pulseWidthUsec - 1050.0)/10.0);
+
+	return clamp(cmdPct, 0.0, 100.0);
+}
+
+// 0 = high, 1 = center, 2 = low
+void spnMotorsCalibrateDrive(int level)
+{
+	int pulseWidths[] = {
+			2000, 1500, 1000
+	};
+
+	if(level <= 2)
+	{
+		for(int i = 0; i < MOTORS_COUNT; i++)
+		{
+			spnServoSetPulseWidth(i, pulseWidths[level]);
+		}
+	}
+	else
+	{
+		spnServoStopAllPulses();
+	}
+}
+
+void spnMotorsStopAll(void)
+{
+	spnServoStopAllPulses();
 }
 
 
