@@ -240,55 +240,58 @@ bool spnConfigInit(void)
 			char entryNameRead[64];
 			char entryValueRead[64];
 
-			// Separate entry name and value from input string
-			sscanf(buf, "%s=%s", entryNameRead, entryValueRead);
-
-			printf("%s", buf);
-			printf("%s, %s", entryNameRead, entryValueRead);
-
-			for(int entry = 0; entry < configEntriesCount; entry++)
+			if(strchr(buf, '=') != NULL)
 			{
-				if(0 == strcmp(entryNameRead, configEntries[entry].textName))
+				// Separate entry name and value from input string
+				sscanf(buf, "%[^=]=%s", entryNameRead, entryValueRead);
+
+				printf("%s", buf);
+				printf("%s, %s", entryNameRead, entryValueRead);
+
+				for(int entry = 0; entry < configEntriesCount; entry++)
 				{
-					// match found
-					// parse and write data to destination memory based on configured type:
-					switch(configEntries[entry].type)
+					if(0 == strcmp(entryNameRead, configEntries[entry].textName))
 					{
-						case UBYTE_E:
-							sscanf(entryValueRead, "%hhu", (unsigned char*)configEntries[entry].pDest);
-							break;
+						// match found
+						// parse and write data to destination memory based on configured type:
+						switch(configEntries[entry].type)
+						{
+							case UBYTE_E:
+								sscanf(entryValueRead, "%hhu", (unsigned char*)configEntries[entry].pDest);
+								break;
 
-						case BYTE_E:
-							sscanf(entryValueRead, "%c", (char*)configEntries[entry].pDest);
-							break;
+							case BYTE_E:
+								sscanf(entryValueRead, "%c", (char*)configEntries[entry].pDest);
+								break;
 
-						case USHORT_E:
-							sscanf(entryValueRead, "%hu", (unsigned short*)configEntries[entry].pDest);
-							break;
+							case USHORT_E:
+								sscanf(entryValueRead, "%hu", (unsigned short*)configEntries[entry].pDest);
+								break;
 
-						case SHORT_E:
-							sscanf(entryValueRead, "%hi", (short*)configEntries[entry].pDest);
-							break;
+							case SHORT_E:
+								sscanf(entryValueRead, "%hi", (short*)configEntries[entry].pDest);
+								break;
 
-						case UINT_E:
-							sscanf(entryValueRead, "%u", (unsigned int*)configEntries[entry].pDest);
-							break;
+							case UINT_E:
+								sscanf(entryValueRead, "%u", (unsigned int*)configEntries[entry].pDest);
+								break;
 
-						case INT_E:
-							sscanf(entryValueRead, "%i", (int*)configEntries[entry].pDest);
-							break;
+							case INT_E:
+								sscanf(entryValueRead, "%i", (int*)configEntries[entry].pDest);
+								break;
 
-						case FLOAT_E:
-							sscanf(entryValueRead, "%f", (float*)configEntries[entry].pDest);
-							break;
+							case FLOAT_E:
+								sscanf(entryValueRead, "%f", (float*)configEntries[entry].pDest);
+								break;
 
-						default:
-							printf("Program Error: Invalid config type.\n");
-							status = FAIL;
-							break;
+							default:
+								printf("Program Error: Invalid config type.\n");
+								status = FAIL;
+								break;
+						}
+
+						break; // break the for loop after match was found
 					}
-
-					break; // break the for loop after match was found
 				}
 			}
 
