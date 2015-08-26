@@ -216,7 +216,7 @@ const SpnQC_Config_Entry_Type configEntries[] = {
 	}
 };
 
-const int configEntriesCount = sizeof(configEntriesCount)/sizeof(SpnQC_Config_Entry_Type);
+const int configEntriesCount = sizeof(configEntries)/sizeof(SpnQC_Config_Entry_Type);
 
 bool spnConfigInit(void)
 {
@@ -244,9 +244,6 @@ bool spnConfigInit(void)
 			{
 				// Separate entry name and value from input string
 				sscanf(buf, "%[^=]=%s", entryNameRead, entryValueRead);
-
-				printf("%s", buf);
-				printf("%s, %s", entryNameRead, entryValueRead);
 
 				for(int entry = 0; entry < configEntriesCount; entry++)
 				{
