@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <signal.h>
+#include <stdint.h>
 
 //
 // DEFINES
@@ -62,6 +63,8 @@ typedef enum
 	MODE_COUNT_E
 } System_Mode_Type;
 
+typedef float  float32_t;
+typedef double float64_t;
 
 //
 // DATA
@@ -131,7 +134,7 @@ float spnMotorsGet(int motorNum);
 void spnMotorsCalibrateDrive(int level);
 void spnMotorsStopAll(void);
 
-bool spnServoInit(const int* gpioInputList, const int* gpioOutputList);
+bool spnServoInit(int inputCount, const int* gpioInputList, int outputCount, const int* gpioOutputList);
 unsigned int spnServoGetPulseWidth(int gpioIndex);
 bool spnServoSetPulseWidth(int gpioIndex, int pulseWidthUsec);
 unsigned int spnServoGetCommandedPulseWidth(int gpioIndex);

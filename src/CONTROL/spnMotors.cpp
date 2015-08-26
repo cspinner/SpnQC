@@ -8,25 +8,27 @@
 #include "SpnQC.h"
 #include <stdlib.h>
 
-#define MOTORS_COUNT 4
-
-// List of output pins using BCM number (list ends with -1)
-const int outputPins[] = { 4, 17, 22, 27, -1 };
-
-// List of input pins using BCM number (list ends with -1)
-const int inputPins[] = { 23, -1 };
+// y = mc + b  --- linear relationship between command % and pulse width
+// commanded pulse width = slope * command percent + intercept
+static float slope;
+static float intercept; 
 
 bool spnMotorsInit(void)
 {
-	return spnServoInit(&inputPins[0], &outputPins[0]);
+    const SpnQC_Config_Type* const pCfg = spnConfigGet();
+    
+    slope = ()pCfg->motors.pulseWidthFullThrottle - pCfg->motors.pulseWidthZeroThrottle)/100.0;
+    intercept = pCfg->motors.pulseWidthZeroThrottle;
+    
+    atexit(&spnMotorsStopAll);
+    
+	return SUCCESS;
 }
 
 void spnMotorsSet(int motorNum, float cmdPct)
 {
-	// 1050 to 2050
-	int pulseWidthUsec = (int)(10.0*cmdPct + 1050.0);
-
-	cmdPct = clamp(cmdPct, 0.0, 100.0);
+    // calculate pulse width based on commanded percent
+	int pulseWidthUsec = (int)(slope*cmdPct + intercept);
 
 	// command the servo driver
 	spnServoSetPulseWidth(motorNum, pulseWidthUsec);
@@ -36,7 +38,7 @@ void spnMotorsSet(int motorNum, float cmdPct)
 float spnMotorsGet(int motorNum)
 {
 	int pulseWidthUsec = spnServoGetCommandedPulseWidth(motorNum);
-	float cmdPct = (((float)pulseWidthUsec - 1050.0)/10.0);
+	float cmdPct = (((float)pulseWidthUsec - intercept)/slope);
 
 	return clamp(cmdPct, 0.0, 100.0);
 }
@@ -44,7 +46,7 @@ float spnMotorsGet(int motorNum)
 // 0 = high, 1 = center, 2 = low
 void spnMotorsCalibrateDrive(int level)
 {
-	int pulseWidths[] = {
+	const int pulseWidths[] = {
 			2000, 1500, 1000
 	};
 

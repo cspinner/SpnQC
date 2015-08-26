@@ -30,14 +30,13 @@ static int gpioOutputPulses[GPIO_COUNT];
 static void servoOnExit(void);
 static void servoInputCbEx(unsigned int gpioNum, unsigned int level, unsigned int tick, void* gpioIndex);
 
-// each array is terminated by -1
-bool spnServoInit(const int* gpioInputList, const int* gpioOutputList)
+bool spnServoInit(int inputCount, const int* gpioInputList, int outputCount, const int* gpioOutputList)
 {
     // Connect to the daemon (localhost)
 	int rtnVal = pigpio_start(NULL, NULL);
     if(rtnVal < 0)
     {
-        printf("spnPwmInit: pigpio_start - %s\n", pigpio_error(rtnVal));
+        printf("spnServoInit: pigpio_start - %s\n", pigpio_error(rtnVal));
         return FAIL;
     }
     else
@@ -47,16 +46,14 @@ bool spnServoInit(const int* gpioInputList, const int* gpioOutputList)
         
         if(gpioInputList != NULL)
         {
-            int index = 0;
-            
             // set each gpio to an input with pull-down resistor
-            while(gpioInputList[index] != END_OF_LIST)
+            for (int index = 0; index < inputCount; index++)
             {
                 rtnVal = set_mode(gpioInputList[index], PI_INPUT);
                    
                 if(rtnVal != 0)
                 {
-                    printf("spnPwmInit: set_mode - %s\n", pigpio_error(rtnVal));
+                    printf("spnServoInit: set_mode - %s\n", pigpio_error(rtnVal));
                     return FAIL;
                 }
                 else
@@ -70,28 +67,24 @@ bool spnServoInit(const int* gpioInputList, const int* gpioOutputList)
                 
                 gpioInputs[index] = gpioInputList[index];
                 gpioInputCount++;
-                index++;
             }
         }
         
         if(gpioOutputList != NULL)
         {
-            int index = 0;
-            
             // set each gpio to an output
-            while(gpioOutputList[index] != END_OF_LIST)
+            for (int index = 0; index < outputCount; index++)
             {
                 rtnVal = set_mode(gpioOutputList[index], PI_OUTPUT);
                    
                 if(rtnVal != 0)
                 {
-                    printf("spnPwmInit: set_mode - %s\n", pigpio_error(rtnVal));
+                    printf("spnServoInit: set_mode - %s\n", pigpio_error(rtnVal));
                     return FAIL;
                 }
                 
                 gpioOutputs[index] = gpioOutputList[index];
                 gpioOutputCount++;
-                index++;
             }
         }
         

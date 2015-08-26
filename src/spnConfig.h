@@ -60,12 +60,15 @@ typedef struct
 	{
 		int chanCount; // 0 - 32
 		int gpioPin[USER_GPIO_MAX]; // BCM number
+        bool useTerminal; 
 	} transceiver;
 
 	struct
 	{
 		int chanCount; // 0 - 32
 		int gpioPin[USER_GPIO_MAX]; // BCM number
+        float pulseWidthZeroThrottle;
+        float pulseWidthFullThrottle;
 	} motor;
 
 	struct

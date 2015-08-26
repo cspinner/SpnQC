@@ -60,25 +60,32 @@ bool spnCommandInit(void)
 	float pid_interval = MINOR_FRAME_TIME_USEC/1000000.0;
 
 	const SpnQC_Config_Type* const pCfg = spnConfigGet();
-
-	// Configure controller PIDs, Motor Outputs, Transceiver Inputs
-	if( (pitchRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
-			pCfg->command.pidPitchKp, pCfg->command.pidPitchKi, pCfg->command.pidPitchKd) == SUCCESS) &&
-	    (pitchAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
-	    		pCfg->command.pidPitchKp, pCfg->command.pidPitchKi, pCfg->command.pidPitchKd) == SUCCESS) &&
-		(rollRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
-				pCfg->command.pidRollKp, pCfg->command.pidRollKi, pCfg->command.pidRollKd) == SUCCESS) &&
-		(rollAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
-				pCfg->command.pidRollKp, pCfg->command.pidRollKi, pCfg->command.pidRollKd) == SUCCESS) &&
-		(yawRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
-				pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == SUCCESS) &&
-		(yawAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
-				pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == SUCCESS) &&
-		(spnMotorsInit() == SUCCESS) &&
-		(spnTransceiverInit() == SUCCESS))
-	{
-		return SUCCESS;
-	}
+    
+    if(spnServoInit(pCfg->transceiver.chanCount, &pCfg->transceiver.gpioPin[0], pCfg->motor.chanCount, &pCfg->motor.gpioPin[0]) == SUCCESS)
+    {
+        // Configure controller PIDs, Motor Outputs, Transceiver Inputs
+        if( (pitchRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+                pCfg->command.pidPitchKp, pCfg->command.pidPitchKi, pCfg->command.pidPitchKd) == SUCCESS) &&
+            (pitchAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+                    pCfg->command.pidPitchKp, pCfg->command.pidPitchKi, pCfg->command.pidPitchKd) == SUCCESS) &&
+            (rollRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+                    pCfg->command.pidRollKp, pCfg->command.pidRollKi, pCfg->command.pidRollKd) == SUCCESS) &&
+            (rollAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+                    pCfg->command.pidRollKp, pCfg->command.pidRollKi, pCfg->command.pidRollKd) == SUCCESS) &&
+            (yawRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+                    pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == SUCCESS) &&
+            (yawAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+                    pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == SUCCESS) &&
+            (spnMotorsInit() == SUCCESS) &&
+            (spnTransceiverInit() == SUCCESS))
+        {
+            return SUCCESS;
+        }
+        else
+        {
+            return FAIL;
+        }
+    }
 	else
 	{
 		return FAIL;
