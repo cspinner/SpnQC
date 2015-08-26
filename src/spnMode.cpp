@@ -7,7 +7,7 @@
 
 #include "spnQC.h"
 
-const char* GBL_MODE_STRINGS[MODE_COUNT_E] =
+const uint8_t* GBL_MODE_STRINGS[MODE_COUNT_E] =
 {
 		//MODE_INIT_E:
 		"INITIALIZATION MODE",
@@ -27,7 +27,7 @@ const char* GBL_MODE_STRINGS[MODE_COUNT_E] =
 
 static System_Mode_Type spnGlobalMode = MODE_INIT_E;
 
-const char* spnModeGetString(void)
+const uint8_t* spnModeGetString(void)
 {
 	return GBL_MODE_STRINGS[spnGlobalMode];
 }
@@ -39,7 +39,7 @@ System_Mode_Type spnModeGet(void)
 
 void spnModeUpdate(void)
 {
-	char userInput = spnUserInputCharGet(false);
+	uint8_t userInput = spnUserInputCharGet(false);
 
 	// Manage mode transitions
 	switch(spnGlobalMode)

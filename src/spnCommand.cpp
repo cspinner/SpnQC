@@ -20,7 +20,7 @@ typedef enum
 	CMD_MODE_COUNT_E
 } SpnCommand_Mode_Type;
 
-const char* CMD_MODE_STRINGS[CMD_MODE_COUNT_E] =
+const uint8_t* CMD_MODE_STRINGS[CMD_MODE_COUNT_E] =
 {
 		//CMD_MODE_STANDBY_E:
 		"CMD STANDBY MODE",
@@ -57,7 +57,7 @@ static void processCommandMode(void);
 
 bool spnCommandInit(void)
 {
-	float pid_interval = MINOR_FRAME_TIME_USEC/1000000.0;
+	float32_t pid_interval = MINOR_FRAME_TIME_USEC/1000000.0;
 
 	const SpnQC_Config_Type* const pCfg = spnConfigGet();
     
@@ -98,7 +98,7 @@ void spnCommandUpdate(void)
 	processCommandMode();
 }
 
-const char* spnCommandGetModeString(void)
+const uint8_t* spnCommandGetModeString(void)
 {
 	return CMD_MODE_STRINGS[commandMode];
 }
@@ -107,7 +107,7 @@ static void setCommandMode(void)
 {
 	static System_Mode_Type previousMode = MODE_INIT_E;
 
-	char userInput = spnUserInputCharGet(false);
+	uint8_t userInput = spnUserInputCharGet(false);
 	System_Mode_Type currentMode = spnModeGet();
 
 	// Set command mode based on system mode
@@ -174,18 +174,18 @@ static void setCommandMode(void)
 
 static void processCommandMode(void)
 {
-	float throttlePct = spnTransceiverGetThrottlePct();
-	float elevatorAngle = spnTransceiverGetElevatorAngle();
-	float aileronAngle = spnTransceiverGetAileronAngle();
-	float rudderAngle = spnTransceiverGetRudderAngle();
+	float32_t throttlePct = spnTransceiverGetThrottlePct();
+	float32_t elevatorAngle = spnTransceiverGetElevatorAngle();
+	float32_t aileronAngle = spnTransceiverGetAileronAngle();
+	float32_t rudderAngle = spnTransceiverGetRudderAngle();
 
-	float rollPidOut = 0.0;
-	float pitchPidOut = 0.0;
-	float yawPidOut = 0.0;
+	float32_t rollPidOut = 0.0;
+	float32_t pitchPidOut = 0.0;
+	float32_t yawPidOut = 0.0;
 
-	float yaw;
-	float pitch;
-	float roll;
+	float32_t yaw;
+	float32_t pitch;
+	float32_t roll;
 
 	// retrieve IMU data
 	spnSensorGetPrincipalAxes(&pitch, &roll, &yaw);

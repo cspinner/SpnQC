@@ -19,7 +19,7 @@ static void sigalrm_debug(void);
 #define CALLBACKS_MAX 32
 
 static __sighandler_t pCallbacks[CALLBACKS_MAX];
-static int CallbackIndex = 0;
+static uint32_t CallbackIndex = 0;
 
 void spnHandleRegisterCallback(__sighandler_t pCallback)
 {
@@ -31,10 +31,10 @@ void spnHandleRegisterCallback(__sighandler_t pCallback)
 	}
 }
 
-void spnHandleSignal(int signum)
+void spnHandleSignal(int32_t signum)
 {
 	// Invoke each of the predefined callbacks
-	for(int i = 0; i < CallbackIndex; i++)
+	for(uint32_t i = 0; i < CallbackIndex; i++)
 	{
 		if(pCallbacks[i])
 		{
@@ -72,7 +72,7 @@ void spnHandleSignal(int signum)
 static void sigalrm_debug(void)
 {
 	static struct timeval tsPrev;
-	static int cnt = 0;
+	static uint32_t cnt = 0;
 
 	if (cnt == 0)
 	{

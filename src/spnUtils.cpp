@@ -35,7 +35,7 @@ static bool TimedOut(struct timeval* pTsEnd)
 }
 
 // delayUsec range 0 - 1000000
-void spnUtilsWaitUsec(unsigned int delayUsec)
+void spnUtilsWaitUsec(uint32_t delayUsec)
 {
 	struct timeval tsNow;
 	struct timeval tsAdder;
@@ -75,9 +75,9 @@ bool spnUtilsTimeCompare(struct timeval* pTsA, struct timeval* pTsB)
 			((pTsA)->tv_usec > (pTsB)->tv_usec) : ((pTsA)->tv_sec > (pTsB)->tv_sec));
 }
 //#include <unistd.h>
-void spnUtilsOpenFileForRead(FILE **pFile, const char *pPathname)
+void spnUtilsOpenFileForRead(FILE **pFile, const uint8_t *pPathname)
 {
-//	char cwd[1024];
+//	uint8_t cwd[1024];
 //	   if (getcwd(cwd, sizeof(cwd)) != NULL)
 //	       printf("Current working dir: %s\n", cwd);
 //
@@ -91,10 +91,10 @@ void spnUtilsOpenFileForRead(FILE **pFile, const char *pPathname)
 }
 
 
-size_t spnUtilsReadLine(FILE *pFile, char* pDest, size_t destSizeBytes)
+size_t spnUtilsReadLine(FILE *pFile, uint8_t* pDest, size_t destSizeBytes)
 {
-	char* readBuffer = pDest;
-	char* rtnBuf;
+	uint8_t* readBuffer = pDest;
+	uint8_t* rtnBuf;
 	size_t readBufferSize = destSizeBytes;
 	_IO_ssize_t bytesRead;
 
@@ -105,18 +105,18 @@ size_t spnUtilsReadLine(FILE *pFile, char* pDest, size_t destSizeBytes)
 	return bytesRead;
 }
 
-// assumes one floating point value per line
-bool spnUtilsReadNextFloatFromFile(FILE* pFile, float* pDest)
+// assumes one float32_ting point value per line
+bool spnUtilsReadNextFloatFromFile(FILE* pFile, float32_t* pDest)
 {
 	size_t bytesRead;
-	char readBytes[128];
+	uint8_t readBytes[128];
 
 	// Read the line
 	bytesRead = spnUtilsReadLine(pFile, readBytes, sizeof(readBytes));
 
 	if(bytesRead > 0)
 	{
-		// Parse the float value
+		// Parse the float32_t value
 		sscanf(readBytes, "%f", pDest);
 
 		return SUCCESS;
@@ -129,17 +129,17 @@ bool spnUtilsReadNextFloatFromFile(FILE* pFile, float* pDest)
 }
 
 // assumes one integer point value per line
-bool spnUtilsReadNextIntFromFile(FILE* pFile, int* pDest)
+bool spnUtilsReadNextIntFromFile(FILE* pFile, int32_t* pDest)
 {
 	size_t bytesRead;
-	char readBytes[128];
+	uint8_t readBytes[128];
 
 	// Read the line
 	bytesRead = spnUtilsReadLine(pFile, readBytes, sizeof(readBytes));
 
 	if(bytesRead > 0)
 	{
-		// Parse the float value
+		// Parse the float32_t value
 		sscanf(readBytes, "%i", pDest);
 
 		return SUCCESS;
@@ -151,7 +151,7 @@ bool spnUtilsReadNextIntFromFile(FILE* pFile, int* pDest)
 	}
 }
 
-void spnUtilsOpenFileForAppend(FILE **pFile, const char *pPathname)
+void spnUtilsOpenFileForAppend(FILE **pFile, const uint8_t *pPathname)
 {
 	*pFile = fopen(pPathname, "a");
 
@@ -161,7 +161,7 @@ void spnUtilsOpenFileForAppend(FILE **pFile, const char *pPathname)
 	}
 }
 
-void spnUtilsCreateFileForWrite(FILE **pFile, const char *pPathname)
+void spnUtilsCreateFileForWrite(FILE **pFile, const uint8_t *pPathname)
 {
 	*pFile = fopen(pPathname, "w");
 
@@ -171,7 +171,7 @@ void spnUtilsCreateFileForWrite(FILE **pFile, const char *pPathname)
 	}
 }
 
-void spnUtilsWriteToFile(FILE *pFile, const char *pBuf)
+void spnUtilsWriteToFile(FILE *pFile, const uint8_t *pBuf)
 {
 	size_t bytesWritten = fputs(pBuf, pFile);
 

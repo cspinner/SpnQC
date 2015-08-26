@@ -21,7 +21,7 @@ typedef enum
 
 typedef struct
 {
-	const char* textName;
+	const uint8_t* textName;
 	DATATYPE type;
 	void* pDest;
 } SpnQC_Config_Entry_Type;
@@ -31,17 +31,17 @@ static SpnQC_Config_Type spnQcConfig;
 const SpnQC_Config_Entry_Type configEntries[] = {
 	{
 		"SPICHSEL",
-		INT_E,
+		UINT_E,
 		&spnQcConfig.spi.chipSelect
 	},
 	{
 		"SPISPEED",
-		INT_E,
+		UINT_E,
 		&spnQcConfig.spi.speed
 	},
 	{
 		"AVGSIZE",
-		INT_E,
+		UINT_E,
 		&spnQcConfig.mpu9250.rollingAvgCount
 	},
 	{
@@ -56,12 +56,12 @@ const SpnQC_Config_Entry_Type configEntries[] = {
 	},
 	{
 		"ACCFSSEL",
-		INT_E,
+		UINT_E,
 		&spnQcConfig.mpu9250.accFsSel
 	},
 	{
 		"GYROFSSEL",
-		INT_E,
+		UINT_E,
 		&spnQcConfig.mpu9250.gyroFsSel
 	},
 	{
@@ -126,47 +126,47 @@ const SpnQC_Config_Entry_Type configEntries[] = {
 	},
 	{
 		"CHANCOUNT",
-		INT_E,
+		UINT_E,
 		&spnQcConfig.transceiver.chanCount
 	},
 	{	
         "TPIN1"
-        INT_E,
+        UINT_E,
         &spnQcConfig.transceiver.gpioPin[0]
     },	
     {	
         "TPIN2"
-        INT_E,
+        UINT_E,
         &spnQcConfig.transceiver.gpioPin[1]
     },	
     {	
         "TPIN3"
-        INT_E,
+        UINT_E,
         &spnQcConfig.transceiver.gpioPin[2]
     },	
     {	
         "TPIN4"
-        INT_E,
+        UINT_E,
         &spnQcConfig.transceiver.gpioPin[3]
     },	
     {	
         "TPIN5"
-        INT_E,
+        UINT_E,
         &spnQcConfig.transceiver.gpioPin[4]
     },	
     {	
         "TPIN6"
-        INT_E,
+        UINT_E,
         &spnQcConfig.transceiver.gpioPin[5]
     },	
     {	
         "TPIN7"
-        INT_E,
+        UINT_E,
         &spnQcConfig.transceiver.gpioPin[6]
     },	
     {	
         "TPIN8"
-        INT_E,
+        UINT_E,
         &spnQcConfig.transceiver.gpioPin[7]
     },	
     {	
@@ -176,47 +176,47 @@ const SpnQC_Config_Entry_Type configEntries[] = {
     },	
 	{
 		"MOTCOUNT",
-		INT_E,
+		UINT_E,
 		&spnQcConfig.motor.chanCount
 	},
 	{	
         "MPIN1"
-        INT_E,
+        UINT_E,
         &spnQcConfig.motor.gpioPin[0]
     },	
     {	
         "MPIN2"
-        INT_E,
+        UINT_E,
         &spnQcConfig.motor.gpioPin[1]
     },	
     {	
         "MPIN3"
-        INT_E,
+        UINT_E,
         &spnQcConfig.motor.gpioPin[2]
     },	
     {	
         "MPIN4"
-        INT_E,
+        UINT_E,
         &spnQcConfig.motor.gpioPin[3]
     },	
     {	
         "MPIN5"
-        INT_E,
+        UINT_E,
         &spnQcConfig.motor.gpioPin[4]
     },	
     {	
         "MPIN6"
-        INT_E,
+        UINT_E,
         &spnQcConfig.motor.gpioPin[5]
     },	
     {	
         "MPIN7"
-        INT_E,
+        UINT_E,
         &spnQcConfig.motor.gpioPin[6]
     },	
     {	
         "MPIN8"
-        INT_E,
+        UINT_E,
         &spnQcConfig.motor.gpioPin[7]
     },	
     ,	
@@ -287,7 +287,7 @@ const SpnQC_Config_Entry_Type configEntries[] = {
 	}
 };
 
-const int configEntriesCount = sizeof(configEntries)/sizeof(SpnQC_Config_Entry_Type);
+const uint32_t configEntriesCount = sizeof(configEntries)/sizeof(SpnQC_Config_Entry_Type);
 
 bool spnConfigInit(void)
 {
@@ -304,19 +304,19 @@ bool spnConfigInit(void)
 	// If file exists, parse the data and populate config structure
 	if(pInputFile != NULL)
 	{
-		char buf[128];
+		uint8_t buf[128];
 
 		while(spnUtilsReadLine(pInputFile, buf, 128) && (status == SUCCESS))
 		{
-			char entryNameRead[64];
-			char entryValueRead[64];
+			uint8_t entryNameRead[64];
+			uint8_t entryValueRead[64];
 
 			if(strchr(buf, '=') != NULL)
 			{
 				// Separate entry name and value from input string
 				sscanf(buf, "%[^=]=%s", entryNameRead, entryValueRead);
 
-				for(int entry = 0; entry < configEntriesCount; entry++)
+				for(uint32_t entry = 0; entry < configEntriesCount; entry++)
 				{
 					if(0 == strcmp(entryNameRead, configEntries[entry].textName))
 					{
@@ -325,31 +325,31 @@ bool spnConfigInit(void)
 						switch(configEntries[entry].type)
 						{
 							case UBYTE_E:
-								sscanf(entryValueRead, "%hhu", (unsigned char*)configEntries[entry].pDest);
+								sscanf(entryValueRead, "%hhu", (uint8_t*)configEntries[entry].pDest);
 								break;
 
 							case BYTE_E:
-								sscanf(entryValueRead, "%c", (char*)configEntries[entry].pDest);
+								sscanf(entryValueRead, "%c", (uint8_t*)configEntries[entry].pDest);
 								break;
 
 							case USHORT_E:
-								sscanf(entryValueRead, "%hu", (unsigned short*)configEntries[entry].pDest);
+								sscanf(entryValueRead, "%hu", (uint16_t*)configEntries[entry].pDest);
 								break;
 
 							case SHORT_E:
-								sscanf(entryValueRead, "%hi", (short*)configEntries[entry].pDest);
+								sscanf(entryValueRead, "%hi", (int16_t*)configEntries[entry].pDest);
 								break;
 
 							case UINT_E:
-								sscanf(entryValueRead, "%u", (unsigned int*)configEntries[entry].pDest);
+								sscanf(entryValueRead, "%u", (uint32_t*)configEntries[entry].pDest);
 								break;
 
 							case INT_E:
-								sscanf(entryValueRead, "%i", (int*)configEntries[entry].pDest);
+								sscanf(entryValueRead, "%i", (int32_t*)configEntries[entry].pDest);
 								break;
 
 							case FLOAT_E:
-								sscanf(entryValueRead, "%f", (float*)configEntries[entry].pDest);
+								sscanf(entryValueRead, "%f", (float32_t*)configEntries[entry].pDest);
 								break;
 
 							default:

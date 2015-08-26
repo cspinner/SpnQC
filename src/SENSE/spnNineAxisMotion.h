@@ -15,46 +15,46 @@ typedef struct
 	// These biases will be added to input data
 	struct
 	{
-		float x_bias; // g
-		float y_bias; // g
-		float z_bias; // g
+		float32_t x_bias; // g
+		float32_t y_bias; // g
+		float32_t z_bias; // g
 	} accel;
 
 	// These biases will be added to input data
 	struct
 	{
-		float x_bias; // º/s
-		float y_bias; // º/s
-		float z_bias; // º/s
+		float32_t x_bias; // º/s
+		float32_t y_bias; // º/s
+		float32_t z_bias; // º/s
 	} gyro;
 
 	struct
 	{
 		// compensates for hard errors:
-		float x_bias; // mG
-		float y_bias; // mG
-		float z_bias; // mG
+		float32_t x_bias; // mG
+		float32_t y_bias; // mG
+		float32_t z_bias; // mG
 
 		// compensates for soft errors:
-		float x_scale;
-		float y_scale;
-		float z_scale;
+		float32_t x_scale;
+		float32_t y_scale;
+		float32_t z_scale;
 	} mag;
 } SpnNineAxisMotion_Calibration_Type;
 
 typedef struct
 {
 	// SPI
-	int chipSelect;
-	int speed;
+	uint32_t chipSelect;
+	uint32_t speed;
 
 	// Filtering
-	int rollingAvgCount;
-	float magOutlierThresh;
+	uint32_t rollingAvgCount;
+	float32_t magOutlierThresh;
 
 	// Sensor scale
-	int accFsSel;
-	int gyroFsSel;
+	uint32_t accFsSel;
+	uint32_t gyroFsSel;
 
 	// Calibration
 	SpnNineAxisMotion_Calibration_Type calibration;
@@ -64,26 +64,26 @@ typedef struct
 {
 	struct
 	{
-		float x; // g
-		float y; // g
-		float z; // g
+		float32_t x; // g
+		float32_t y; // g
+		float32_t z; // g
 	} accel;
 
 	struct
 	{
-		float x; // º/s
-		float y; // º/s
-		float z; // º/s
+		float32_t x; // º/s
+		float32_t y; // º/s
+		float32_t z; // º/s
 	} gyro;
 
 	struct
 	{
-		float x; // mG
-		float y; // mG
-		float z; // mG
+		float32_t x; // mG
+		float32_t y; // mG
+		float32_t z; // mG
 	} mag;
 
-	float temperature; // ºF
+	float32_t temperature; // ºF
 } SpnNineAxisMotion_Data_Type;
 
 // For the MPU-9250 sensor
@@ -97,17 +97,17 @@ public:
 
 	void acquireData(void);
 
-	bool retrieveData(int* size, void* data);
+	bool retrieveData(uint32_t* size, void* data);
 
 private:
-	char readRegister(int address);
-	void writeRegister(int address, char data);
-	char readRegisterMask(int address, char mask);
-	void writeRegisterMask(int address, char mask, char data);
-	char readMagRegister(char address);
-	void writeMagRegister(char address, char data);
-	void writeMagRegisterMask(int address, char mask, char data);
-	void readMagRegisterSet(int startAddress, char readCount, char* pOut);
+	uint8_t readRegister(uint32_t address);
+	void writeRegister(uint32_t address, uint8_t data);
+	uint8_t readRegisterMask(uint32_t address, uint8_t mask);
+	void writeRegisterMask(uint32_t address, uint8_t mask, uint8_t data);
+	uint8_t readMagRegister(uint8_t address);
+	void writeMagRegister(uint8_t address, uint8_t data);
+	void writeMagRegisterMask(uint32_t address, uint8_t mask, uint8_t data);
+	void readMagRegisterSet(uint32_t startAddress, uint8_t readCount, uint8_t* pOut);
 	void applyCalibration(void);
 };
 

@@ -18,15 +18,15 @@ bool spnTransceiverInit(void)
 	return SUCCESS;
 }
 
-float spnTransceiverGetThrottlePct(void)
+float32_t spnTransceiverGetThrottlePct(void)
 {
-    float throttlePct = 0.0;
+    float32_t throttlePct = 0.0;
     
     if(terminalOverride)
     {
-        static float ovrInput = 0.0;
+        static float32_t ovrInput = 0.0;
 
-        char userInput = spnUserInputCharGet(false);
+        uint8_t userInput = spnUserInputCharGet(false);
 
         if(userInput == '[') ovrInput -= 2.0;
         else if (userInput == ']') ovrInput += 2.0;
@@ -44,15 +44,15 @@ float spnTransceiverGetThrottlePct(void)
 }
 
 // Determines Change In Pitch
-float spnTransceiverGetElevatorAngle(void)
+float32_t spnTransceiverGetElevatorAngle(void)
 {
-	float elevAngle = 0.0;
+	float32_t elevAngle = 0.0;
 
     if(terminalOverride)
     {
-        static float ovrInput = 0.0;
+        static float32_t ovrInput = 0.0;
 
-        char userInput = spnUserInputCharGet(false);
+        uint8_t userInput = spnUserInputCharGet(false);
 
         if(userInput == 'q') ovrInput -= 2.0;
         else if (userInput == 'w') ovrInput += 2.0;
@@ -70,15 +70,15 @@ float spnTransceiverGetElevatorAngle(void)
 }
 
 // Determines Change In Roll
-float spnTransceiverGetAileronAngle(void)
+float32_t spnTransceiverGetAileronAngle(void)
 {
-	static float ailAngle = 0.0;
+	static float32_t ailAngle = 0.0;
 
     if(terminalOverride)
     {
-        static float ovrInput = 0.0;
+        static float32_t ovrInput = 0.0;
 
-        char userInput = spnUserInputCharGet(false);
+        uint8_t userInput = spnUserInputCharGet(false);
 
         if(userInput == 'e') ovrInput -= 2.0;
         else if (userInput == 'r') ovrInput += 2.0;
@@ -96,15 +96,15 @@ float spnTransceiverGetAileronAngle(void)
 }
 
 // Determines Change In Yaw
-float spnTransceiverGetRudderAngle(void)
+float32_t spnTransceiverGetRudderAngle(void)
 {
-	static float rudAngle = 0.0;
+	static float32_t rudAngle = 0.0;
 
     if(terminalOverride)
     {
-        static float ovrInput = 0.0;
+        static float32_t ovrInput = 0.0;
 
-        char userInput = spnUserInputCharGet(false);
+        uint8_t userInput = spnUserInputCharGet(false);
 
         if(userInput == 't') ovrInput -= 2.0;
         else if (userInput == 'y') ovrInput += 2.0;

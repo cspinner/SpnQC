@@ -10,22 +10,22 @@
 #include <stdio.h>
 
 static FILE* pOutputFile = NULL; // output file descriptor
-static unsigned int fgElapsedSec;
-static unsigned int fgElapsedMSec;
-static unsigned int fgElapsedUSec;
-static unsigned int fgElapsedMaxSec;
-static unsigned int fgElapsedMaxMSec;
-static unsigned int fgElapsedMaxUSec;
-static unsigned int intElapsedSec;
-static unsigned int intElapsedMSec;
-static unsigned int intElapsedUSec;
-static unsigned int intElapsedMaxSec;
-static unsigned int intElapsedMaxMSec;
-static unsigned int intElapsedMaxUSec;
-static float Pitch;
-static float Roll;
-static float Yaw;
-static float Temperature;
+static uint32_t fgElapsedSec;
+static uint32_t fgElapsedMSec;
+static uint32_t fgElapsedUSec;
+static uint32_t fgElapsedMaxSec;
+static uint32_t fgElapsedMaxMSec;
+static uint32_t fgElapsedMaxUSec;
+static uint32_t intElapsedSec;
+static uint32_t intElapsedMSec;
+static uint32_t intElapsedUSec;
+static uint32_t intElapsedMaxSec;
+static uint32_t intElapsedMaxMSec;
+static uint32_t intElapsedMaxUSec;
+static float32_t Pitch;
+static float32_t Roll;
+static float32_t Yaw;
+static float32_t Temperature;
 
 static void userOutputOnExit(void);
 static void userOutputConsole(void);
@@ -72,7 +72,7 @@ void spnUserOutputUpdate(void)
 static void userOutputConsole(void)
 {
 	// Clear screen
-	for(int i = 0; i < 200; i++) printf("\n");
+	for(uint32_t i = 0; i < 200; i++) printf("\n");
 
 	printf("System Mode: %s - Command Mode: %s\n", spnModeGetString(), spnCommandGetModeString());
 	printf("Frame count: %i\n", spnSchedulerGetFrameCount());
@@ -87,7 +87,7 @@ static void userOutputConsole(void)
 	printf("%-5s: Yaw: %10f, Pitch: %10f, Roll: %10f\n", "Pos", Yaw, Pitch, Roll);
 	printf("Input Pulse 0: %u\n", spnServoGetPulseWidth(0));
 
-	for(int i = 0; i < 4; i++)
+	for(uint32_t i = 0; i < 4; i++)
 	{
 		printf("Motor Cmd %i: %.1f\n", i, spnMotorsGet(i));
 	}
@@ -96,7 +96,7 @@ static void userOutputConsole(void)
 static void userOutputFile(void)
 {
 	// write data to file
-	char buf[1024];
+	uint8_t buf[1024];
 	sprintf(buf, "%s,%s,%i,%.1f,%.1f,%.1f,%.1f,%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%u,%u,%u,%u,%u,%u\n",
 			spnModeGetString(),
 			spnCommandGetModeString(),

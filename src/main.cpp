@@ -5,7 +5,7 @@
 
 using namespace std;
 
-int main (void)
+int32_t main (void)
 {
 	struct sigaction sa = { 0 };
 	struct itimerval timer = { 0 };

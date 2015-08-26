@@ -38,21 +38,21 @@ bool SpnCompass::configure(void)
 void SpnCompass::acquireData(void)
 {
 	SpnSensor::acquireData();
-	short hi = wiringPiI2CReadReg8(i2c_fd, 2);
-	short lo = wiringPiI2CReadReg8(i2c_fd, 3);
+	int16_t hi = wiringPiI2CReadReg8(i2c_fd, 2);
+	int16_t lo = wiringPiI2CReadReg8(i2c_fd, 3);
 
 	//printf ("Hi: %d, Lo:%d\n", hi, lo);
 	dataRaw = (hi << 8) | lo;
 }
 
-bool SpnCompass::retrieveData(int* size, void* data)
+bool SpnCompass::retrieveData(uint32_t* size, void* data)
 {
 	setStatus(SpnSensor::retrieveData(size, data));
 
 	if(getStatus() == SUCCESS)
 	{
 		*size = 1;
-		*(float*)data = dataRaw/10.0;
+		*(float32_t*)data = dataRaw/10.0;
 	}
 
 	return getStatus();

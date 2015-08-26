@@ -12,14 +12,14 @@ using namespace std;
 
 #define LED_STATUS_STEP_COUNT 10
 
-static int spnMinorFrameCount = 0;
+static uint32_t spnMinorFrameCount = 0;
 static struct timeval tsFgElapsed;
 static struct timeval tsIntElapsed;
 static struct timeval tsFgElapsedMax = {0};
 static struct timeval tsIntElapsedMax = {0};
-static int pinLevelPosition = 0;
+static uint32_t pinLevelPosition = 0;
 
-const int LED_STATUS_PATTERN[MODE_COUNT_E][LED_STATUS_STEP_COUNT] =
+const uint32_t LED_STATUS_PATTERN[MODE_COUNT_E][LED_STATUS_STEP_COUNT] =
 {
 	//MODE_INIT_E:
 	{1,0,0,0,0,0,0,0,0,0},
@@ -59,7 +59,7 @@ void spnSchedulerForeground(void)
 	// Flash LED - 2 second cycle time for entire LED pattern.
 	//             And each pattern has LED_STATUS_STEP_COUNT positions.
 	if(spnMinorFrameCount %
-			(int)((2000/(MINOR_FRAME_TIME_USEC/1000))/LED_STATUS_STEP_COUNT) == 0)
+			(uint32_t)((2000/(MINOR_FRAME_TIME_USEC/1000))/LED_STATUS_STEP_COUNT) == 0)
 	{
 		digitalWrite (OUTPUT_PIN_STATUS_LED,
 				LED_STATUS_PATTERN[spnModeGet()][pinLevelPosition]) ;
@@ -85,43 +85,43 @@ void spnSchedulerForeground(void)
 	spnMinorFrameCount++;
 }
 
-void spnSchedulerGetFrameTime(unsigned int* pSec,
-						      unsigned int* pMSec,
-							  unsigned int* pUSec)
+void spnSchedulerGetFrameTime(uint32_t* pSec,
+						      uint32_t* pMSec,
+							  uint32_t* pUSec)
 {
 	*pSec = tsFgElapsed.tv_sec;
 	*pMSec = tsFgElapsed.tv_usec/1000;
 	*pUSec = tsFgElapsed.tv_usec%1000;
 }
 
-void spnSchedulerGetMaxFrameTime(unsigned int* pSec,
-						         unsigned int* pMSec,
-							     unsigned int* pUSec)
+void spnSchedulerGetMaxFrameTime(uint32_t* pSec,
+						         uint32_t* pMSec,
+							     uint32_t* pUSec)
 {
 	*pSec = tsFgElapsedMax.tv_sec;
 	*pMSec = tsFgElapsedMax.tv_usec/1000;
 	*pUSec = tsFgElapsedMax.tv_usec%1000;
 }
 
-void spnSchedulerGetIntTime(unsigned int* pSec,
-						      unsigned int* pMSec,
-							  unsigned int* pUSec)
+void spnSchedulerGetIntTime(uint32_t* pSec,
+						      uint32_t* pMSec,
+							  uint32_t* pUSec)
 {
 	*pSec = tsIntElapsed.tv_sec;
 	*pMSec = tsIntElapsed.tv_usec/1000;
 	*pUSec = tsIntElapsed.tv_usec%1000;
 }
 
-void spnSchedulerGetMaxIntTime(unsigned int* pSec,
-						         unsigned int* pMSec,
-							     unsigned int* pUSec)
+void spnSchedulerGetMaxIntTime(uint32_t* pSec,
+						         uint32_t* pMSec,
+							     uint32_t* pUSec)
 {
 	*pSec = tsIntElapsedMax.tv_sec;
 	*pMSec = tsIntElapsedMax.tv_usec/1000;
 	*pUSec = tsIntElapsedMax.tv_usec%1000;
 }
 
-int spnSchedulerGetFrameCount(void)
+uint32_t spnSchedulerGetFrameCount(void)
 {
 	return spnMinorFrameCount;
 }
