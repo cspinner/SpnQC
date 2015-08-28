@@ -103,27 +103,27 @@ typedef struct
 	{
 		struct
 		{
-			unsigned char WIA;
-			unsigned char INFO;
-			unsigned char ST1;
-			unsigned char HXL;
-			unsigned char HXH;
-			unsigned char HYL;
-			unsigned char HYH;
-			unsigned char HZL;
-			unsigned char HZH;
-			unsigned char ST2;
-			unsigned char CNTL1;
-			unsigned char CNTL2;
-			unsigned char ASTC;
-			unsigned char TS1;
-			unsigned char TS2;
-			unsigned char I2CDIS;
-			unsigned char ASAX;
-			unsigned char ASAY;
-			unsigned char ASAZ;
+			char WIA;
+			char INFO;
+			char ST1;
+			char HXL;
+			char HXH;
+			char HYL;
+			char HYH;
+			char HZL;
+			char HZH;
+			char ST2;
+			char CNTL1;
+			char CNTL2;
+			char ASTC;
+			char TS1;
+			char TS2;
+			char I2CDIS;
+			char ASAX;
+			char ASAY;
+			char ASAZ;
 		} regByName;
-		unsigned char regByIndex[19];
+		char regByIndex[19];
 	};
 
 } Mag_Register_Set_Type;
@@ -132,79 +132,79 @@ typedef struct
 {
 	struct
 	{
-		float x_raw;
-		float y_raw;
-		float z_raw;
+		float32_t x_raw;
+		float32_t y_raw;
+		float32_t z_raw;
 	} accel;
 
 	struct
 	{
-		float x_raw;
-		float y_raw;
-		float z_raw;
+		float32_t x_raw;
+		float32_t y_raw;
+		float32_t z_raw;
 	} gyro;
 
 	struct
 	{
-		float x_raw;
-		float y_raw;
-		float z_raw;
+		float32_t x_raw;
+		float32_t y_raw;
+		float32_t z_raw;
 	} mag;
 
-	float temperature_raw;
+	float32_t temperature_raw;
 } SpnNineAxisMotion_Raw_Data_Type;
 
 // LSB/(º/s) - indexed by FS_SEL
-const float GYRO_SENSITIVITY[4] =
+const float32_t GYRO_SENSITIVITY[4] =
 {
 	131.0, 65.5, 32.8, 16.4
 };
 
 // LSB/g - indexed by FS_SEL
-const float ACCEL_SENSITIVITY[4] =
+const float32_t ACCEL_SENSITIVITY[4] =
 {
 	16384.0, 8192.0, 4096.0, 2048.0
 };
 
-int spi_fd;
-int chipSelect;
-int speed;
-int accFsSel;
-int gyroFsSel;
+int32_t spi_fd;
+uint32_t chipSelect;
+uint32_t speed;
+uint32_t accFsSel;
+uint32_t gyroFsSel;
 
 SpnNineAxisMotion_Calibration_Type calData;
 
-int rollingAvgCount;
-int rawDataCount;
-float magOutlierThresh;
+uint32_t rollingAvgCount;
+uint32_t rawDataCount;
+float32_t magOutlierThresh;
 SpnNineAxisMotion_Raw_Data_Type rawData[128]; // max 128 sample avg
 SpnNineAxisMotion_Raw_Data_Type filtData;
 
 Mag_Register_Set_Type mag_registers;
 
-char SpnNineAxisMotion::readRegister(int address)
+char SpnNineAxisMotion::readRegister(uint32_t address)
 {
-	unsigned char spiTransfer[2];
+	char spiTransfer[2];
 
 	spiTransfer[0] = address;
 	spiTransfer[0] |= READ;
 	spiTransfer[1] = 0x0;
-	wiringPiSPIDataRW(spi_fd, (unsigned char*)(unsigned char*)&spiTransfer, sizeof(spiTransfer));
+	wiringPiSPIDataRW(spi_fd, (uint8_t*)&spiTransfer, sizeof(spiTransfer));
 
 	return spiTransfer[1];
 }
 
-void SpnNineAxisMotion::writeRegister(int address, char data)
+void SpnNineAxisMotion::writeRegister(uint32_t address, char data)
 {
-	unsigned char spiTransfer[2];
+	char spiTransfer[2];
 
 	spiTransfer[0] = address;
 	spiTransfer[0] |= WRITE;
 	spiTransfer[1] = data;
-	wiringPiSPIDataRW(spi_fd, (unsigned char*)(unsigned char*)&spiTransfer, sizeof(spiTransfer));
+	wiringPiSPIDataRW(spi_fd, (uint8_t*)&spiTransfer, sizeof(spiTransfer));
 }
 
-char SpnNineAxisMotion::readRegisterMask(int address, char mask)
+char SpnNineAxisMotion::readRegisterMask(uint32_t address, char mask)
 {
 	char maskIn = mask;
 	char valueRead = readRegister(address) & mask;
@@ -218,7 +218,7 @@ char SpnNineAxisMotion::readRegisterMask(int address, char mask)
 	return valueRead;
 }
 
-void SpnNineAxisMotion::writeRegisterMask(int address, char mask, char data)
+void SpnNineAxisMotion::writeRegisterMask(uint32_t address, char mask, char data)
 {
 	char maskIn = mask;
 	char writeData = data;
@@ -233,9 +233,9 @@ void SpnNineAxisMotion::writeRegisterMask(int address, char mask, char data)
 	writeRegister(address, ((readData & ~mask) | writeData));
 }
 
-void SpnNineAxisMotion::readMagRegisterSet(int startAddress, char readCount, char* pOut)
+void SpnNineAxisMotion::readMagRegisterSet(uint32_t startAddress, char readCount, char* pOut)
 {
-	int i;
+	uint32_t i;
 
 	writeRegister(MPU9250_I2C_SLV0_ADDR_ADDR, 0x8C); // Read from I2C address 12
 	writeRegister(MPU9250_I2C_SLV0_REG_ADDR, startAddress); // Reg address
@@ -261,7 +261,7 @@ void SpnNineAxisMotion::writeMagRegister(char address, char data)
 	spnUtilsWaitUsec(1000);
 }
 
-void SpnNineAxisMotion::writeMagRegisterMask(int address, char mask, char data)
+void SpnNineAxisMotion::writeMagRegisterMask(uint32_t address, char mask, char data)
 {
 	char maskIn = mask;
 	char writeData = data;
@@ -347,14 +347,14 @@ bool SpnNineAxisMotion::configure(void* cfg)
 			//
 			// Apply GYRO user offset
 			//
-			short gyroOffsetX, gyroOffsetY, gyroOffsetZ;
-			float gyroSensitivity = GYRO_SENSITIVITY[gyroFsSel];
+			int16_t gyroOffsetX, gyroOffsetY, gyroOffsetZ;
+			float32_t gyroSensitivity = GYRO_SENSITIVITY[gyroFsSel];
 
 			// Convert offset into format required by the register. Divide by 4 to get 32.9 LSB per deg/s
 			//  to conform to expected bias input format
-			gyroOffsetX = (short)((calData.gyro.x_bias * gyroSensitivity * pow(2, gyroFsSel)) / 4.0);
-			gyroOffsetY = (short)((calData.gyro.y_bias * gyroSensitivity * pow(2, gyroFsSel)) / 4.0);
-			gyroOffsetZ = (short)((calData.gyro.z_bias * gyroSensitivity * pow(2, gyroFsSel)) / 4.0);
+			gyroOffsetX = (int16_t)((calData.gyro.x_bias * gyroSensitivity * pow(2, gyroFsSel)) / 4.0);
+			gyroOffsetY = (int16_t)((calData.gyro.y_bias * gyroSensitivity * pow(2, gyroFsSel)) / 4.0);
+			gyroOffsetZ = (int16_t)((calData.gyro.z_bias * gyroSensitivity * pow(2, gyroFsSel)) / 4.0);
 
 			writeRegisterMask(MPU9250_GYRO_X_OFFS_USR_H_ADDR, 0xFFu, ((gyroOffsetX>>8) & 0xFFu));
 			writeRegisterMask(MPU9250_GYRO_X_OFFS_USR_L_ADDR, 0xFFu, (gyroOffsetX & 0xFFu));
@@ -366,9 +366,9 @@ bool SpnNineAxisMotion::configure(void* cfg)
 			//
 			// Apply ACCEL user offset
 			//
-			short accelOffsetRegX, accelOffsetRegY, accelOffsetRegZ;
-			short accelOffsetX, accelOffsetY, accelOffsetZ;
-			float accelSensitivity = ACCEL_SENSITIVITY[accFsSel];
+			int16_t accelOffsetRegX, accelOffsetRegY, accelOffsetRegZ;
+			int16_t accelOffsetX, accelOffsetY, accelOffsetZ;
+			float32_t accelSensitivity = ACCEL_SENSITIVITY[accFsSel];
 
 			// Apparently there is factory bias already loaded into the accel registers.
 			//  We will need to add our bias to it.
@@ -378,9 +378,9 @@ bool SpnNineAxisMotion::configure(void* cfg)
 
 			// Convert offset into format required by the register. Divide by 8 to get 2048 LSB per g
 			//  to conform to expected bias input format. Mask LSB since it must be preserved.
-			accelOffsetX = accelOffsetRegX + ((short)(calData.accel.x_bias * accelSensitivity * pow(2, accFsSel) / 8.0) & ~1);
-			accelOffsetY = accelOffsetRegY + ((short)(calData.accel.y_bias * accelSensitivity * pow(2, accFsSel) / 8.0) & ~1);
-			accelOffsetZ = accelOffsetRegZ + ((short)(calData.accel.z_bias * accelSensitivity * pow(2, accFsSel) / 8.0) & ~1);
+			accelOffsetX = accelOffsetRegX + ((int16_t)(calData.accel.x_bias * accelSensitivity * pow(2, accFsSel) / 8.0) & ~1);
+			accelOffsetY = accelOffsetRegY + ((int16_t)(calData.accel.y_bias * accelSensitivity * pow(2, accFsSel) / 8.0) & ~1);
+			accelOffsetZ = accelOffsetRegZ + ((int16_t)(calData.accel.z_bias * accelSensitivity * pow(2, accFsSel) / 8.0) & ~1);
 
 			writeRegister(MPU9250_ACCEL_X_OFFS_USR_H_ADDR, ((accelOffsetX>>8) & 0xFFu));
 			writeRegister(MPU9250_ACCEL_X_OFFS_USR_L_ADDR, (accelOffsetX & 0xFFu));
@@ -425,22 +425,22 @@ void SpnNineAxisMotion::acquireData(void)
 	//
 	// READ SENSOR DATA
 	//
-	pUnfiltered->accel.x_raw = ((short)((readRegister(MPU9250_ACCEL_XOUT_H_ADDR) << 8)|readRegister(MPU9250_ACCEL_XOUT_L_ADDR)))*1.0;
-	pUnfiltered->accel.y_raw = ((short)((readRegister(MPU9250_ACCEL_YOUT_H_ADDR) << 8)|readRegister(MPU9250_ACCEL_YOUT_L_ADDR)))*1.0;
-	pUnfiltered->accel.z_raw = ((short)((readRegister(MPU9250_ACCEL_ZOUT_H_ADDR) << 8)|readRegister(MPU9250_ACCEL_ZOUT_L_ADDR)))*1.0;
+	pUnfiltered->accel.x_raw = ((int16_t)((readRegister(MPU9250_ACCEL_XOUT_H_ADDR) << 8)|readRegister(MPU9250_ACCEL_XOUT_L_ADDR)))*1.0;
+	pUnfiltered->accel.y_raw = ((int16_t)((readRegister(MPU9250_ACCEL_YOUT_H_ADDR) << 8)|readRegister(MPU9250_ACCEL_YOUT_L_ADDR)))*1.0;
+	pUnfiltered->accel.z_raw = ((int16_t)((readRegister(MPU9250_ACCEL_ZOUT_H_ADDR) << 8)|readRegister(MPU9250_ACCEL_ZOUT_L_ADDR)))*1.0;
 
-	pUnfiltered->gyro.x_raw = ((short)((readRegister(MPU9250_GYRO_XOUT_H_ADDR) << 8)|readRegister(MPU9250_GYRO_XOUT_L_ADDR)))*1.0;
-	pUnfiltered->gyro.y_raw = ((short)((readRegister(MPU9250_GYRO_YOUT_H_ADDR) << 8)|readRegister(MPU9250_GYRO_YOUT_L_ADDR)))*1.0;
-	pUnfiltered->gyro.z_raw = ((short)((readRegister(MPU9250_GYRO_ZOUT_H_ADDR) << 8)|readRegister(MPU9250_GYRO_ZOUT_L_ADDR)))*1.0;
+	pUnfiltered->gyro.x_raw = ((int16_t)((readRegister(MPU9250_GYRO_XOUT_H_ADDR) << 8)|readRegister(MPU9250_GYRO_XOUT_L_ADDR)))*1.0;
+	pUnfiltered->gyro.y_raw = ((int16_t)((readRegister(MPU9250_GYRO_YOUT_H_ADDR) << 8)|readRegister(MPU9250_GYRO_YOUT_L_ADDR)))*1.0;
+	pUnfiltered->gyro.z_raw = ((int16_t)((readRegister(MPU9250_GYRO_ZOUT_H_ADDR) << 8)|readRegister(MPU9250_GYRO_ZOUT_L_ADDR)))*1.0;
 
 	readMagRegisterSet(AK8963_HXL_ADDR, 12, (char*)&mag_registers.regByIndex[3]);
 
 	// perform sensitivity adjustment
-	pUnfiltered->mag.x_raw = ((short)((mag_registers.regByName.HXH << 8)|mag_registers.regByName.HXL))*1.0;
-	pUnfiltered->mag.y_raw = ((short)((mag_registers.regByName.HYH << 8)|mag_registers.regByName.HYL))*1.0;
-	pUnfiltered->mag.z_raw = ((short)((mag_registers.regByName.HZH << 8)|mag_registers.regByName.HZL))*1.0;
+	pUnfiltered->mag.x_raw = ((int16_t)((mag_registers.regByName.HXH << 8)|mag_registers.regByName.HXL))*1.0;
+	pUnfiltered->mag.y_raw = ((int16_t)((mag_registers.regByName.HYH << 8)|mag_registers.regByName.HYL))*1.0;
+	pUnfiltered->mag.z_raw = ((int16_t)((mag_registers.regByName.HZH << 8)|mag_registers.regByName.HZL))*1.0;
 
-	pUnfiltered->temperature_raw = ((short)((readRegister(MPU9250_TEMP_OUT_H_ADDR) << 8)|readRegister(MPU9250_TEMP_OUT_L_ADDR)))*1.0;
+	pUnfiltered->temperature_raw = ((int16_t)((readRegister(MPU9250_TEMP_OUT_H_ADDR) << 8)|readRegister(MPU9250_TEMP_OUT_L_ADDR)))*1.0;
 
 	if(rawDataCount < rollingAvgCount) rawDataCount++;
 
@@ -463,7 +463,7 @@ void SpnNineAxisMotion::acquireData(void)
 	}
 
 	// sum the raw data
-	for(int i = 0; i < rawDataCount; i++)
+	for(uint32_t i = 0; i < rawDataCount; i++)
 	{
 		filtData.accel.x_raw += pUnfiltered[i].accel.x_raw;
 		filtData.accel.y_raw += pUnfiltered[i].accel.y_raw;
@@ -497,7 +497,7 @@ void SpnNineAxisMotion::acquireData(void)
 
 
 	// Shift un-filtered data right, pushing the oldest data out
-	for(int i = rollingAvgCount-1; i > 0; i--)
+	for(uint32_t i = rollingAvgCount-1; i > 0; i--)
 	{
 		pUnfiltered[i] = pUnfiltered[i-1];
 	}
@@ -523,7 +523,7 @@ void SpnNineAxisMotion::acquireData(void)
     filtData.mag.z_raw *= calData.mag.z_scale;
 }
 
-bool SpnNineAxisMotion::retrieveData(int* size, void* data)
+bool SpnNineAxisMotion::retrieveData(uint32_t* size, void* data)
 {
 	SpnNineAxisMotion_Data_Type output;
 	setStatus(SpnSensor::retrieveData(size, data));

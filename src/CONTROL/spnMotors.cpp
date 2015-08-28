@@ -8,49 +8,53 @@
 #include "SpnQC.h"
 #include <stdlib.h>
 
-#define MOTORS_COUNT 4
-
-// List of output pins using BCM number (list ends with -1)
-const int outputPins[] = { 4, 17, 22, 27, -1 };
-
-// List of input pins using BCM number (list ends with -1)
-const int inputPins[] = { 23, -1 };
+// y = mc + b  --- linear relationship between command % and pulse width
+// commanded pulse width = slope * command percent + intercept
+static float32_t slope;
+static float32_t intercept; 
+static uint32_t motorCount;
 
 bool spnMotorsInit(void)
 {
-	return spnServoInit(&inputPins[0], &outputPins[0]);
+    const SpnQC_Config_Type* const pCfg = spnConfigGet();
+    
+    slope = (pCfg->motor.pulseWidthFullThrottle - pCfg->motor.pulseWidthZeroThrottle)/100.0;
+    intercept = pCfg->motor.pulseWidthZeroThrottle;
+    motorCount = pCfg->motor.chanCount;
+    
+    atexit(&spnMotorsStopAll);
+    
+	return SUCCESS;
 }
 
-void spnMotorsSet(int motorNum, float cmdPct)
+void spnMotorsSet(uint32_t motorNum, float32_t cmdPct)
 {
-	// 1050 to 2050
-	int pulseWidthUsec = (int)(10.0*cmdPct + 1050.0);
-
-	cmdPct = clamp(cmdPct, 0.0, 100.0);
+    // calculate pulse width based on commanded percent
+	uint32_t pulseWidthUsec = (uint32_t)(slope*cmdPct + intercept);
 
 	// command the servo driver
 	spnServoSetPulseWidth(motorNum, pulseWidthUsec);
 }
 
 // Get motor pct 0-100%
-float spnMotorsGet(int motorNum)
+float32_t spnMotorsGet(uint32_t motorNum)
 {
-	int pulseWidthUsec = spnServoGetCommandedPulseWidth(motorNum);
-	float cmdPct = (((float)pulseWidthUsec - 1050.0)/10.0);
+	uint32_t pulseWidthUsec = spnServoGetCommandedPulseWidth(motorNum);
+	float32_t cmdPct = (((float32_t)pulseWidthUsec - intercept)/slope);
 
 	return clamp(cmdPct, 0.0, 100.0);
 }
 
 // 0 = high, 1 = center, 2 = low
-void spnMotorsCalibrateDrive(int level)
+void spnMotorsCalibrateDrive(uint32_t level)
 {
-	int pulseWidths[] = {
+	const uint32_t pulseWidths[] = {
 			2000, 1500, 1000
 	};
 
 	if(level <= 2)
 	{
-		for(int i = 0; i < MOTORS_COUNT; i++)
+		for(uint32_t i = 0; i < motorCount; i++)
 		{
 			spnServoSetPulseWidth(i, pulseWidths[level]);
 		}
@@ -63,6 +67,7 @@ void spnMotorsCalibrateDrive(int level)
 
 void spnMotorsStopAll(void)
 {
+	printf("Stopping all motors...\n");
 	spnServoStopAllPulses();
 }
 

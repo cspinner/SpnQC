@@ -57,28 +57,35 @@ static void processCommandMode(void);
 
 bool spnCommandInit(void)
 {
-	float pid_interval = MINOR_FRAME_TIME_USEC/1000000.0;
+	float32_t pid_interval = MINOR_FRAME_TIME_USEC/1000000.0;
 
 	const SpnQC_Config_Type* const pCfg = spnConfigGet();
-
-	// Configure controller PIDs, Motor Outputs, Transceiver Inputs
-	if( (pitchRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
-			pCfg->command.pidPitchKp, pCfg->command.pidPitchKi, pCfg->command.pidPitchKd) == SUCCESS) &&
-	    (pitchAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
-	    		pCfg->command.pidPitchKp, pCfg->command.pidPitchKi, pCfg->command.pidPitchKd) == SUCCESS) &&
-		(rollRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
-				pCfg->command.pidRollKp, pCfg->command.pidRollKi, pCfg->command.pidRollKd) == SUCCESS) &&
-		(rollAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
-				pCfg->command.pidRollKp, pCfg->command.pidRollKi, pCfg->command.pidRollKd) == SUCCESS) &&
-		(yawRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
-				pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == SUCCESS) &&
-		(yawAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
-				pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == SUCCESS) &&
-		(spnMotorsInit() == SUCCESS) &&
-		(spnTransceiverInit() == SUCCESS))
-	{
-		return SUCCESS;
-	}
+    
+    if(spnServoInit(pCfg->transceiver.chanCount, &pCfg->transceiver.gpioPin[0], pCfg->motor.chanCount, &pCfg->motor.gpioPin[0]) == SUCCESS)
+    {
+        // Configure controller PIDs, Motor Outputs, Transceiver Inputs
+        if( (pitchRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+                pCfg->command.pidPitchKp, pCfg->command.pidPitchKi, pCfg->command.pidPitchKd) == SUCCESS) &&
+            (pitchAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+                    pCfg->command.pidPitchKp, pCfg->command.pidPitchKi, pCfg->command.pidPitchKd) == SUCCESS) &&
+            (rollRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+                    pCfg->command.pidRollKp, pCfg->command.pidRollKi, pCfg->command.pidRollKd) == SUCCESS) &&
+            (rollAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+                    pCfg->command.pidRollKp, pCfg->command.pidRollKi, pCfg->command.pidRollKd) == SUCCESS) &&
+            (yawRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+                    pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == SUCCESS) &&
+            (yawAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+                    pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == SUCCESS) &&
+            (spnMotorsInit() == SUCCESS) &&
+            (spnTransceiverInit() == SUCCESS))
+        {
+            return SUCCESS;
+        }
+        else
+        {
+            return FAIL;
+        }
+    }
 	else
 	{
 		return FAIL;
@@ -167,18 +174,18 @@ static void setCommandMode(void)
 
 static void processCommandMode(void)
 {
-	float throttlePct = spnTransceiverGetThrottlePct();
-	float elevatorAngle = spnTransceiverGetElevatorAngle();
-	float aileronAngle = spnTransceiverGetAileronAngle();
-	float rudderAngle = spnTransceiverGetRudderAngle();
+	float32_t throttlePct = spnTransceiverGetThrottlePct();
+	float32_t elevatorAngle = spnTransceiverGetElevatorAngle();
+	float32_t aileronAngle = spnTransceiverGetAileronAngle();
+	float32_t rudderAngle = spnTransceiverGetRudderAngle();
 
-	float rollPidOut = 0.0;
-	float pitchPidOut = 0.0;
-	float yawPidOut = 0.0;
+	float32_t rollPidOut = 0.0;
+	float32_t pitchPidOut = 0.0;
+	float32_t yawPidOut = 0.0;
 
-	float yaw;
-	float pitch;
-	float roll;
+	float32_t yaw;
+	float32_t pitch;
+	float32_t roll;
 
 	// retrieve IMU data
 	spnSensorGetPrincipalAxes(&pitch, &roll, &yaw);

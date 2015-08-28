@@ -32,12 +32,12 @@ bool SpnSensor::configure(void* cfg)
 void SpnSensor::acquireData(void){}
 void SpnSensor::acquireData(void* opt){}
 
-bool SpnSensor::retrieveData(int* size, void* data)
+bool SpnSensor::retrieveData(uint32_t* size, void* data)
 {
 	*size = 0;
 	return getStatus();
 }
-bool SpnSensor::retrieveData(void* opt, int* size, void* data)
+bool SpnSensor::retrieveData(void* opt, uint32_t* size, void* data)
 {
 	*size = 0;
 	return getStatus();

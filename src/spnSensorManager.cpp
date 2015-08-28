@@ -19,7 +19,7 @@ using namespace std;
 
 static SpnNineAxisMotion MPU9250;
 static SpnNineAxisMotion_Data_Type SpnNineAxisMotionData;
-static float Pitch, Yaw, Roll;
+static float32_t Pitch, Yaw, Roll;
 
 static bool initMPU9250(void)
 {
@@ -52,13 +52,13 @@ static bool initMPU9250(void)
 	return MPU9250.configure(&cfg_mpu9250);
 }
 
-static void quaternionToEuler(float* quat0, float* quat1, float* quat2, float* quat3,
-						      float* yawRad, float* pitchRad, float* rollRad)
+static void quaternionToEuler(float32_t* quat0, float32_t* quat1, float32_t* quat2, float32_t* quat3,
+						      float32_t* yawRad, float32_t* pitchRad, float32_t* rollRad)
 {
-	float sqx = (*quat1)*(*quat1);
-	float sqy = (*quat2)*(*quat2);
-	float sqz = (*quat3)*(*quat3);
-	float asinfInput;
+	float32_t sqx = (*quat1)*(*quat1);
+	float32_t sqy = (*quat2)*(*quat2);
+	float32_t sqz = (*quat3)*(*quat3);
+	float32_t asinfInput;
 
 	asinfInput = -2.f * ((*quat0)*(*quat2) - (*quat1)*(*quat3));
 	if(asinfInput > 1) asinfInput = 1; // protects against NaN - clamp to 90 deg max
@@ -80,8 +80,8 @@ bool spnSensorManagerInit(void)
 
 void spnSensorManagerUpdate(void)
 {
-	int phNineAxisDataSize;
-	float yawRad, pitchRad, rollRad;
+	uint32_t phNineAxisDataSize;
+	float32_t yawRad, pitchRad, rollRad;
 
 	// Acquire Sensor Data
 	MPU9250.acquireData();
@@ -126,14 +126,14 @@ void spnSensorManagerUpdate(void)
 //	Yaw = (Yaw + 180.0)/2.0;
 }
 
-void spnSensorGetPrincipalAxes(float* pPitch, float* pRoll, float* pYaw)
+void spnSensorGetPrincipalAxes(float32_t* pPitch, float32_t* pRoll, float32_t* pYaw)
 {
 	*pPitch = Pitch;
 	*pRoll = Roll;
 	*pYaw = Yaw;
 }
 
-float spnSensorGetTemperature(void)
+float32_t spnSensorGetTemperature(void)
 {
 	return SpnNineAxisMotionData.temperature;
 }

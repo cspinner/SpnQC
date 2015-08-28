@@ -17,18 +17,9 @@ static bool isTerminalStateSet = false;
 static struct termios ttystateold;
 static char charInput = 0;
 
-static int getKeyboardHit(void);
+static uint32_t getKeyboardHit(void);
 static void setTerminalState(void);
 static void restoreTerminalState(void);
-
-
-
-void doExit(int signal)
-{
-  restoreTerminalState();
-}
-
-
 
 bool spnUserInputInit(void)
 {
@@ -65,7 +56,7 @@ char spnUserInputCharGet(bool consume)
 	return rtnChar;
 }
 
-static int getKeyboardHit(void)
+static uint32_t getKeyboardHit(void)
 {
 	struct timeval tv;
 	fd_set fds;

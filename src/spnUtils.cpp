@@ -35,7 +35,7 @@ static bool TimedOut(struct timeval* pTsEnd)
 }
 
 // delayUsec range 0 - 1000000
-void spnUtilsWaitUsec(unsigned int delayUsec)
+void spnUtilsWaitUsec(uint32_t delayUsec)
 {
 	struct timeval tsNow;
 	struct timeval tsAdder;
@@ -105,8 +105,8 @@ size_t spnUtilsReadLine(FILE *pFile, char* pDest, size_t destSizeBytes)
 	return bytesRead;
 }
 
-// assumes one floating point value per line
-bool spnUtilsReadNextFloatFromFile(FILE* pFile, float* pDest)
+// assumes one float32_ting point value per line
+bool spnUtilsReadNextFloatFromFile(FILE* pFile, float32_t* pDest)
 {
 	size_t bytesRead;
 	char readBytes[128];
@@ -116,7 +116,7 @@ bool spnUtilsReadNextFloatFromFile(FILE* pFile, float* pDest)
 
 	if(bytesRead > 0)
 	{
-		// Parse the float value
+		// Parse the float32_t value
 		sscanf(readBytes, "%f", pDest);
 
 		return SUCCESS;
@@ -129,7 +129,7 @@ bool spnUtilsReadNextFloatFromFile(FILE* pFile, float* pDest)
 }
 
 // assumes one integer point value per line
-bool spnUtilsReadNextIntFromFile(FILE* pFile, int* pDest)
+bool spnUtilsReadNextIntFromFile(FILE* pFile, int32_t* pDest)
 {
 	size_t bytesRead;
 	char readBytes[128];
@@ -139,7 +139,7 @@ bool spnUtilsReadNextIntFromFile(FILE* pFile, int* pDest)
 
 	if(bytesRead > 0)
 	{
-		// Parse the float value
+		// Parse the float32_t value
 		sscanf(readBytes, "%i", pDest);
 
 		return SUCCESS;

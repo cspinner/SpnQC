@@ -31,17 +31,17 @@ static SpnQC_Config_Type spnQcConfig;
 const SpnQC_Config_Entry_Type configEntries[] = {
 	{
 		"SPICHSEL",
-		INT_E,
+		UINT_E,
 		&spnQcConfig.spi.chipSelect
 	},
 	{
 		"SPISPEED",
-		INT_E,
+		UINT_E,
 		&spnQcConfig.spi.speed
 	},
 	{
 		"AVGSIZE",
-		INT_E,
+		UINT_E,
 		&spnQcConfig.mpu9250.rollingAvgCount
 	},
 	{
@@ -56,12 +56,12 @@ const SpnQC_Config_Entry_Type configEntries[] = {
 	},
 	{
 		"ACCFSSEL",
-		INT_E,
+		UINT_E,
 		&spnQcConfig.mpu9250.accFsSel
 	},
 	{
 		"GYROFSSEL",
-		INT_E,
+		UINT_E,
 		&spnQcConfig.mpu9250.gyroFsSel
 	},
 	{
@@ -126,39 +126,109 @@ const SpnQC_Config_Entry_Type configEntries[] = {
 	},
 	{
 		"CHANCOUNT",
-		INT_E,
+		UINT_E,
 		&spnQcConfig.transceiver.chanCount
 	},
-	{
-		"TPIN1",
-		INT_E,
-		&spnQcConfig.transceiver.gpioPin[0]
-	},
+	{	
+        "TPIN1",
+        UINT_E,
+        &spnQcConfig.transceiver.gpioPin[0]
+    },	
+    {	
+        "TPIN2",
+        UINT_E,
+        &spnQcConfig.transceiver.gpioPin[1]
+    },	
+    {	
+        "TPIN3",
+        UINT_E,
+        &spnQcConfig.transceiver.gpioPin[2]
+    },	
+    {	
+        "TPIN4",
+        UINT_E,
+        &spnQcConfig.transceiver.gpioPin[3]
+    },	
+    {	
+        "TPIN5",
+        UINT_E,
+        &spnQcConfig.transceiver.gpioPin[4]
+    },	
+    {	
+        "TPIN6",
+        UINT_E,
+        &spnQcConfig.transceiver.gpioPin[5]
+    },	
+    {	
+        "TPIN7",
+        UINT_E,
+        &spnQcConfig.transceiver.gpioPin[6]
+    },	
+    {	
+        "TPIN8",
+        UINT_E,
+        &spnQcConfig.transceiver.gpioPin[7]
+    },	
+    {	
+        "TERMINPUT",
+        INT_E,
+        &spnQcConfig.transceiver.useTerminal
+    },	
 	{
 		"MOTCOUNT",
-		INT_E,
+		UINT_E,
 		&spnQcConfig.motor.chanCount
 	},
-	{
-		"MPIN1",
-		INT_E,
-		&spnQcConfig.motor.gpioPin[0]
-	},
-	{
-		"MPIN2",
-		INT_E,
-		&spnQcConfig.motor.gpioPin[1]
-	},
-	{
-		"MPIN3",
-		INT_E,
-		&spnQcConfig.motor.gpioPin[2]
-	},
-	{
-		"MPIN4",
-		INT_E,
-		&spnQcConfig.motor.gpioPin[3]
-	},
+	{	
+        "MPIN1",
+        UINT_E,
+        &spnQcConfig.motor.gpioPin[0]
+    },	
+    {	
+        "MPIN2",
+        UINT_E,
+        &spnQcConfig.motor.gpioPin[1]
+    },	
+    {	
+        "MPIN3",
+        UINT_E,
+        &spnQcConfig.motor.gpioPin[2]
+    },	
+    {	
+        "MPIN4",
+        UINT_E,
+        &spnQcConfig.motor.gpioPin[3]
+    },	
+    {	
+        "MPIN5",
+        UINT_E,
+        &spnQcConfig.motor.gpioPin[4]
+    },	
+    {	
+        "MPIN6",
+        UINT_E,
+        &spnQcConfig.motor.gpioPin[5]
+    },	
+    {	
+        "MPIN7",
+        UINT_E,
+        &spnQcConfig.motor.gpioPin[6]
+    },	
+    {	
+        "MPIN8",
+        UINT_E,
+        &spnQcConfig.motor.gpioPin[7]
+    },
+    {	
+        "PWZEROTH",
+        FLOAT_E,
+        &spnQcConfig.motor.pulseWidthZeroThrottle
+    },
+    {	
+        "PWFULLTH",
+        FLOAT_E,
+        &spnQcConfig.motor.pulseWidthFullThrottle
+    },
 	{
 		"PIDOUTMIN",
 		FLOAT_E,
@@ -216,7 +286,7 @@ const SpnQC_Config_Entry_Type configEntries[] = {
 	}
 };
 
-const int configEntriesCount = sizeof(configEntries)/sizeof(SpnQC_Config_Entry_Type);
+const uint32_t configEntriesCount = sizeof(configEntries)/sizeof(SpnQC_Config_Entry_Type);
 
 bool spnConfigInit(void)
 {
@@ -245,7 +315,7 @@ bool spnConfigInit(void)
 				// Separate entry name and value from input string
 				sscanf(buf, "%[^=]=%s", entryNameRead, entryValueRead);
 
-				for(int entry = 0; entry < configEntriesCount; entry++)
+				for(uint32_t entry = 0; entry < configEntriesCount; entry++)
 				{
 					if(0 == strcmp(entryNameRead, configEntries[entry].textName))
 					{
@@ -254,7 +324,7 @@ bool spnConfigInit(void)
 						switch(configEntries[entry].type)
 						{
 							case UBYTE_E:
-								sscanf(entryValueRead, "%hhu", (unsigned char*)configEntries[entry].pDest);
+								sscanf(entryValueRead, "%hhu", (char*)configEntries[entry].pDest);
 								break;
 
 							case BYTE_E:
@@ -262,23 +332,23 @@ bool spnConfigInit(void)
 								break;
 
 							case USHORT_E:
-								sscanf(entryValueRead, "%hu", (unsigned short*)configEntries[entry].pDest);
+								sscanf(entryValueRead, "%hu", (uint16_t*)configEntries[entry].pDest);
 								break;
 
 							case SHORT_E:
-								sscanf(entryValueRead, "%hi", (short*)configEntries[entry].pDest);
+								sscanf(entryValueRead, "%hi", (int16_t*)configEntries[entry].pDest);
 								break;
 
 							case UINT_E:
-								sscanf(entryValueRead, "%u", (unsigned int*)configEntries[entry].pDest);
+								sscanf(entryValueRead, "%u", (uint32_t*)configEntries[entry].pDest);
 								break;
 
 							case INT_E:
-								sscanf(entryValueRead, "%i", (int*)configEntries[entry].pDest);
+								sscanf(entryValueRead, "%i", (int32_t*)configEntries[entry].pDest);
 								break;
 
 							case FLOAT_E:
-								sscanf(entryValueRead, "%f", (float*)configEntries[entry].pDest);
+								sscanf(entryValueRead, "%f", (float32_t*)configEntries[entry].pDest);
 								break;
 
 							default:

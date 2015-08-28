@@ -20,8 +20,8 @@ SpnPID::SpnPID(void)
 	Kd = 0.0;
 }
 
-bool SpnPID::configure(float minOut, float maxOut, float interval,
-					   float KpIn, float KiIn, float KdIn)
+bool SpnPID::configure(float32_t minOut, float32_t maxOut, float32_t interval,
+					   float32_t KpIn, float32_t KiIn, float32_t KdIn)
 {
 	if(interval > 0.0)
 	{
@@ -40,21 +40,21 @@ bool SpnPID::configure(float minOut, float maxOut, float interval,
 	}
 }
 
-void SpnPID::setGains(float KpIn, float KiIn, float KdIn)
+void SpnPID::setGains(float32_t KpIn, float32_t KiIn, float32_t KdIn)
 {
 	Kp = KpIn;
 	Ki = KiIn;
 	Kd = KdIn;
 }
 
-float SpnPID::update(float setPoint, float feedback)
+float32_t SpnPID::update(float32_t setPoint, float32_t feedback)
 {
-	static float errorPrev = 0;
-	static float integral = 0;
+	static float32_t errorPrev = 0;
+	static float32_t integral = 0;
 
-	float error;
-	float derivative;
-	float output;
+	float32_t error;
+	float32_t derivative;
+	float32_t output;
 
 	// Calculate P, I and D terms
 	error = setPoint - feedback;

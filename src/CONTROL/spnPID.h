@@ -13,17 +13,17 @@ class SpnPID
 public:
 	SpnPID(void);
 
-	bool configure(float minOut, float maxOut, float interval, float KpIn, float KiIn, float KdIn);
-	void setGains(float KpIn, float KiIn, float KdIn);
-	float update(float setPoint, float feedback);
+	bool configure(float32_t minOut, float32_t maxOut, float32_t interval, float32_t KpIn, float32_t KiIn, float32_t KdIn);
+	void setGains(float32_t KpIn, float32_t KiIn, float32_t KdIn);
+	float32_t update(float32_t setPoint, float32_t feedback);
 
 private:
-	float Kp;
-	float Ki;
-	float Kd;
-	float MinOut;
-	float MaxOut;
-	float Interval;
+	float32_t Kp;
+	float32_t Ki;
+	float32_t Kd;
+	float32_t MinOut;
+	float32_t MaxOut;
+	float32_t Interval;
 };
 
 
