@@ -15,7 +15,7 @@
 
 static bool isTerminalStateSet = false;
 static struct termios ttystateold;
-static uint8_t uint8_tInput = 0;
+static char charInput = 0;
 
 static uint32_t getKeyboardHit(void);
 static void setTerminalState(void);
@@ -42,16 +42,16 @@ void spnUserInputUpdate(void)
 {
 	if(getKeyboardHit() != 0)
 	{
-		uint8_tInput = fgetc(stdin);
+		charInput = fgetc(stdin);
 	}
 }
 
-uint8_t spnUserInputCharGet(bool consume)
+char spnUserInputCharGet(bool consume)
 {
-	uint8_t rtnChar = uint8_tInput;
+	char rtnChar = charInput;
 
 	// Consume the input by clearing the character
-	if(consume) uint8_tInput = 0;
+	if(consume) charInput = 0;
 
 	return rtnChar;
 }

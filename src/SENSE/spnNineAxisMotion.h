@@ -100,14 +100,14 @@ public:
 	bool retrieveData(uint32_t* size, void* data);
 
 private:
-	uint8_t readRegister(uint32_t address);
-	void writeRegister(uint32_t address, uint8_t data);
-	uint8_t readRegisterMask(uint32_t address, uint8_t mask);
-	void writeRegisterMask(uint32_t address, uint8_t mask, uint8_t data);
-	uint8_t readMagRegister(uint8_t address);
-	void writeMagRegister(uint8_t address, uint8_t data);
-	void writeMagRegisterMask(uint32_t address, uint8_t mask, uint8_t data);
-	void readMagRegisterSet(uint32_t startAddress, uint8_t readCount, uint8_t* pOut);
+	char readRegister(uint32_t address);
+	void writeRegister(uint32_t address, char data);
+	char readRegisterMask(uint32_t address, char mask);
+	void writeRegisterMask(uint32_t address, char mask, char data);
+	char readMagRegister(char address);
+	void writeMagRegister(char address, char data);
+	void writeMagRegisterMask(uint32_t address, char mask, char data);
+	void readMagRegisterSet(uint32_t startAddress, char readCount, char* pOut);
 	void applyCalibration(void);
 };
 

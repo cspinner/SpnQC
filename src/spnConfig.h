@@ -8,7 +8,12 @@
 #ifndef SPNCONFIG_H_
 #define SPNCONFIG_H_
 
+#include <stdint.h>
+
 #define USER_GPIO_MAX 32
+
+typedef float  float32_t;
+typedef double float64_t;
 
 typedef struct
 {

@@ -91,12 +91,18 @@ static void userOutputConsole(void)
 	{
 		printf("Motor Cmd %i: %.1f\n", i, spnMotorsGet(i));
 	}
+
+	printf("\n");
+	printf("Throttle Cmd: %.1f %%\n", spnTransceiverGetThrottlePct());
+	printf("Elevator Cmd: %.1f degrees\n", spnTransceiverGetElevatorAngle());
+	printf("Aileron Cmd: %.1f degrees\n", spnTransceiverGetAileronAngle());
+	printf("Rudder Cmd: %.1f degrees\n", spnTransceiverGetRudderAngle());
 }
 
 static void userOutputFile(void)
 {
 	// write data to file
-	uint8_t buf[1024];
+	char buf[1024];
 	sprintf(buf, "%s,%s,%i,%.1f,%.1f,%.1f,%.1f,%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%u,%u,%u,%u,%u,%u\n",
 			spnModeGetString(),
 			spnCommandGetModeString(),

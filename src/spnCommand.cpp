@@ -20,7 +20,7 @@ typedef enum
 	CMD_MODE_COUNT_E
 } SpnCommand_Mode_Type;
 
-const uint8_t* CMD_MODE_STRINGS[CMD_MODE_COUNT_E] =
+const char* CMD_MODE_STRINGS[CMD_MODE_COUNT_E] =
 {
 		//CMD_MODE_STANDBY_E:
 		"CMD STANDBY MODE",
@@ -98,7 +98,7 @@ void spnCommandUpdate(void)
 	processCommandMode();
 }
 
-const uint8_t* spnCommandGetModeString(void)
+const char* spnCommandGetModeString(void)
 {
 	return CMD_MODE_STRINGS[commandMode];
 }
@@ -107,7 +107,7 @@ static void setCommandMode(void)
 {
 	static System_Mode_Type previousMode = MODE_INIT_E;
 
-	uint8_t userInput = spnUserInputCharGet(false);
+	char userInput = spnUserInputCharGet(false);
 	System_Mode_Type currentMode = spnModeGet();
 
 	// Set command mode based on system mode

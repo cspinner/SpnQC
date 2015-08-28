@@ -75,9 +75,9 @@ bool spnUtilsTimeCompare(struct timeval* pTsA, struct timeval* pTsB)
 			((pTsA)->tv_usec > (pTsB)->tv_usec) : ((pTsA)->tv_sec > (pTsB)->tv_sec));
 }
 //#include <unistd.h>
-void spnUtilsOpenFileForRead(FILE **pFile, const uint8_t *pPathname)
+void spnUtilsOpenFileForRead(FILE **pFile, const char *pPathname)
 {
-//	uint8_t cwd[1024];
+//	char cwd[1024];
 //	   if (getcwd(cwd, sizeof(cwd)) != NULL)
 //	       printf("Current working dir: %s\n", cwd);
 //
@@ -91,10 +91,10 @@ void spnUtilsOpenFileForRead(FILE **pFile, const uint8_t *pPathname)
 }
 
 
-size_t spnUtilsReadLine(FILE *pFile, uint8_t* pDest, size_t destSizeBytes)
+size_t spnUtilsReadLine(FILE *pFile, char* pDest, size_t destSizeBytes)
 {
-	uint8_t* readBuffer = pDest;
-	uint8_t* rtnBuf;
+	char* readBuffer = pDest;
+	char* rtnBuf;
 	size_t readBufferSize = destSizeBytes;
 	_IO_ssize_t bytesRead;
 
@@ -109,7 +109,7 @@ size_t spnUtilsReadLine(FILE *pFile, uint8_t* pDest, size_t destSizeBytes)
 bool spnUtilsReadNextFloatFromFile(FILE* pFile, float32_t* pDest)
 {
 	size_t bytesRead;
-	uint8_t readBytes[128];
+	char readBytes[128];
 
 	// Read the line
 	bytesRead = spnUtilsReadLine(pFile, readBytes, sizeof(readBytes));
@@ -132,7 +132,7 @@ bool spnUtilsReadNextFloatFromFile(FILE* pFile, float32_t* pDest)
 bool spnUtilsReadNextIntFromFile(FILE* pFile, int32_t* pDest)
 {
 	size_t bytesRead;
-	uint8_t readBytes[128];
+	char readBytes[128];
 
 	// Read the line
 	bytesRead = spnUtilsReadLine(pFile, readBytes, sizeof(readBytes));
@@ -151,7 +151,7 @@ bool spnUtilsReadNextIntFromFile(FILE* pFile, int32_t* pDest)
 	}
 }
 
-void spnUtilsOpenFileForAppend(FILE **pFile, const uint8_t *pPathname)
+void spnUtilsOpenFileForAppend(FILE **pFile, const char *pPathname)
 {
 	*pFile = fopen(pPathname, "a");
 
@@ -161,7 +161,7 @@ void spnUtilsOpenFileForAppend(FILE **pFile, const uint8_t *pPathname)
 	}
 }
 
-void spnUtilsCreateFileForWrite(FILE **pFile, const uint8_t *pPathname)
+void spnUtilsCreateFileForWrite(FILE **pFile, const char *pPathname)
 {
 	*pFile = fopen(pPathname, "w");
 
@@ -171,7 +171,7 @@ void spnUtilsCreateFileForWrite(FILE **pFile, const uint8_t *pPathname)
 	}
 }
 
-void spnUtilsWriteToFile(FILE *pFile, const uint8_t *pBuf)
+void spnUtilsWriteToFile(FILE *pFile, const char *pBuf)
 {
 	size_t bytesWritten = fputs(pBuf, pFile);
 

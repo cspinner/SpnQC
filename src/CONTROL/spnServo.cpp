@@ -94,6 +94,8 @@ bool spnServoInit(uint32_t inputCount, const uint32_t* gpioInputList, uint32_t o
 
 static void servoOnExit(void)
 {
+	printf("Disconnecting Servos...\n");
+
     // cancel any registered callbacks
     for(uint32_t i = 0; i < gpioInputCount; i++)
     {

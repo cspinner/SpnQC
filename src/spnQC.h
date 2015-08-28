@@ -99,12 +99,12 @@ float32_t spnSensorGetTemperature(void);
 
 bool spnCommandInit(void);
 void spnCommandUpdate(void);
-const uint8_t* spnCommandGetModeString(void);
+const char* spnCommandGetModeString(void);
 
 bool spnStatusGet(void);
 void spnStatusSet(bool);
 
-const uint8_t* spnModeGetString(void);
+const char* spnModeGetString(void);
 System_Mode_Type spnModeGet(void);
 void spnModeUpdate(void);
 
@@ -112,13 +112,13 @@ void spnUtilsWaitUsec(uint32_t delayUsec);
 void spnUtilsMarkTimestamp(void);
 struct timeval spnUtilsGetElapsedTime(void);
 bool spnUtilsTimeCompare(struct timeval* pTsA, struct timeval* pTsB);
-void spnUtilsOpenFileForRead(FILE **pFile, const uint8_t *pPathname);
-size_t spnUtilsReadLine(FILE *pFile, uint8_t* pDest, size_t destSizeBytes);
+void spnUtilsOpenFileForRead(FILE **pFile, const char *pPathname);
+size_t spnUtilsReadLine(FILE *pFile, char* pDest, size_t destSizeBytes);
 bool spnUtilsReadNextFloatFromFile(FILE* pFile, float32_t* pDest);
 bool spnUtilsReadNextIntFromFile(FILE* pFile, int32_t* pDest);
-void spnUtilsOpenFileForAppend(FILE **pFile, const uint8_t *pPathname);
-void spnUtilsCreateFileForWrite(FILE **pFile, const uint8_t *pPathname);
-void spnUtilsWriteToFile(FILE *pFile, const uint8_t *pBuf);
+void spnUtilsOpenFileForAppend(FILE **pFile, const char *pPathname);
+void spnUtilsCreateFileForWrite(FILE **pFile, const char *pPathname);
+void spnUtilsWriteToFile(FILE *pFile, const char *pBuf);
 void spnUtilsCloseFile(FILE *pFile);
 
 bool spnUserOutputInit(void);
@@ -126,7 +126,7 @@ void spnUserOutputUpdate(void);
 
 bool spnUserInputInit(void);
 void spnUserInputUpdate(void);
-uint8_t spnUserInputCharGet(bool consume);
+char spnUserInputCharGet(bool consume);
 
 bool spnMotorsInit(void);
 void spnMotorsSet(uint32_t motorNum, float32_t cmdPct);

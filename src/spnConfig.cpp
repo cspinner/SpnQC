@@ -21,7 +21,7 @@ typedef enum
 
 typedef struct
 {
-	const uint8_t* textName;
+	const char* textName;
 	DATATYPE type;
 	void* pDest;
 } SpnQC_Config_Entry_Type;
@@ -130,47 +130,47 @@ const SpnQC_Config_Entry_Type configEntries[] = {
 		&spnQcConfig.transceiver.chanCount
 	},
 	{	
-        "TPIN1"
+        "TPIN1",
         UINT_E,
         &spnQcConfig.transceiver.gpioPin[0]
     },	
     {	
-        "TPIN2"
+        "TPIN2",
         UINT_E,
         &spnQcConfig.transceiver.gpioPin[1]
     },	
     {	
-        "TPIN3"
+        "TPIN3",
         UINT_E,
         &spnQcConfig.transceiver.gpioPin[2]
     },	
     {	
-        "TPIN4"
+        "TPIN4",
         UINT_E,
         &spnQcConfig.transceiver.gpioPin[3]
     },	
     {	
-        "TPIN5"
+        "TPIN5",
         UINT_E,
         &spnQcConfig.transceiver.gpioPin[4]
     },	
     {	
-        "TPIN6"
+        "TPIN6",
         UINT_E,
         &spnQcConfig.transceiver.gpioPin[5]
     },	
     {	
-        "TPIN7"
+        "TPIN7",
         UINT_E,
         &spnQcConfig.transceiver.gpioPin[6]
     },	
     {	
-        "TPIN8"
+        "TPIN8",
         UINT_E,
         &spnQcConfig.transceiver.gpioPin[7]
     },	
     {	
-        "TERMINPUT"
+        "TERMINPUT",
         INT_E,
         &spnQcConfig.transceiver.useTerminal
     },	
@@ -180,53 +180,52 @@ const SpnQC_Config_Entry_Type configEntries[] = {
 		&spnQcConfig.motor.chanCount
 	},
 	{	
-        "MPIN1"
+        "MPIN1",
         UINT_E,
         &spnQcConfig.motor.gpioPin[0]
     },	
     {	
-        "MPIN2"
+        "MPIN2",
         UINT_E,
         &spnQcConfig.motor.gpioPin[1]
     },	
     {	
-        "MPIN3"
+        "MPIN3",
         UINT_E,
         &spnQcConfig.motor.gpioPin[2]
     },	
     {	
-        "MPIN4"
+        "MPIN4",
         UINT_E,
         &spnQcConfig.motor.gpioPin[3]
     },	
     {	
-        "MPIN5"
+        "MPIN5",
         UINT_E,
         &spnQcConfig.motor.gpioPin[4]
     },	
     {	
-        "MPIN6"
+        "MPIN6",
         UINT_E,
         &spnQcConfig.motor.gpioPin[5]
     },	
     {	
-        "MPIN7"
+        "MPIN7",
         UINT_E,
         &spnQcConfig.motor.gpioPin[6]
     },	
     {	
-        "MPIN8"
+        "MPIN8",
         UINT_E,
         &spnQcConfig.motor.gpioPin[7]
-    },	
-    ,	
+    },
     {	
-        "PWZEROTH"
+        "PWZEROTH",
         FLOAT_E,
         &spnQcConfig.motor.pulseWidthZeroThrottle
     },
     {	
-        "PWFULLTH"
+        "PWFULLTH",
         FLOAT_E,
         &spnQcConfig.motor.pulseWidthFullThrottle
     },
@@ -304,12 +303,12 @@ bool spnConfigInit(void)
 	// If file exists, parse the data and populate config structure
 	if(pInputFile != NULL)
 	{
-		uint8_t buf[128];
+		char buf[128];
 
 		while(spnUtilsReadLine(pInputFile, buf, 128) && (status == SUCCESS))
 		{
-			uint8_t entryNameRead[64];
-			uint8_t entryValueRead[64];
+			char entryNameRead[64];
+			char entryValueRead[64];
 
 			if(strchr(buf, '=') != NULL)
 			{
@@ -325,11 +324,11 @@ bool spnConfigInit(void)
 						switch(configEntries[entry].type)
 						{
 							case UBYTE_E:
-								sscanf(entryValueRead, "%hhu", (uint8_t*)configEntries[entry].pDest);
+								sscanf(entryValueRead, "%hhu", (char*)configEntries[entry].pDest);
 								break;
 
 							case BYTE_E:
-								sscanf(entryValueRead, "%c", (uint8_t*)configEntries[entry].pDest);
+								sscanf(entryValueRead, "%c", (char*)configEntries[entry].pDest);
 								break;
 
 							case USHORT_E:

@@ -24,7 +24,7 @@ public:
 
 private:
 	int32_t i2c_fd;
-	uint8_t version; // compass version
+	char version; // compass version
 	int16_t dataRaw; // 0-3599 for a full circle, representing 0-359.9 degrees.
 	float32_t dataConverted; // 0-359.9 degrees
 };

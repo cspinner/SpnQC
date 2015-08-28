@@ -16,14 +16,14 @@
 //----------------------------------------------------------------------------------------------------
 // Variable declaration
 
-extern float32_t beta;				// algorithm gain
-extern float32_t q0, q1, q2, q3;	// quaternion of sensor frame relative to auxiliary frame
+extern float beta;				// algorithm gain
+extern float q0, q1, q2, q3;	// quaternion of sensor frame relative to auxiliary frame
 
 //---------------------------------------------------------------------------------------------------
 // Function declarations
 
-void MadgwickAHRSupdate(float32_t gx, float32_t gy, float32_t gz, float32_t ax, float32_t ay, float32_t az, float32_t mx, float32_t my, float32_t mz);
-void MadgwickAHRSupdateIMU(float32_t gx, float32_t gy, float32_t gz, float32_t ax, float32_t ay, float32_t az);
+void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
+void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az);
 
 #endif
 //=====================================================================================================

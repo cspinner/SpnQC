@@ -103,27 +103,27 @@ typedef struct
 	{
 		struct
 		{
-			uint8_t WIA;
-			uint8_t INFO;
-			uint8_t ST1;
-			uint8_t HXL;
-			uint8_t HXH;
-			uint8_t HYL;
-			uint8_t HYH;
-			uint8_t HZL;
-			uint8_t HZH;
-			uint8_t ST2;
-			uint8_t CNTL1;
-			uint8_t CNTL2;
-			uint8_t ASTC;
-			uint8_t TS1;
-			uint8_t TS2;
-			uint8_t I2CDIS;
-			uint8_t ASAX;
-			uint8_t ASAY;
-			uint8_t ASAZ;
+			char WIA;
+			char INFO;
+			char ST1;
+			char HXL;
+			char HXH;
+			char HYL;
+			char HYH;
+			char HZL;
+			char HZH;
+			char ST2;
+			char CNTL1;
+			char CNTL2;
+			char ASTC;
+			char TS1;
+			char TS2;
+			char I2CDIS;
+			char ASAX;
+			char ASAY;
+			char ASAZ;
 		} regByName;
-		uint8_t regByIndex[19];
+		char regByIndex[19];
 	};
 
 } Mag_Register_Set_Type;
@@ -182,9 +182,9 @@ SpnNineAxisMotion_Raw_Data_Type filtData;
 
 Mag_Register_Set_Type mag_registers;
 
-uint8_t SpnNineAxisMotion::readRegister(uint32_t address)
+char SpnNineAxisMotion::readRegister(uint32_t address)
 {
-	uint8_t spiTransfer[2];
+	char spiTransfer[2];
 
 	spiTransfer[0] = address;
 	spiTransfer[0] |= READ;
@@ -194,9 +194,9 @@ uint8_t SpnNineAxisMotion::readRegister(uint32_t address)
 	return spiTransfer[1];
 }
 
-void SpnNineAxisMotion::writeRegister(uint32_t address, uint8_t data)
+void SpnNineAxisMotion::writeRegister(uint32_t address, char data)
 {
-	uint8_t spiTransfer[2];
+	char spiTransfer[2];
 
 	spiTransfer[0] = address;
 	spiTransfer[0] |= WRITE;
@@ -204,10 +204,10 @@ void SpnNineAxisMotion::writeRegister(uint32_t address, uint8_t data)
 	wiringPiSPIDataRW(spi_fd, (uint8_t*)&spiTransfer, sizeof(spiTransfer));
 }
 
-uint8_t SpnNineAxisMotion::readRegisterMask(uint32_t address, uint8_t mask)
+char SpnNineAxisMotion::readRegisterMask(uint32_t address, char mask)
 {
-	uint8_t maskIn = mask;
-	uint8_t valueRead = readRegister(address) & mask;
+	char maskIn = mask;
+	char valueRead = readRegister(address) & mask;
 
 	while(0 == (maskIn & 0x01))             /* Shift the value to the left until    */
 	{                                       /* it aligns with the bit field         */
@@ -218,11 +218,11 @@ uint8_t SpnNineAxisMotion::readRegisterMask(uint32_t address, uint8_t mask)
 	return valueRead;
 }
 
-void SpnNineAxisMotion::writeRegisterMask(uint32_t address, uint8_t mask, uint8_t data)
+void SpnNineAxisMotion::writeRegisterMask(uint32_t address, char mask, char data)
 {
-	uint8_t maskIn = mask;
-	uint8_t writeData = data;
-	uint8_t readData = readRegister(address);
+	char maskIn = mask;
+	char writeData = data;
+	char readData = readRegister(address);
 
 	while(0 == (maskIn & 0x01))             /* Shift the value to the left until    */
 	{                                       /* it aligns with the bit field         */
@@ -233,7 +233,7 @@ void SpnNineAxisMotion::writeRegisterMask(uint32_t address, uint8_t mask, uint8_
 	writeRegister(address, ((readData & ~mask) | writeData));
 }
 
-void SpnNineAxisMotion::readMagRegisterSet(uint32_t startAddress, uint8_t readCount, uint8_t* pOut)
+void SpnNineAxisMotion::readMagRegisterSet(uint32_t startAddress, char readCount, char* pOut)
 {
 	uint32_t i;
 
@@ -250,7 +250,7 @@ void SpnNineAxisMotion::readMagRegisterSet(uint32_t startAddress, uint8_t readCo
 	}
 }
 
-void SpnNineAxisMotion::writeMagRegister(uint8_t address, uint8_t data)
+void SpnNineAxisMotion::writeMagRegister(char address, char data)
 {
 	writeRegister(MPU9250_I2C_SLV0_ADDR_ADDR, 0x0C); // Write to I2C address 12
 	writeRegister(MPU9250_I2C_SLV0_REG_ADDR, address); // Reg address
@@ -261,11 +261,11 @@ void SpnNineAxisMotion::writeMagRegister(uint8_t address, uint8_t data)
 	spnUtilsWaitUsec(1000);
 }
 
-void SpnNineAxisMotion::writeMagRegisterMask(uint32_t address, uint8_t mask, uint8_t data)
+void SpnNineAxisMotion::writeMagRegisterMask(uint32_t address, char mask, char data)
 {
-	uint8_t maskIn = mask;
-	uint8_t writeData = data;
-	uint8_t readData = mag_registers.regByIndex[address];
+	char maskIn = mask;
+	char writeData = data;
+	char readData = mag_registers.regByIndex[address];
 
 	while(0 == (maskIn & 0x01))             /* Shift the value to the left until    */
 	{                                       /* it aligns with the bit field         */
@@ -330,7 +330,7 @@ bool SpnNineAxisMotion::configure(void* cfg)
 		writeRegister(MPU9250_USER_CONTROL_ADDR, 0x3); // Reset FIFO, I2C, and Signal Paths
 
 		// Validate device ID
-		uint8_t deviceId = readRegister(MPU9250_WHO_AM_I_ADDR);
+		char deviceId = readRegister(MPU9250_WHO_AM_I_ADDR);
 		if(deviceId != MPU9250_IDENTIFIER)
 		{
 			printf("MPU9250 Identification Check Failed.\n");
@@ -405,7 +405,7 @@ bool SpnNineAxisMotion::configure(void* cfg)
 
 			// Configure Magnetometer CNTRL
 			writeMagRegister(AK8963_CNTL1_ADDR, 0x0F); // FUSE Prom Read mode
-			readMagRegisterSet(AK8963_ASAX_ADDR, 3, (uint8_t*)&mag_registers.regByIndex[16]); // Read registers ASAX, ASAY, ASAZ
+			readMagRegisterSet(AK8963_ASAX_ADDR, 3, (char*)&mag_registers.regByIndex[16]); // Read registers ASAX, ASAY, ASAZ
 			writeMagRegister(AK8963_CNTL1_ADDR, 0x00); // Enter power down mode
 			spnUtilsWaitUsec(100); // Wait the required time before exiting power down
 			writeMagRegister(AK8963_CNTL1_ADDR, 0x16); // Continuous Measurement Mode 2 (100Hz), 16-bit mode
@@ -433,7 +433,7 @@ void SpnNineAxisMotion::acquireData(void)
 	pUnfiltered->gyro.y_raw = ((int16_t)((readRegister(MPU9250_GYRO_YOUT_H_ADDR) << 8)|readRegister(MPU9250_GYRO_YOUT_L_ADDR)))*1.0;
 	pUnfiltered->gyro.z_raw = ((int16_t)((readRegister(MPU9250_GYRO_ZOUT_H_ADDR) << 8)|readRegister(MPU9250_GYRO_ZOUT_L_ADDR)))*1.0;
 
-	readMagRegisterSet(AK8963_HXL_ADDR, 12, (uint8_t*)&mag_registers.regByIndex[3]);
+	readMagRegisterSet(AK8963_HXL_ADDR, 12, (char*)&mag_registers.regByIndex[3]);
 
 	// perform sensitivity adjustment
 	pUnfiltered->mag.x_raw = ((int16_t)((mag_registers.regByName.HXH << 8)|mag_registers.regByName.HXL))*1.0;

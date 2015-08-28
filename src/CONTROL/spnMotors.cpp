@@ -18,9 +18,9 @@ bool spnMotorsInit(void)
 {
     const SpnQC_Config_Type* const pCfg = spnConfigGet();
     
-    slope = ()pCfg->motors.pulseWidthFullThrottle - pCfg->motors.pulseWidthZeroThrottle)/100.0;
-    intercept = pCfg->motors.pulseWidthZeroThrottle;
-    motorCount = pCfg->motors.chanCount;
+    slope = (pCfg->motor.pulseWidthFullThrottle - pCfg->motor.pulseWidthZeroThrottle)/100.0;
+    intercept = pCfg->motor.pulseWidthZeroThrottle;
+    motorCount = pCfg->motor.chanCount;
     
     atexit(&spnMotorsStopAll);
     
@@ -67,6 +67,7 @@ void spnMotorsCalibrateDrive(uint32_t level)
 
 void spnMotorsStopAll(void)
 {
+	printf("Stopping all motors...\n");
 	spnServoStopAllPulses();
 }
 
