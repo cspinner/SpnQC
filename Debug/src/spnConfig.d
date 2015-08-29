@@ -1,5 +1,5 @@
-src/spnConfig.d: ../src/spnConfig.cpp ../src/SpnQC.h ../src/SpnConfig.h
+src/spnConfig.d: ../src/spnConfig.cpp ../src/spnQC.h ../src/SpnConfig.h
 
-../src/SpnQC.h:
+../src/spnQC.h:
 
 ../src/SpnConfig.h:

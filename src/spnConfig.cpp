@@ -5,8 +5,9 @@
  *      Author: cspinner
  */
 
-#include "SpnQC.h"
+#include "spnQC.h"
 #include <string.h>
+#include <stdlib.h>
 
 typedef enum
 {
@@ -290,7 +291,7 @@ const uint32_t configEntriesCount = sizeof(configEntries)/sizeof(SpnQC_Config_En
 
 bool spnConfigInit(void)
 {
-	bool status = SUCCESS;
+	bool status = EXIT_SUCCESS;
 	FILE* pInputFile = NULL; // input file descriptor
 
 	//
@@ -305,7 +306,7 @@ bool spnConfigInit(void)
 	{
 		char buf[128];
 
-		while(spnUtilsReadLine(pInputFile, buf, 128) && (status == SUCCESS))
+		while(spnUtilsReadLine(pInputFile, buf, 128) && (status == EXIT_SUCCESS))
 		{
 			char entryNameRead[64];
 			char entryValueRead[64];
@@ -353,7 +354,7 @@ bool spnConfigInit(void)
 
 							default:
 								printf("Program Error: Invalid config type.\n");
-								status = FAIL;
+								status = EXIT_FAILURE;
 								break;
 						}
 
@@ -372,7 +373,7 @@ bool spnConfigInit(void)
 	else
 	{
 		perror("Failed to open SpnQC.cfg.");
-		status = FAIL;
+		status = EXIT_FAILURE;
 	}
 
 	return status;

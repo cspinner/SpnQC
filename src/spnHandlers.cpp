@@ -58,12 +58,12 @@ void spnHandleSignal(int32_t signum)
 
 			// Now reset to the default signal action
 			signal(signum, SIG_DFL);
-			exit(0);
+			exit(EXIT_SUCCESS);
 			break;
 
 		default:
 			printf("Unexpected signal: %d", signum);
-			spnStatusSet(FAIL);
+			exit(EXIT_FAILURE);
 			break;
 	}
 }

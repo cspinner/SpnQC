@@ -5,7 +5,7 @@
  *      Author: cspinner
  */
 
-#include "SpnQC.h"
+#include "spnQC.h"
 #include <stdlib.h>
 
 // y = mc + b  --- linear relationship between command % and pulse width
@@ -13,6 +13,8 @@
 static float32_t slope;
 static float32_t intercept; 
 static uint32_t motorCount;
+
+static void motorsOnExit(void);
 
 bool spnMotorsInit(void)
 {
@@ -22,9 +24,9 @@ bool spnMotorsInit(void)
     intercept = pCfg->motor.pulseWidthZeroThrottle;
     motorCount = pCfg->motor.chanCount;
     
-    atexit(&spnMotorsStopAll);
+    atexit(&motorsOnExit);
     
-	return SUCCESS;
+	return EXIT_SUCCESS;
 }
 
 void spnMotorsSet(uint32_t motorNum, float32_t cmdPct)
@@ -67,8 +69,11 @@ void spnMotorsCalibrateDrive(uint32_t level)
 
 void spnMotorsStopAll(void)
 {
-	printf("Stopping all motors...\n");
 	spnServoStopAllPulses();
 }
 
-
+static void motorsOnExit(void)
+{
+	printf("Stopping all motors...\n");
+	spnMotorsStopAll();
+}

@@ -8,6 +8,7 @@
 #include "spnQC.h"
 #include "spnPID.h"
 #include <math.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -32,11 +33,11 @@ bool SpnPID::configure(float32_t minOut, float32_t maxOut, float32_t interval,
 		Ki = KiIn;
 		Kd = KdIn;
 
-		return SUCCESS;
+		return EXIT_SUCCESS;
 	}
 	else
 	{
-		return FAIL;
+		return EXIT_FAILURE;
 	}
 }
 

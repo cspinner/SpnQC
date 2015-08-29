@@ -7,40 +7,45 @@
 
 #include "spnQC.h"
 #include "wiringPi.h"
-#include <iostream>
+#include <stdlib.h>
 
 using namespace std;
 
 bool spnInit(void)
 {
-	bool status = FAIL;
+	bool status = EXIT_FAILURE;
 
 	// Attempt to increase program's scheduling priority
 	if(piHiPri(99) == 0)
 	{
 		// Retrieve configuration
-		if(spnConfigInit() == SUCCESS)
+		if(spnConfigInit() == EXIT_SUCCESS)
 		{
 			// Configure CPU peripherals
 			wiringPiSetup() ;
 			pinMode (OUTPUT_PIN_STATUS_LED, OUTPUT) ; // LED
 
-			// Configure sensors, motors
-			if( (spnSensorManagerInit() == SUCCESS) &&
-				(spnCommandInit() == SUCCESS))
+			// Configure sensors, motors, console/file output
+			if( (spnSensorManagerInit() == EXIT_SUCCESS) &&
+				(spnCommandInit() == EXIT_SUCCESS) &&
+				(spnUserOutputInit() == EXIT_SUCCESS) &&
+				(spnUserInputInit() == EXIT_SUCCESS))
 			{
-				// Configure console/file output
-				status = spnUserOutputInit() && spnUserInputInit();
+				status = EXIT_SUCCESS;
+			}
+			else
+			{
+				status = EXIT_FAILURE;
 			}
 		}
 		else
 		{
-			status = FAIL;
+			status = EXIT_FAILURE;
 		}
 	}
 	else
 	{
-		status = FAIL;
+		status = EXIT_FAILURE;
 	}
 
 	return status;

@@ -11,6 +11,7 @@
 #include "wiringPiSPI.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
 using namespace std;
@@ -297,10 +298,9 @@ SpnNineAxisMotion::SpnNineAxisMotion(void)
 bool SpnNineAxisMotion::configure(void* cfg)
 {
 	SpnNineAxisMotion_Cfg_Type* mpu9250_config = (SpnNineAxisMotion_Cfg_Type*)cfg;
+	bool status = EXIT_SUCCESS;
 
-	setStatus(SpnSensor::configure(cfg));
-
-	if(getStatus() == SUCCESS)
+	if(SpnSensor::configure(cfg) == EXIT_SUCCESS)
 	{
 		// SPI
 		if(spi_fd == 0) // Protects against multiple calls to "configure"
@@ -335,7 +335,7 @@ bool SpnNineAxisMotion::configure(void* cfg)
 		{
 			printf("MPU9250 Identification Check Failed.\n");
 			printf("Read: 0x%X, Expected: 0x%X\n", deviceId, MPU9250_IDENTIFIER);
-			setStatus(FAIL);
+			status = EXIT_FAILURE;
 		}
 		else
 		{
@@ -411,8 +411,12 @@ bool SpnNineAxisMotion::configure(void* cfg)
 			writeMagRegister(AK8963_CNTL1_ADDR, 0x16); // Continuous Measurement Mode 2 (100Hz), 16-bit mode
 		}
 	}
+	else
+	{
+		status = EXIT_FAILURE;
+	}
 
-	return getStatus();
+	return status;
 }
 
 void SpnNineAxisMotion::acquireData(void)
@@ -526,9 +530,8 @@ void SpnNineAxisMotion::acquireData(void)
 bool SpnNineAxisMotion::retrieveData(uint32_t* size, void* data)
 {
 	SpnNineAxisMotion_Data_Type output;
-	setStatus(SpnSensor::retrieveData(size, data));
 
-	if(getStatus() == SUCCESS)
+	if(SpnSensor::retrieveData(size, data) == EXIT_SUCCESS)
 	{
 		//
 		// CONVERT TO ENGINEERING UNITS

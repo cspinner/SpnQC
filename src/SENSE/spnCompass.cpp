@@ -10,6 +10,7 @@
 #include "spnCompass.h"
 #include "wiringPiI2C.h"
 #include "stdio.h"
+#include "stdlib.h"
 using namespace std;
 
 #define CMPS03_ADDRESS 0x60u
@@ -23,9 +24,7 @@ SpnCompass::SpnCompass(void)
 
 bool SpnCompass::configure(void)
 {
-	setStatus(SpnSensor::configure());
-
-	if(getStatus() == SUCCESS)
+	if(SpnSensor::configure() == EXIT_SUCCESS)
 	{
 		// I2C
 		i2c_fd = wiringPiI2CSetup(CMPS03_ADDRESS);
@@ -47,9 +46,7 @@ void SpnCompass::acquireData(void)
 
 bool SpnCompass::retrieveData(uint32_t* size, void* data)
 {
-	setStatus(SpnSensor::retrieveData(size, data));
-
-	if(getStatus() == SUCCESS)
+	if(SpnSensor::retrieveData(size, data) == EXIT_SUCCESS)
 	{
 		*size = 1;
 		*(float32_t*)data = dataRaw/10.0;

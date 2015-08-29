@@ -7,26 +7,26 @@
 
 #include "spnQC.h"
 #include "spnSensor.h"
+#include <stdlib.h>
 
 using namespace std;
 
 SpnSensor::SpnSensor(void)
 {
 	isConfigured = false;
-	setStatus(FAIL);
 }
 
 bool SpnSensor::configure(void)
 {
 	isConfigured = true;
-	setStatus(SUCCESS);
-	return getStatus();
+
+	return EXIT_SUCCESS;
 }
 bool SpnSensor::configure(void* cfg)
 {
 	isConfigured = true;
-	setStatus(SUCCESS);
-	return getStatus();
+
+	return EXIT_SUCCESS;
 }
 
 void SpnSensor::acquireData(void){}
@@ -35,12 +35,12 @@ void SpnSensor::acquireData(void* opt){}
 bool SpnSensor::retrieveData(uint32_t* size, void* data)
 {
 	*size = 0;
-	return getStatus();
+	return EXIT_SUCCESS;
 }
 bool SpnSensor::retrieveData(void* opt, uint32_t* size, void* data)
 {
 	*size = 0;
-	return getStatus();
+	return EXIT_SUCCESS;
 }
 
 bool SpnSensor::getStatus(void)

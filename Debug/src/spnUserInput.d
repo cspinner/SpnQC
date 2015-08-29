@@ -1,6 +1,6 @@
-src/spnUserInput.d: ../src/spnUserInput.cpp ../src/SpnQC.h \
+src/spnUserInput.d: ../src/spnUserInput.cpp ../src/spnQC.h \
  ../src/SpnConfig.h
 
-../src/SpnQC.h:
+../src/spnQC.h:
 
 ../src/SpnConfig.h:

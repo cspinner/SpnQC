@@ -9,6 +9,7 @@
 #include "spnNineAxisMotion.h"
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
 
 extern "C"
 {
@@ -70,7 +71,7 @@ static void quaternionToEuler(float32_t* quat0, float32_t* quat1, float32_t* qua
 
 bool spnSensorManagerInit(void)
 {
-	bool status = FAIL;
+	bool status = EXIT_FAILURE;
 
 	// Configure sensors
 	status = initMPU9250();
@@ -83,11 +84,9 @@ void spnSensorManagerUpdate(void)
 	uint32_t phNineAxisDataSize;
 	float32_t yawRad, pitchRad, rollRad;
 
-	// Acquire Sensor Data
+	// Acquire and Convert Sensor Data
 	MPU9250.acquireData();
-
-	// Convert and Retrieve Sensor Data
-	spnStatusSet(MPU9250.retrieveData(&phNineAxisDataSize, &SpnNineAxisMotionData));
+	MPU9250.retrieveData(&phNineAxisDataSize, &SpnNineAxisMotionData);
 
 	//
 	// MADGWICK

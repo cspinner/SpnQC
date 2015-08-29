@@ -18,8 +18,6 @@
 //
 // DEFINES
 //
-#define SUCCESS true
-#define FAIL false
 #define MINOR_FRAME_TIME_USEC 30000
 
 #define OUTPUT_PIN_STATUS_LED 27
@@ -100,9 +98,6 @@ float32_t spnSensorGetTemperature(void);
 bool spnCommandInit(void);
 void spnCommandUpdate(void);
 const char* spnCommandGetModeString(void);
-
-bool spnStatusGet(void);
-void spnStatusSet(bool);
 
 const char* spnModeGetString(void);
 System_Mode_Type spnModeGet(void);

@@ -2,6 +2,7 @@
 #include "spnQC.h"
 #include <sys/time.h>
 #include <signal.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -23,15 +24,21 @@ int32_t main (void)
 	signal(SIGQUIT, &spnHandleSignal);
 	signal(SIGTSTP, &spnHandleSignal);
 
-	spnStatusSet(spnInit());
+	if(spnInit() == EXIT_SUCCESS)
+	{
+		// Start the minor frame timer
+		setitimer (ITIMER_REAL, &timer, NULL);
 
-	// Start the minor frame timer
-	setitimer (ITIMER_REAL, &timer, NULL);
+		while(1);
 
-	while(spnStatusGet() == SUCCESS);
+		setitimer (ITIMER_REAL, NULL, NULL);
 
-	setitimer (ITIMER_REAL, NULL, NULL);
-    return 0;
+		return EXIT_SUCCESS;
+	}
+	else
+	{
+		return EXIT_FAILURE;
+	}
 
 }
 

@@ -5,7 +5,7 @@
  *      Author: cspinner
  */
 
-#include "SpnQC.h"
+#include "spnQC.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -46,11 +46,11 @@ bool spnUserOutputInit(void)
 		spnUtilsWriteToFile(pOutputFile,
 				",,,DEGREES,DEGREES,DEGREES,DEG_F,USEC,PCT,PCT,PCT,PCT,PCT,DEGREES,DEGREES,DEGREES,SEC,MSEC,USEC,SEC,MSEC,USEC,\n");
 
-		return SUCCESS;
+		return EXIT_SUCCESS;
 	}
 	else
 	{
-		return FAIL;
+		return EXIT_FAILURE;
 	}
 }
 
@@ -85,6 +85,8 @@ static void userOutputConsole(void)
 
 	printf("Temperature (F): %f\n", Temperature);
 	printf("%-5s: Yaw: %10f, Pitch: %10f, Roll: %10f\n", "Pos", Yaw, Pitch, Roll);
+
+	printf("\n");
 	printf("Input Pulse 0: %u\n", spnServoGetPulseWidth(0));
 
 	for(uint32_t i = 0; i < 4; i++)

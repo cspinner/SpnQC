@@ -5,7 +5,7 @@
  *      Author: cspinner
  */
 
-#include "SpnQC.h"
+#include "spnQC.h"
 #include <unistd.h>
 #include <termios.h>
 #include <signal.h>
@@ -30,11 +30,11 @@ bool spnUserInputInit(void)
 	{
 		atexit(&restoreTerminalState);
 
-		return SUCCESS;
+		return EXIT_SUCCESS;
 	}
 	else
 	{
-		return FAIL;
+		return EXIT_FAILURE;
 	}
 }
 

@@ -1,4 +1,4 @@
-#include "SpnQC.h"
+#include "spnQC.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -37,7 +37,7 @@ bool spnServoInit(uint32_t inputCount, const uint32_t* gpioInputList, uint32_t o
     if(rtnVal < 0)
     {
         printf("spnServoInit: pigpio_start - %s\n", pigpio_error(rtnVal));
-        return FAIL;
+        return EXIT_FAILURE;
     }
     else
     {
@@ -54,7 +54,7 @@ bool spnServoInit(uint32_t inputCount, const uint32_t* gpioInputList, uint32_t o
                 if(rtnVal != 0)
                 {
                     printf("spnServoInit: set_mode - %s\n", pigpio_error(rtnVal));
-                    return FAIL;
+                    return EXIT_FAILURE;
                 }
                 else
                 {
@@ -80,7 +80,7 @@ bool spnServoInit(uint32_t inputCount, const uint32_t* gpioInputList, uint32_t o
                 if(rtnVal != 0)
                 {
                     printf("spnServoInit: set_mode - %s\n", pigpio_error(rtnVal));
-                    return FAIL;
+                    return EXIT_FAILURE;
                 }
                 
                 gpioOutputs[index] = gpioOutputList[index];
@@ -88,7 +88,7 @@ bool spnServoInit(uint32_t inputCount, const uint32_t* gpioInputList, uint32_t o
             }
         }
         
-        return SUCCESS;
+        return EXIT_SUCCESS;
     }    
 }
 
@@ -148,12 +148,12 @@ bool spnServoSetPulseWidth(uint32_t gpioIndex, uint32_t pulseWidthUsec)
     if(rtnVal != 0)
     {
         printf("spnServoSetPulseWidth: set_servo_pulsewidth - %s\n", pigpio_error(rtnVal));
-        return FAIL;
+        return EXIT_FAILURE;
     }
     else
     {
     	gpioOutputPulses[gpioIndex] = pulseWidthUsec;
-        return SUCCESS;
+        return EXIT_SUCCESS;
     }
 }
 
@@ -164,14 +164,14 @@ uint32_t spnServoGetCommandedPulseWidth(uint32_t gpioIndex)
 
 bool spnServoStopAllPulses(void)
 {
-    bool rtnStatus = SUCCESS;
+    bool rtnStatus = EXIT_SUCCESS;
     
     // write pulse width of 0 to stop each of the output gpios
     for(uint32_t index = 0; index < gpioOutputCount; index++)
     {
-        if(spnServoSetPulseWidth(index, PI_SERVO_OFF) != SUCCESS)
+        if(spnServoSetPulseWidth(index, PI_SERVO_OFF) != EXIT_SUCCESS)
         {
-            rtnStatus = FAIL;
+            rtnStatus = EXIT_FAILURE;
         }
     }
     

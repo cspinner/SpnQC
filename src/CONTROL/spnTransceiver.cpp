@@ -5,7 +5,8 @@
  *      Author: cspinner
  */
 
-#include "SpnQC.h"
+#include "spnQC.h"
+#include <stdlib.h>
 
 static bool terminalOverride = false;
 
@@ -15,7 +16,7 @@ bool spnTransceiverInit(void)
     
     terminalOverride = pCfg->transceiver.useTerminal;
     
-	return SUCCESS;
+	return EXIT_SUCCESS;
 }
 
 float32_t spnTransceiverGetThrottlePct(void)

@@ -119,12 +119,12 @@ bool spnUtilsReadNextFloatFromFile(FILE* pFile, float32_t* pDest)
 		// Parse the float32_t value
 		sscanf(readBytes, "%f", pDest);
 
-		return SUCCESS;
+		return EXIT_SUCCESS;
 	}
 	else
 	{
 		// some error or EOF
-		return FAIL;
+		return EXIT_FAILURE;
 	}
 }
 
@@ -142,12 +142,12 @@ bool spnUtilsReadNextIntFromFile(FILE* pFile, int32_t* pDest)
 		// Parse the float32_t value
 		sscanf(readBytes, "%i", pDest);
 
-		return SUCCESS;
+		return EXIT_SUCCESS;
 	}
 	else
 	{
 		// some error or EOF
-		return FAIL;
+		return EXIT_FAILURE;
 	}
 }
 
