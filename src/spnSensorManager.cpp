@@ -132,6 +132,11 @@ void spnSensorGetPrincipalAxes(float32_t* pPitch, float32_t* pRoll, float32_t* p
 	*pYaw = Yaw;
 }
 
+void spnSensorGetNineAxesData(SpnNineAxisMotion_Data_Type* pSensorData)
+{
+	*pSensorData = SpnNineAxisMotionData;
+}
+
 float32_t spnSensorGetTemperature(void)
 {
 	return SpnNineAxisMotionData.temperature;

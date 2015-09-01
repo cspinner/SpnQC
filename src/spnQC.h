@@ -9,6 +9,7 @@
 #define SPNQC_H_
 
 #include "SpnConfig.h"
+#include "spnNineAxisMotion.h"
 #include <time.h>
 #include <stdio.h>
 #include <stddef.h>
@@ -93,6 +94,7 @@ uint32_t spnSchedulerGetFrameCount(void);
 bool spnSensorManagerInit(void);
 void spnSensorManagerUpdate(void);
 void spnSensorGetPrincipalAxes(float32_t* pPitch, float32_t* pRoll, float32_t* pYaw);
+void spnSensorGetNineAxesData(SpnNineAxisMotion_Data_Type* pSensorData);
 float32_t spnSensorGetTemperature(void);
 
 bool spnCommandInit(void);

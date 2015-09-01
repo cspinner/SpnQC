@@ -26,6 +26,7 @@ static float32_t Pitch;
 static float32_t Roll;
 static float32_t Yaw;
 static float32_t Temperature;
+static SpnNineAxisMotion_Data_Type nineAxesData;
 
 static void userOutputOnExit(void);
 static void userOutputConsole(void);
@@ -42,9 +43,9 @@ bool spnUserOutputInit(void)
 
 		// write all headings and units
 		spnUtilsWriteToFile(pOutputFile,
-				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,TEMP_F,INPW0,MOTCMD0,MOTCMD1,MOTCMD2,MOTCMD3,THROT,ELEV,AILER,RUDD,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US\n");
+				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,TEMP_F,INPW0,MOTCMD0,MOTCMD1,MOTCMD2,MOTCMD3,THROT,ELEV,AILER,RUDD,GYROX,GYROY,GYROZ,ACCX,ACCY,ACCZ,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US\n");
 		spnUtilsWriteToFile(pOutputFile,
-				",,,DEGREES,DEGREES,DEGREES,DEG_F,USEC,PCT,PCT,PCT,PCT,PCT,DEGREES,DEGREES,DEGREES,SEC,MSEC,USEC,SEC,MSEC,USEC,\n");
+				",,,DEGREES,DEGREES,DEGREES,DEG_F,USEC,PCT,PCT,PCT,PCT,PCT,DEGREES,DEGREES,DEGREES,DEG/S,DEG/S,DEG/S,G,G,G,SEC,MSEC,USEC,SEC,MSEC,USEC,\n");
 
 		return EXIT_SUCCESS;
 	}
@@ -62,6 +63,7 @@ void spnUserOutputUpdate(void)
 	spnSchedulerGetIntTime(&intElapsedSec, &intElapsedMSec, &intElapsedUSec);
 	spnSchedulerGetMaxIntTime(&intElapsedMaxSec, &intElapsedMaxMSec, &intElapsedMaxUSec);
 	spnSensorGetPrincipalAxes(&Pitch, &Roll, &Yaw);
+	spnSensorGetNineAxesData(&nineAxesData);
 	Temperature = spnSensorGetTemperature();
 
 	// Output the data
@@ -105,7 +107,7 @@ static void userOutputFile(void)
 {
 	// write data to file
 	char buf[1024];
-	sprintf(buf, "%s,%s,%i,%.1f,%.1f,%.1f,%.1f,%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%u,%u,%u,%u,%u,%u\n",
+	sprintf(buf, "%s,%s,%i,%.1f,%.1f,%.1f,%.1f,%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%u,%u,%u,%u,%u,%u\n",
 			spnModeGetString(),
 			spnCommandGetModeString(),
 			spnSchedulerGetFrameCount(),
@@ -122,6 +124,12 @@ static void userOutputFile(void)
 			spnTransceiverGetElevatorAngle(),
 			spnTransceiverGetAileronAngle(),
 			spnTransceiverGetRudderAngle(),
+			nineAxesData.gyro.x,
+			nineAxesData.gyro.y,
+			nineAxesData.gyro.z,
+			nineAxesData.accel.x,
+			nineAxesData.accel.y,
+			nineAxesData.accel.z,
 			fgElapsedSec,
 			fgElapsedMSec,
 			fgElapsedUSec,

@@ -32,7 +32,7 @@ float32_t spnTransceiverGetThrottlePct(void)
         if(userInput == '[') ovrInput -= 2.0;
         else if (userInput == ']') ovrInput += 2.0;
 
-        ovrInput = clamp(ovrInput, 0.0, 100.0);
+        ovrInput = clamp(ovrInput, 0.0, 90.0);
         
         throttlePct = ovrInput;
     }
@@ -55,8 +55,8 @@ float32_t spnTransceiverGetElevatorAngle(void)
 
         char userInput = spnUserInputCharGet(false);
 
-        if(userInput == 'q') ovrInput -= 2.0;
-        else if (userInput == 'w') ovrInput += 2.0;
+        if(userInput == 't') ovrInput -= 2.0;
+        else if (userInput == 'y') ovrInput += 2.0;
 
         ovrInput = clamp(ovrInput, -90.0, 90.0);
         
@@ -81,8 +81,8 @@ float32_t spnTransceiverGetAileronAngle(void)
 
         char userInput = spnUserInputCharGet(false);
 
-        if(userInput == 'e') ovrInput -= 2.0;
-        else if (userInput == 'r') ovrInput += 2.0;
+        if(userInput == 'g') ovrInput -= 2.0;
+        else if (userInput == 'b') ovrInput += 2.0;
 
         ovrInput = clamp(ovrInput, -90.0, 90.0);
         
@@ -107,8 +107,8 @@ float32_t spnTransceiverGetRudderAngle(void)
 
         char userInput = spnUserInputCharGet(false);
 
-        if(userInput == 't') ovrInput -= 2.0;
-        else if (userInput == 'y') ovrInput += 2.0;
+        if(userInput == 'u') ovrInput -= 2.0;
+        else if (userInput == 'i') ovrInput += 2.0;
 
         ovrInput = clamp(ovrInput, -90.0, 90.0);
         

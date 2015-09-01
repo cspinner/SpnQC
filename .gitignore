@@ -2,9 +2,3 @@
 *.o
 
 *.d
-
-Debug/src/CONTROL/spnMotors.d
-
-*.o
-
-*.d
