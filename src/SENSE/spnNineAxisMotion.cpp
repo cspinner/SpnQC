@@ -411,7 +411,7 @@ void SpnNineAxisMotion::acquireData(void)
 	// Use the 0th entry. Data is always right shifted after the algorithm
 	SpnNineAxisMotion_Raw_Data_Type* pAccelUnfiltered = &rawAccelDataFifo[0];
 	SpnNineAxisMotion_Raw_Data_Type* pGyroUnfiltered = &rawGyroDataFifo[0];
-	SpnNineAxisMotion_Raw_Data_Type* pMagUnfiltered = &rawMagDataFifo[0];
+//	SpnNineAxisMotion_Raw_Data_Type* pMagUnfiltered = &rawMagDataFifo[0];
 
 	//
 	// READ SENSOR DATA
@@ -460,23 +460,23 @@ void SpnNineAxisMotion::acquireData(void)
 	// sum the raw data
 	for(uint32_t i = 0; i < accelDataCount; i++)
 	{
-		filtAccelData.x_raw += pAccelUnfiltered->x_raw;
-		filtAccelData.y_raw += pAccelUnfiltered->y_raw;
-		filtAccelData.z_raw += pAccelUnfiltered->z_raw;
+		filtAccelData.x_raw += pAccelUnfiltered[i].x_raw;
+		filtAccelData.y_raw += pAccelUnfiltered[i].y_raw;
+		filtAccelData.z_raw += pAccelUnfiltered[i].z_raw;
 	}
 
 	for(uint32_t i = 0; i < gyroDataCount; i++)
 	{
-		filtGyroData.x_raw += pGyroUnfiltered->x_raw;
-		filtGyroData.y_raw += pGyroUnfiltered->y_raw;
-		filtGyroData.z_raw += pGyroUnfiltered->z_raw;
+		filtGyroData.x_raw += pGyroUnfiltered[i].x_raw;
+		filtGyroData.y_raw += pGyroUnfiltered[i].y_raw;
+		filtGyroData.z_raw += pGyroUnfiltered[i].z_raw;
 	}
 
 //	for(uint32_t i = 0; i < magDataCount; i++)
 //	{
-//		filtMagData.x_raw += pMagUnfiltered->x_raw;
-//		filtMagData.y_raw += pMagUnfiltered->y_raw;
-//		filtMagData.z_raw += pMagUnfiltered->z_raw;
+//		filtMagData.x_raw += pMagUnfiltered[i].x_raw;
+//		filtMagData.y_raw += pMagUnfiltered[i].y_raw;
+//		filtMagData.z_raw += pMagUnfiltered[i].z_raw;
 //	}
 
 	// divide by number of samples to get avg
