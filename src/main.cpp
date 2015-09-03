@@ -29,7 +29,10 @@ int32_t main (void)
 		// Start the minor frame timer
 		setitimer (ITIMER_REAL, &timer, NULL);
 
-		while(1);
+		for(;;)
+		{
+			spnSchedulerPollSensors();
+		}
 
 		setitimer (ITIMER_REAL, NULL, NULL);
 

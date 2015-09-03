@@ -131,28 +131,9 @@ typedef struct
 
 typedef struct
 {
-	struct
-	{
-		float32_t x_raw;
-		float32_t y_raw;
-		float32_t z_raw;
-	} accel;
-
-	struct
-	{
-		float32_t x_raw;
-		float32_t y_raw;
-		float32_t z_raw;
-	} gyro;
-
-	struct
-	{
-		float32_t x_raw;
-		float32_t y_raw;
-		float32_t z_raw;
-	} mag;
-
-	float32_t temperature_raw;
+	float32_t x_raw;
+	float32_t y_raw;
+	float32_t z_raw;
 } SpnNineAxisMotion_Raw_Data_Type;
 
 // LSB/(º/s) - indexed by FS_SEL
@@ -175,11 +156,21 @@ uint32_t gyroFsSel;
 
 SpnNineAxisMotion_Calibration_Type calData;
 
-uint32_t rollingAvgCount;
-uint32_t rawDataCount;
+uint32_t accelFiltWindow;
+uint32_t gyroFiltWindow;
+uint32_t magFiltWindow;
+uint32_t accelDataCount;
+uint32_t gyroDataCount;
+uint32_t magDataCount;
 float32_t magOutlierThresh;
-SpnNineAxisMotion_Raw_Data_Type rawData[128]; // max 128 sample avg
-SpnNineAxisMotion_Raw_Data_Type filtData;
+
+SpnNineAxisMotion_Raw_Data_Type rawAccelDataFifo[128]; // max 128 sample window
+SpnNineAxisMotion_Raw_Data_Type rawGyroDataFifo[128]; // max 128 sample window
+SpnNineAxisMotion_Raw_Data_Type rawMagDataFifo[128]; // max 128 sample window
+SpnNineAxisMotion_Raw_Data_Type filtAccelData;
+SpnNineAxisMotion_Raw_Data_Type filtGyroData;
+SpnNineAxisMotion_Raw_Data_Type filtMagData;
+float32_t temperatureData;
 
 Mag_Register_Set_Type mag_registers;
 
@@ -281,18 +272,7 @@ void SpnNineAxisMotion::writeMagRegisterMask(uint32_t address, char mask, char d
 SpnNineAxisMotion::SpnNineAxisMotion(void)
 :SpnSensor()
 {
-	spi_fd = 0;
-	chipSelect = 0;
-	speed = 0;
-	rollingAvgCount = 0;
-	rawDataCount = 0;
-	accFsSel = 0;
-	gyroFsSel = 0;
 
-	memset(&calData, 0, sizeof(calData));
-	memset(&rawData, 0, sizeof(rawData));
-	memset(&filtData, 0, sizeof(filtData));
-	memset(&mag_registers, 0, sizeof(mag_registers));
 }
 
 bool SpnNineAxisMotion::configure(void* cfg)
@@ -311,12 +291,16 @@ bool SpnNineAxisMotion::configure(void* cfg)
 			spi_fd = wiringPiSPISetup(chipSelect, speed);
 		}
 
-		rollingAvgCount = mpu9250_config->rollingAvgCount;
+		accelFiltWindow = mpu9250_config->accelFilterWindow;
+		gyroFiltWindow = mpu9250_config->gyroFilterWindow;
+		magFiltWindow = mpu9250_config->magFilterWindow;
 		magOutlierThresh = mpu9250_config->magOutlierThresh;
 		accFsSel = mpu9250_config->accFsSel;
 		gyroFsSel = mpu9250_config->gyroFsSel;
 		calData = mpu9250_config->calibration;
-		rawDataCount = 0;
+		accelDataCount = 0;
+		gyroDataCount = 0;
+		magDataCount = 0;
 
 		// First reset the MPU9250
 		writeRegisterMask(MPU9250_PWR_MGMT_1_ADDR, 0x80, 0x1);
@@ -341,8 +325,9 @@ bool SpnNineAxisMotion::configure(void* cfg)
 		{
 			// configure gyro and accel
 			writeRegisterMask(MPU9250_GYRO_CONFIG_ADDR, 0x18, gyroFsSel);
+			writeRegisterMask(MPU9250_GYRO_CONFIG_ADDR, 0x03, 0x3); // fchoice_b = 2'b11
 			writeRegisterMask(MPU9250_ACCEL_CONFIG_ADDR, 0x18, accFsSel);
-			writeRegisterMask(MPU9250_CONFIG_ADDR, 0x07, 0x6); //DLPF_CFG = 6
+			writeRegisterMask(MPU9250_ACCEL_CONFIG2_ADDR, 0x08, 0x1); // accel_fchoice_b = 2'b1
 
 			//
 			// Apply GYRO user offset
@@ -424,107 +409,127 @@ void SpnNineAxisMotion::acquireData(void)
 	SpnSensor::acquireData();
 
 	// Use the 0th entry. Data is always right shifted after the algorithm
-	SpnNineAxisMotion_Raw_Data_Type* pUnfiltered = &rawData[0];
+	SpnNineAxisMotion_Raw_Data_Type* pAccelUnfiltered = &rawAccelDataFifo[0];
+	SpnNineAxisMotion_Raw_Data_Type* pGyroUnfiltered = &rawGyroDataFifo[0];
+	SpnNineAxisMotion_Raw_Data_Type* pMagUnfiltered = &rawMagDataFifo[0];
 
 	//
 	// READ SENSOR DATA
 	//
-	pUnfiltered->accel.x_raw = ((int16_t)((readRegister(MPU9250_ACCEL_XOUT_H_ADDR) << 8)|readRegister(MPU9250_ACCEL_XOUT_L_ADDR)))*1.0;
-	pUnfiltered->accel.y_raw = ((int16_t)((readRegister(MPU9250_ACCEL_YOUT_H_ADDR) << 8)|readRegister(MPU9250_ACCEL_YOUT_L_ADDR)))*1.0;
-	pUnfiltered->accel.z_raw = ((int16_t)((readRegister(MPU9250_ACCEL_ZOUT_H_ADDR) << 8)|readRegister(MPU9250_ACCEL_ZOUT_L_ADDR)))*1.0;
+	pAccelUnfiltered->x_raw = ((int16_t)((readRegister(MPU9250_ACCEL_XOUT_H_ADDR) << 8)|readRegister(MPU9250_ACCEL_XOUT_L_ADDR)))*1.0;
+	pAccelUnfiltered->y_raw = ((int16_t)((readRegister(MPU9250_ACCEL_YOUT_H_ADDR) << 8)|readRegister(MPU9250_ACCEL_YOUT_L_ADDR)))*1.0;
+	pAccelUnfiltered->z_raw = ((int16_t)((readRegister(MPU9250_ACCEL_ZOUT_H_ADDR) << 8)|readRegister(MPU9250_ACCEL_ZOUT_L_ADDR)))*1.0;
 
-	pUnfiltered->gyro.x_raw = ((int16_t)((readRegister(MPU9250_GYRO_XOUT_H_ADDR) << 8)|readRegister(MPU9250_GYRO_XOUT_L_ADDR)))*1.0;
-	pUnfiltered->gyro.y_raw = ((int16_t)((readRegister(MPU9250_GYRO_YOUT_H_ADDR) << 8)|readRegister(MPU9250_GYRO_YOUT_L_ADDR)))*1.0;
-	pUnfiltered->gyro.z_raw = ((int16_t)((readRegister(MPU9250_GYRO_ZOUT_H_ADDR) << 8)|readRegister(MPU9250_GYRO_ZOUT_L_ADDR)))*1.0;
+	pGyroUnfiltered->x_raw = ((int16_t)((readRegister(MPU9250_GYRO_XOUT_H_ADDR) << 8)|readRegister(MPU9250_GYRO_XOUT_L_ADDR)))*1.0;
+	pGyroUnfiltered->y_raw = ((int16_t)((readRegister(MPU9250_GYRO_YOUT_H_ADDR) << 8)|readRegister(MPU9250_GYRO_YOUT_L_ADDR)))*1.0;
+	pGyroUnfiltered->z_raw = ((int16_t)((readRegister(MPU9250_GYRO_ZOUT_H_ADDR) << 8)|readRegister(MPU9250_GYRO_ZOUT_L_ADDR)))*1.0;
 
-	readMagRegisterSet(AK8963_HXL_ADDR, 12, (char*)&mag_registers.regByIndex[3]);
+//	readMagRegisterSet(AK8963_HXL_ADDR, 12, (char*)&mag_registers.regByIndex[3]);
+//
+//	// perform sensitivity adjustment
+//	pMagUnfiltered->x_raw = ((int16_t)((mag_registers.regByName.HXH << 8)|mag_registers.regByName.HXL))*1.0;
+//	pMagUnfiltered->y_raw = ((int16_t)((mag_registers.regByName.HYH << 8)|mag_registers.regByName.HYL))*1.0;
+//	pMagUnfiltered->z_raw = ((int16_t)((mag_registers.regByName.HZH << 8)|mag_registers.regByName.HZL))*1.0;
 
-	// perform sensitivity adjustment
-	pUnfiltered->mag.x_raw = ((int16_t)((mag_registers.regByName.HXH << 8)|mag_registers.regByName.HXL))*1.0;
-	pUnfiltered->mag.y_raw = ((int16_t)((mag_registers.regByName.HYH << 8)|mag_registers.regByName.HYL))*1.0;
-	pUnfiltered->mag.z_raw = ((int16_t)((mag_registers.regByName.HZH << 8)|mag_registers.regByName.HZL))*1.0;
+	temperatureData = ((int16_t)((readRegister(MPU9250_TEMP_OUT_H_ADDR) << 8)|readRegister(MPU9250_TEMP_OUT_L_ADDR)))*1.0;
 
-	pUnfiltered->temperature_raw = ((int16_t)((readRegister(MPU9250_TEMP_OUT_H_ADDR) << 8)|readRegister(MPU9250_TEMP_OUT_L_ADDR)))*1.0;
-
-	if(rawDataCount < rollingAvgCount) rawDataCount++;
+	if(accelDataCount < accelFiltWindow) accelDataCount++;
+	if(gyroDataCount < gyroFiltWindow) gyroDataCount++;
+	if(magDataCount < magFiltWindow) magDataCount++;
 
 	//
 	// APPLY FILTERING
 	//
 
 	// clear the buffer
-	memset(&filtData, 0, sizeof(filtData));
+	memset(&filtAccelData, 0, sizeof(filtAccelData));
+	memset(&filtGyroData, 0, sizeof(filtGyroData));
+	memset(&filtMagData, 0, sizeof(filtMagData));
 
-	// Throw out outliers (maintain previous value)
-	if(rawDataCount == rollingAvgCount)
-	{
-		if(fabsf(pUnfiltered->mag.x_raw - pUnfiltered[1].mag.x_raw) > magOutlierThresh)
-			pUnfiltered->mag.x_raw = pUnfiltered[1].mag.x_raw;
-		if(fabsf(pUnfiltered->mag.y_raw - pUnfiltered[1].mag.y_raw) > magOutlierThresh)
-			pUnfiltered->mag.y_raw = pUnfiltered[1].mag.y_raw;
-		if(fabsf(pUnfiltered->mag.z_raw - pUnfiltered[1].mag.z_raw) > magOutlierThresh)
-			pUnfiltered->mag.z_raw = pUnfiltered[1].mag.z_raw;
-	}
+//	// Throw out outliers (maintain previous value)
+//	if(rawDataCount == rollingAvgCount)
+//	{
+//		if(fabsf(pMagUnfiltered->x_raw - pUnfiltered[1].mag.x_raw) > magOutlierThresh)
+//			pMagUnfiltered->x_raw = pUnfiltered[1].mag.x_raw;
+//		if(fabsf(pMagUnfiltered->y_raw - pUnfiltered[1].mag.y_raw) > magOutlierThresh)
+//			pMagUnfiltered->y_raw = pUnfiltered[1].mag.y_raw;
+//		if(fabsf(pMagUnfiltered->z_raw - pUnfiltered[1].mag.z_raw) > magOutlierThresh)
+//			pMagUnfiltered->z_raw = pUnfiltered[1].mag.z_raw;
+//	}
 
 	// sum the raw data
-	for(uint32_t i = 0; i < rawDataCount; i++)
+	for(uint32_t i = 0; i < accelDataCount; i++)
 	{
-		filtData.accel.x_raw += pUnfiltered[i].accel.x_raw;
-		filtData.accel.y_raw += pUnfiltered[i].accel.y_raw;
-		filtData.accel.z_raw += pUnfiltered[i].accel.z_raw;
-
-		filtData.gyro.x_raw += pUnfiltered[i].gyro.x_raw;
-		filtData.gyro.y_raw += pUnfiltered[i].gyro.y_raw;
-		filtData.gyro.z_raw += pUnfiltered[i].gyro.z_raw;
-
-		filtData.mag.x_raw += pUnfiltered[i].mag.x_raw;
-		filtData.mag.y_raw += pUnfiltered[i].mag.y_raw;
-		filtData.mag.z_raw += pUnfiltered[i].mag.z_raw;
-
-		filtData.temperature_raw += pUnfiltered[i].temperature_raw;
+		filtAccelData.x_raw += pAccelUnfiltered->x_raw;
+		filtAccelData.y_raw += pAccelUnfiltered->y_raw;
+		filtAccelData.z_raw += pAccelUnfiltered->z_raw;
 	}
 
+	for(uint32_t i = 0; i < gyroDataCount; i++)
+	{
+		filtGyroData.x_raw += pGyroUnfiltered->x_raw;
+		filtGyroData.y_raw += pGyroUnfiltered->y_raw;
+		filtGyroData.z_raw += pGyroUnfiltered->z_raw;
+	}
+
+//	for(uint32_t i = 0; i < magDataCount; i++)
+//	{
+//		filtMagData.x_raw += pMagUnfiltered->x_raw;
+//		filtMagData.y_raw += pMagUnfiltered->y_raw;
+//		filtMagData.z_raw += pMagUnfiltered->z_raw;
+//	}
+
 	// divide by number of samples to get avg
-	filtData.accel.x_raw /= rawDataCount;
-	filtData.accel.y_raw /= rawDataCount;
-	filtData.accel.z_raw /= rawDataCount;
+	filtAccelData.x_raw /= accelDataCount;
+	filtAccelData.y_raw /= accelDataCount;
+	filtAccelData.z_raw /= accelDataCount;
 
-	filtData.gyro.x_raw /= rawDataCount;
-	filtData.gyro.y_raw /= rawDataCount;
-	filtData.gyro.z_raw /= rawDataCount;
+	filtGyroData.x_raw /= gyroDataCount;
+	filtGyroData.y_raw /= gyroDataCount;
+	filtGyroData.z_raw /= gyroDataCount;
+//
+//	filtMagData.x_raw /= magDataCount;
+//	filtMagData.y_raw /= magDataCount;
+//	filtMagData.z_raw /= magDataCount;
 
-	filtData.mag.x_raw /= rawDataCount;
-	filtData.mag.y_raw /= rawDataCount;
-	filtData.mag.z_raw /= rawDataCount;
-
-    filtData.temperature_raw /= rawDataCount;
 
 
 	// Shift un-filtered data right, pushing the oldest data out
-	for(uint32_t i = rollingAvgCount-1; i > 0; i--)
+	for(uint32_t i = accelFiltWindow-1; i > 0; i--)
 	{
-		pUnfiltered[i] = pUnfiltered[i-1];
+		pAccelUnfiltered[i] = pAccelUnfiltered[i-1];
 	}
-	memset(&pUnfiltered[0], 0, sizeof(SpnNineAxisMotion_Raw_Data_Type)); // clear for the next entry
+	memset(&pAccelUnfiltered[0], 0, sizeof(SpnNineAxisMotion_Raw_Data_Type)); // clear for the next entry
 
-	//
-	// APPLY CALIBRATION
-	//
+	for(uint32_t i = gyroFiltWindow-1; i > 0; i--)
+	{
+		pGyroUnfiltered[i] = pGyroUnfiltered[i-1];
+	}
+	memset(&pGyroUnfiltered[0], 0, sizeof(SpnNineAxisMotion_Raw_Data_Type)); // clear for the next entry
 
-	// Apply factory sensitivity adjustment
-	filtData.mag.x_raw = filtData.mag.x_raw * (((mag_registers.regByName.ASAX - 128) * 0.5)/128.0 + 1.0);
-	filtData.mag.y_raw = filtData.mag.y_raw * (((mag_registers.regByName.ASAY - 128) * 0.5)/128.0 + 1.0);
-	filtData.mag.z_raw = filtData.mag.z_raw * (((mag_registers.regByName.ASAZ - 128) * 0.5)/128.0 + 1.0);
-
-	// Apply bias to compensate for hard errors (note bias is in mG, need to convert back to uT):
-	filtData.mag.x_raw -= calData.mag.x_bias / 10.0;
-	filtData.mag.y_raw -= calData.mag.y_bias / 10.0;
-	filtData.mag.z_raw -= calData.mag.z_bias / 10.0;
-
-	// Apply scale to compensate for soft errors:
-	filtData.mag.x_raw *= calData.mag.x_scale;
-	filtData.mag.y_raw *= calData.mag.y_scale;
-    filtData.mag.z_raw *= calData.mag.z_scale;
+//	for(uint32_t i = magFiltWindow-1; i > 0; i--)
+//	{
+//		pMagUnfiltered[i] = pMagUnfiltered[i-1];
+//	}
+//	memset(&pMagUnfiltered[0], 0, sizeof(SpnNineAxisMotion_Raw_Data_Type)); // clear for the next entry
+//	//
+//	// APPLY CALIBRATION
+//	//
+//
+//	// Apply factory sensitivity adjustment
+//	filtMagData.x_raw = filtMagData.x_raw * (((mag_registers.regByName.ASAX - 128) * 0.5)/128.0 + 1.0);
+//	filtMagData.y_raw = filtMagData.y_raw * (((mag_registers.regByName.ASAY - 128) * 0.5)/128.0 + 1.0);
+//	filtMagData.z_raw = filtMagData.z_raw * (((mag_registers.regByName.ASAZ - 128) * 0.5)/128.0 + 1.0);
+//
+//	// Apply bias to compensate for hard errors (note bias is in mG, need to convert back to uT):
+//	filtMagData.x_raw -= calData.mag.x_bias / 10.0;
+//	filtMagData.y_raw -= calData.mag.y_bias / 10.0;
+//	filtMagData.z_raw -= calData.mag.z_bias / 10.0;
+//
+//	// Apply scale to compensate for soft errors:
+//	filtMagData.x_raw *= calData.mag.x_scale;
+//	filtMagData.y_raw *= calData.mag.y_scale;
+//  filtMagData.z_raw *= calData.mag.z_scale;
 }
 
 bool SpnNineAxisMotion::retrieveData(uint32_t* size, void* data)
@@ -538,23 +543,23 @@ bool SpnNineAxisMotion::retrieveData(uint32_t* size, void* data)
 		//
 
 		// Converts raw temperature data into degrees C, then to degrees F
-		output.temperature = ((filtData.temperature_raw - MPU9250_ROOM_TEMP_OFFSET)/MPU9250_TEMP_SENSITIVITY) + MPU9250_ROOM_TEMP_OFFSET;
+		output.temperature = ((temperatureData - MPU9250_ROOM_TEMP_OFFSET)/MPU9250_TEMP_SENSITIVITY) + MPU9250_ROOM_TEMP_OFFSET;
 		output.temperature = output.temperature*1.8 + 32;
 
 		// Converts raw accelerometer data into g
-		output.accel.x = filtData.accel.x_raw / ACCEL_SENSITIVITY[accFsSel];
-		output.accel.y = filtData.accel.y_raw / ACCEL_SENSITIVITY[accFsSel];
-		output.accel.z = filtData.accel.z_raw / ACCEL_SENSITIVITY[accFsSel];
+		output.accel.x = filtAccelData.x_raw / ACCEL_SENSITIVITY[accFsSel];
+		output.accel.y = filtAccelData.y_raw / ACCEL_SENSITIVITY[accFsSel];
+		output.accel.z = filtAccelData.z_raw / ACCEL_SENSITIVITY[accFsSel];
 
 		// Converts raw gyroscope data into º/s
-		output.gyro.x = filtData.gyro.x_raw / GYRO_SENSITIVITY[gyroFsSel];
-		output.gyro.y = filtData.gyro.y_raw / GYRO_SENSITIVITY[gyroFsSel];
-		output.gyro.z = filtData.gyro.z_raw / GYRO_SENSITIVITY[gyroFsSel];
+		output.gyro.x = filtGyroData.x_raw / GYRO_SENSITIVITY[gyroFsSel];
+		output.gyro.y = filtGyroData.y_raw / GYRO_SENSITIVITY[gyroFsSel];
+		output.gyro.z = filtGyroData.z_raw / GYRO_SENSITIVITY[gyroFsSel];
 
 		// Convert uT to mG
-		output.mag.x = filtData.mag.x_raw * 10.0;
-		output.mag.y = filtData.mag.y_raw * 10.0;
-		output.mag.z = filtData.mag.z_raw * 10.0;
+		output.mag.x = filtMagData.x_raw * 10.0;
+		output.mag.y = filtMagData.y_raw * 10.0;
+		output.mag.z = filtMagData.z_raw * 10.0;
 
 		*size = sizeof(output);
 		*(SpnNineAxisMotion_Data_Type*)data = output;

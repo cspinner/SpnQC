@@ -19,6 +19,7 @@
 //
 // DEFINES
 //
+#define SENSOR_FRAME_TIME_USEC 5000
 #define MINOR_FRAME_TIME_USEC 30000
 
 #define OUTPUT_PIN_STATUS_LED 27
@@ -77,9 +78,22 @@ void spnHandleRegisterCallback(__sighandler_t pCallback);
 void spnHandleSignal(int32_t);
 
 void spnSchedulerForeground(void);
+void spnSchedulerPollSensors(void);
 void spnSchedulerGetFrameTime(uint32_t* pSec,
 						      uint32_t* pMSec,
 							  uint32_t* pUSec);
+void spnSchedulerGetSensorPollTime(uint32_t* pSec,
+								   uint32_t* pMSec,
+								   uint32_t* pUSec);
+void spnSchedulerGetMaxSensorPollTime(uint32_t* pSec,
+								   uint32_t* pMSec,
+								   uint32_t* pUSec);
+void spnSchedulerGetSenStart2StartTime(uint32_t* pSec,
+								   uint32_t* pMSec,
+								   uint32_t* pUSec);
+void spnSchedulerGetMaxSenStart2StartTime(uint32_t* pSec,
+								   uint32_t* pMSec,
+								   uint32_t* pUSec);
 void spnSchedulerGetMaxFrameTime(uint32_t* pSec,
 						         uint32_t* pMSec,
 							     uint32_t* pUSec);
@@ -93,6 +107,7 @@ uint32_t spnSchedulerGetFrameCount(void);
 
 bool spnSensorManagerInit(void);
 void spnSensorManagerUpdate(void);
+void spnSensorManagerPollSensors(void);
 void spnSensorGetPrincipalAxes(float32_t* pPitch, float32_t* pRoll, float32_t* pYaw);
 void spnSensorGetNineAxesData(SpnNineAxisMotion_Data_Type* pSensorData);
 float32_t spnSensorGetTemperature(void);
@@ -105,9 +120,11 @@ const char* spnModeGetString(void);
 System_Mode_Type spnModeGet(void);
 void spnModeUpdate(void);
 
+bool spnUtilsTimedOut(struct timeval* pTsEnd);
 void spnUtilsWaitUsec(uint32_t delayUsec);
-void spnUtilsMarkTimestamp(void);
-struct timeval spnUtilsGetElapsedTime(void);
+struct timeval spnUtilsAddToTimestamp(struct timeval* pTimeStamp, __time_t sec, __suseconds_t usec);
+void spnUtilsMarkTimestamp(struct timeval* pTimeStamp);
+struct timeval spnUtilsGetElapsedTime(struct timeval* pTimeStamp);
 bool spnUtilsTimeCompare(struct timeval* pTsA, struct timeval* pTsB);
 void spnUtilsOpenFileForRead(FILE **pFile, const char *pPathname);
 size_t spnUtilsReadLine(FILE *pFile, char* pDest, size_t destSizeBytes);

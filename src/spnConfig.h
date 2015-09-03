@@ -58,7 +58,9 @@ typedef struct
 		uint32_t accFsSel; // 0 - 3
 		uint32_t gyroFsSel; // 0 - 3
 		float32_t magOutlierThresh;
-		uint32_t rollingAvgCount; // 1 - 128
+		uint32_t accelFilterWindow; // 1 - 128
+		uint32_t gyroFilterWindow; // 1 - 128
+		uint32_t magFilterWindow; // 1 - 128
 	} mpu9250;
 
 	struct

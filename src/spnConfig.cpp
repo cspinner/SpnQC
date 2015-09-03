@@ -41,9 +41,19 @@ const SpnQC_Config_Entry_Type configEntries[] = {
 		&spnQcConfig.spi.speed
 	},
 	{
-		"AVGSIZE",
+		"ACCFILTWD",
 		UINT_E,
-		&spnQcConfig.mpu9250.rollingAvgCount
+		&spnQcConfig.mpu9250.accelFilterWindow
+	},
+	{
+		"GYRFILTWD",
+		UINT_E,
+		&spnQcConfig.mpu9250.gyroFilterWindow
+	},
+	{
+		"MAGFILTWD",
+		UINT_E,
+		&spnQcConfig.mpu9250.magFilterWindow
 	},
 	{
 		"MAXSMPDIFF",

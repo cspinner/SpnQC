@@ -10,12 +10,24 @@
 #include <stdio.h>
 
 static FILE* pOutputFile = NULL; // output file descriptor
+static uint32_t senElapsedSec;
+static uint32_t senElapsedMSec;
+static uint32_t senElapsedUSec;
+static uint32_t senElapsedMaxSec;
+static uint32_t senElapsedMaxMSec;
+static uint32_t senElapsedMaxUSec;
 static uint32_t fgElapsedSec;
 static uint32_t fgElapsedMSec;
 static uint32_t fgElapsedUSec;
 static uint32_t fgElapsedMaxSec;
 static uint32_t fgElapsedMaxMSec;
 static uint32_t fgElapsedMaxUSec;
+static uint32_t senS2SElapsedSec;
+static uint32_t senS2SElapsedMSec;
+static uint32_t senS2SElapsedUSec;
+static uint32_t senS2SElapsedMaxSec;
+static uint32_t senS2SElapsedMaxMSec;
+static uint32_t senS2SElapsedMaxUSec;
 static uint32_t intElapsedSec;
 static uint32_t intElapsedMSec;
 static uint32_t intElapsedUSec;
@@ -43,9 +55,9 @@ bool spnUserOutputInit(void)
 
 		// write all headings and units
 		spnUtilsWriteToFile(pOutputFile,
-				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,TEMP_F,INPW0,MOTCMD0,MOTCMD1,MOTCMD2,MOTCMD3,THROT,ELEV,AILER,RUDD,GYROX,GYROY,GYROZ,ACCX,ACCY,ACCZ,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US\n");
+				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,TEMP_F,INPW0,MOTCMD0,MOTCMD1,MOTCMD2,MOTCMD3,THROT,ELEV,AILER,RUDD,GYROX,GYROY,GYROZ,ACCX,ACCY,ACCZ,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US,SEN_TIME_S,SEN_TIME_MS,SEN_TIME_US,SEN_MAX_TIME_S,SEN_MAX_TIME_MS,SEN_MAX_TIME_US,SEN_S2S_TIME_S,SEN_S2S_TIME_MS,SEN_S2S_TIME_US,SEN_S2S_MAX_TIME_S,SEN_S2S_MAX_TIME_MS,SEN_S2S_MAX_TIME_US\n");
 		spnUtilsWriteToFile(pOutputFile,
-				",,,DEGREES,DEGREES,DEGREES,DEG_F,USEC,PCT,PCT,PCT,PCT,PCT,DEGREES,DEGREES,DEGREES,DEG/S,DEG/S,DEG/S,G,G,G,SEC,MSEC,USEC,SEC,MSEC,USEC,\n");
+				",,,DEGREES,DEGREES,DEGREES,DEG_F,USEC,PCT,PCT,PCT,PCT,PCT,DEGREES,DEGREES,DEGREES,DEG/S,DEG/S,DEG/S,G,G,G,SEC,MSEC,USEC,SEC,MSEC,USEC,SEC,MSEC,USEC,SEC,MSEC,USEC,SEC,MSEC,USEC,SEC,MSEC,USEC\n");
 
 		return EXIT_SUCCESS;
 	}
@@ -59,7 +71,11 @@ void spnUserOutputUpdate(void)
 {
 	// Update data for output
 	spnSchedulerGetFrameTime(&fgElapsedSec, &fgElapsedMSec, &fgElapsedUSec);
+	spnSchedulerGetSensorPollTime(&senElapsedSec, &senElapsedMSec, &senElapsedUSec);
+	spnSchedulerGetMaxSensorPollTime(&senElapsedMaxSec, &senElapsedMaxMSec, &senElapsedMaxUSec);
 	spnSchedulerGetMaxFrameTime(&fgElapsedMaxSec, &fgElapsedMaxMSec, &fgElapsedMaxUSec);
+	spnSchedulerGetSenStart2StartTime(&senS2SElapsedSec, &senS2SElapsedMSec, &senS2SElapsedUSec);
+	spnSchedulerGetMaxSenStart2StartTime(&senS2SElapsedMaxSec, &senS2SElapsedMaxMSec, &senS2SElapsedMaxUSec);
 	spnSchedulerGetIntTime(&intElapsedSec, &intElapsedMSec, &intElapsedUSec);
 	spnSchedulerGetMaxIntTime(&intElapsedMaxSec, &intElapsedMaxMSec, &intElapsedMaxUSec);
 	spnSensorGetPrincipalAxes(&Pitch, &Roll, &Yaw);
@@ -78,10 +94,8 @@ static void userOutputConsole(void)
 
 	printf("System Mode: %s - Command Mode: %s\n", spnModeGetString(), spnCommandGetModeString());
 	printf("Frame count: %i\n", spnSchedulerGetFrameCount());
+	printf("Sensor time: %u sec, %u msec, %u usec\n", senElapsedSec, senElapsedMSec, senElapsedUSec);
 	printf("Frame time: %u sec, %u msec, %u usec\n", fgElapsedSec, fgElapsedMSec, fgElapsedUSec);
-	printf("Max Frame time: %u sec, %u msec, %u usec\n", fgElapsedMaxSec, fgElapsedMaxMSec, fgElapsedMaxUSec);
-	printf("Interrupt time: %u sec, %u msec, %u usec\n", intElapsedSec, intElapsedMSec, intElapsedUSec);
-	printf("Max Interrupt time: %u sec, %u msec, %u usec\n", intElapsedMaxSec, intElapsedMaxMSec, intElapsedMaxUSec);
 
 	printf("\n");
 
@@ -107,7 +121,7 @@ static void userOutputFile(void)
 {
 	// write data to file
 	char buf[1024];
-	sprintf(buf, "%s,%s,%i,%.1f,%.1f,%.1f,%.1f,%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%u,%u,%u,%u,%u,%u\n",
+	sprintf(buf, "%s,%s,%i,%.1f,%.1f,%.1f,%.1f,%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\n",
 			spnModeGetString(),
 			spnCommandGetModeString(),
 			spnSchedulerGetFrameCount(),
@@ -135,7 +149,19 @@ static void userOutputFile(void)
 			fgElapsedUSec,
 			intElapsedSec,
 			intElapsedMSec,
-			intElapsedUSec);
+			intElapsedUSec,
+			senElapsedSec,
+			senElapsedMSec,
+			senElapsedUSec,
+			senElapsedMaxSec,
+			senElapsedMaxMSec,
+			senElapsedMaxUSec,
+			senS2SElapsedSec,
+			senS2SElapsedMSec,
+			senS2SElapsedUSec,
+			senS2SElapsedMaxSec,
+			senS2SElapsedMaxMSec,
+			senS2SElapsedMaxUSec);
 
 	spnUtilsWriteToFile(pOutputFile, buf);
 }

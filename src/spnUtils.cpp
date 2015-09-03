@@ -15,9 +15,7 @@
 // Max input file buffer
 #define BUF_SIZE 8192
 
-static struct timeval TimeStamp = {0};
-
-static bool TimedOut(struct timeval* pTsEnd)
+bool spnUtilsTimedOut(struct timeval* pTsEnd)
 {
 	struct timeval tsNow;
 
@@ -47,23 +45,36 @@ void spnUtilsWaitUsec(uint32_t delayUsec)
 	tsAdder.tv_usec = delayUsec;
 	timeradd(&tsNow, &tsAdder, &tsEnd);
 
-	while(!TimedOut(&tsEnd)) {};
+	while(!spnUtilsTimedOut(&tsEnd)) {};
 }
 
-void spnUtilsMarkTimestamp(void)
+struct timeval spnUtilsAddToTimestamp(struct timeval* pTimeStamp, __time_t sec, __suseconds_t usec)
 {
-	gettimeofday(&TimeStamp, 0);
+	struct timeval tsAdder;
+	struct timeval tsEnd = *pTimeStamp;
+
+	// Compute end time
+	tsAdder.tv_sec = sec;
+	tsAdder.tv_usec = usec;
+	timeradd(&tsEnd, &tsAdder, &tsEnd);
+
+	return tsEnd;
 }
 
-// Returns time since spnUtilsMarkTimestamp was called
-struct timeval spnUtilsGetElapsedTime(void)
+void spnUtilsMarkTimestamp(struct timeval* pTimeStamp)
+{
+	gettimeofday(pTimeStamp, 0);
+}
+
+// Returns time since pTimeStamp
+struct timeval spnUtilsGetElapsedTime(struct timeval* pTimeStamp)
 {
 	struct timeval tsNow = {0};
 	struct timeval tsElapsed = {0};
 
 	// Get elapsed time since timestamp
 	gettimeofday(&tsNow, 0);
-	timersub(&tsNow, &TimeStamp, &tsElapsed);
+	timersub(&tsNow, pTimeStamp, &tsElapsed);
 
 	return tsElapsed;
 }

@@ -34,7 +34,9 @@ static bool initMPU9250(void)
 	cfg_mpu9250.accFsSel = pCfg->mpu9250.accFsSel;
 	cfg_mpu9250.gyroFsSel = pCfg->mpu9250.gyroFsSel;
 	cfg_mpu9250.magOutlierThresh = pCfg->mpu9250.magOutlierThresh;
-	cfg_mpu9250.rollingAvgCount = pCfg->mpu9250.rollingAvgCount;
+	cfg_mpu9250.accelFilterWindow = pCfg->mpu9250.accelFilterWindow;
+	cfg_mpu9250.gyroFilterWindow = pCfg->mpu9250.gyroFilterWindow;
+	cfg_mpu9250.magFilterWindow = pCfg->mpu9250.magFilterWindow;
 	cfg_mpu9250.calibration.accel.x_bias = pCfg->mpu9250.accel.x_bias;
 	cfg_mpu9250.calibration.accel.y_bias = pCfg->mpu9250.accel.y_bias;
 	cfg_mpu9250.calibration.accel.z_bias = pCfg->mpu9250.accel.z_bias;
@@ -79,13 +81,18 @@ bool spnSensorManagerInit(void)
 	return status;
 }
 
+void spnSensorManagerPollSensors(void)
+{
+	// Acquire Sensor Data
+	MPU9250.acquireData();
+}
+
 void spnSensorManagerUpdate(void)
 {
 	uint32_t phNineAxisDataSize;
 	float32_t yawRad, pitchRad, rollRad;
 
-	// Acquire and Convert Sensor Data
-	MPU9250.acquireData();
+	// Convert Sensor Data
 	MPU9250.retrieveData(&phNineAxisDataSize, &SpnNineAxisMotionData);
 
 	//
