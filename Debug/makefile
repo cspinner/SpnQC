@@ -8,8 +8,8 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include src/SUPPORT/subdir.mk
 -include src/SENSE/subdir.mk
--include src/MADGWICK/subdir.mk
 -include src/CONTROL/subdir.mk
 -include src/subdir.mk
 -include subdir.mk

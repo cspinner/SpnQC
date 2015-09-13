@@ -47,7 +47,11 @@ const uint32_t LED_STATUS_PATTERN[MODE_COUNT_E][LED_STATUS_STEP_COUNT] =
 
 void spnSchedulerPollSensors(void)
 {
+	static uint32_t spnFrameCountStart = 0;
+	static uint32_t sensorAcquireIndex = 0;
+
 	struct timeval tsEnd = spnUtilsAddToTimestamp(&tsSenStart, 0, SENSOR_FRAME_TIME_USEC);
+	struct timeval tsMid;
 
 	// wait for at least SENSOR_FRAME_TIME_USEC to elapse since the last time this function ran
 	while(!spnUtilsTimedOut(&tsEnd)) {}
@@ -70,7 +74,25 @@ void spnSchedulerPollSensors(void)
 	// START scheduling routines:
 	//
 
-	spnSensorManagerPollSensors();
+	if(spnFrameCountStart != spnMinorFrameCount)
+	{
+		sensorAcquireIndex = 0;
+		spnFrameCountStart = spnMinorFrameCount;
+	}
+
+	spnSensorManagerPollSensors(); // 1st poll
+	spnUtilsMarkTimestamp(&tsMid);
+	spnUserOutputSensorUpdate(sensorAcquireIndex);
+	sensorAcquireIndex++;
+
+	// wait for at least SENSOR_FRAME_TIME_USEC/2 to elapse before sampling again
+	tsMid = spnUtilsAddToTimestamp(&tsEnd, 0, SENSOR_FRAME_TIME_USEC/2);
+	while(!spnUtilsTimedOut(&tsMid)) {}
+
+	spnSensorManagerPollSensors(); // 2nd poll
+
+	spnUserOutputSensorUpdate(sensorAcquireIndex);
+	sensorAcquireIndex++;
 
 	//
 	// END scheduling routines
@@ -126,7 +148,7 @@ void spnSchedulerForeground(void)
 	spnUserInputCharGet(true);
 
 	// Print outputs
-	spnUserOutputUpdate();
+	spnUserOutputUpdate(spnMinorFrameCount);
 
 	//
 	// END scheduling routines

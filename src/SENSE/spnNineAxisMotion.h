@@ -100,6 +100,7 @@ public:
 	void acquireData(void);
 
 	bool retrieveData(uint32_t* size, void* data);
+	bool retrieveData(void* opt, uint32_t* size, void* data);
 
 private:
 	char readRegister(uint32_t address);

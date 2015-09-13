@@ -74,6 +74,7 @@ typedef struct
 	{
 		uint32_t chanCount; // 0 - 32
 		uint32_t gpioPin[USER_GPIO_MAX]; // BCM number
+		bool motorEnable[USER_GPIO_MAX];
         float32_t pulseWidthZeroThrottle;
         float32_t pulseWidthFullThrottle;
 	} motor;

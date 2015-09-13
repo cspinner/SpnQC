@@ -19,6 +19,7 @@
 //
 // DEFINES
 //
+//#define NO_FILTER 1
 #define SENSOR_FRAME_TIME_USEC 5000
 #define MINOR_FRAME_TIME_USEC 30000
 
@@ -109,6 +110,7 @@ bool spnSensorManagerInit(void);
 void spnSensorManagerUpdate(void);
 void spnSensorManagerPollSensors(void);
 void spnSensorGetPrincipalAxes(float32_t* pPitch, float32_t* pRoll, float32_t* pYaw);
+void spnSensorGetRawNineAxesData(SpnNineAxisMotion_Data_Type* pSensorData, uint32_t index);
 void spnSensorGetNineAxesData(SpnNineAxisMotion_Data_Type* pSensorData);
 float32_t spnSensorGetTemperature(void);
 
@@ -136,7 +138,8 @@ void spnUtilsWriteToFile(FILE *pFile, const char *pBuf);
 void spnUtilsCloseFile(FILE *pFile);
 
 bool spnUserOutputInit(void);
-void spnUserOutputUpdate(void);
+void spnUserOutputUpdate(uint32_t frame);
+void spnUserOutputSensorUpdate(uint32_t frame);
 
 bool spnUserInputInit(void);
 void spnUserInputUpdate(void);

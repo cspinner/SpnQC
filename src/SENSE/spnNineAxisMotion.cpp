@@ -156,23 +156,145 @@ uint32_t gyroFsSel;
 
 SpnNineAxisMotion_Calibration_Type calData;
 
-uint32_t accelFiltWindow;
-uint32_t gyroFiltWindow;
-uint32_t magFiltWindow;
-uint32_t accelDataCount;
-uint32_t gyroDataCount;
-uint32_t magDataCount;
+//uint32_t accelFiltWindow;
+//uint32_t gyroFiltWindow;
+//uint32_t magFiltWindow;
+uint32_t acquireCount;
 float32_t magOutlierThresh;
 
-SpnNineAxisMotion_Raw_Data_Type rawAccelDataFifo[128]; // max 128 sample window
-SpnNineAxisMotion_Raw_Data_Type rawGyroDataFifo[128]; // max 128 sample window
-SpnNineAxisMotion_Raw_Data_Type rawMagDataFifo[128]; // max 128 sample window
+SpnNineAxisMotion_Raw_Data_Type rawAccelData[128]; // max 128 sample window
+SpnNineAxisMotion_Raw_Data_Type rawGyroData[128]; // max 128 sample window
+SpnNineAxisMotion_Raw_Data_Type rawMagData[128]; // max 128 sample window
 SpnNineAxisMotion_Raw_Data_Type filtAccelData;
 SpnNineAxisMotion_Raw_Data_Type filtGyroData;
 SpnNineAxisMotion_Raw_Data_Type filtMagData;
+
 float32_t temperatureData;
 
 Mag_Register_Set_Type mag_registers;
+
+// Low pass filter - 2 poles, cutoff @ 7Hz - sample rate 200hz
+static void lp2_7(uint32_t instance, SpnNineAxisMotion_Raw_Data_Type rawData[], SpnNineAxisMotion_Raw_Data_Type* filtData, uint32_t dataCount) // 200hz
+{
+	#define NZEROS 2
+	#define NPOLES 2
+	#define NINSTANCES 16
+	#define GAIN   9.585509742e+01
+
+	static float gxv[NINSTANCES][NZEROS+1][3], gyv[NINSTANCES][NPOLES+1][3];
+
+	for(int32_t axis = 0; axis < 3; axis++)
+	{
+		float32_t* pRawData;
+		float32_t* pFiltData;
+
+		for(uint32_t i = 0; i < dataCount; i++)
+		{
+			if(axis == 0) { pRawData = &rawData[i].x_raw; pFiltData = &filtData->x_raw; }
+			if(axis == 1) { pRawData = &rawData[i].y_raw; pFiltData = &filtData->y_raw; }
+			if(axis == 2) { pRawData = &rawData[i].z_raw; pFiltData = &filtData->z_raw; }
+
+			gxv[instance][0][axis] = gxv[instance][1][axis]; gxv[instance][1][axis] = gxv[instance][2][axis];
+			gxv[instance][2][axis] = *pRawData / GAIN;
+			gyv[instance][0][axis] = gyv[instance][1][axis]; gyv[instance][1][axis] = gyv[instance][2][axis];
+			gyv[instance][2][axis] =   (gxv[instance][0][axis] + gxv[instance][2][axis]) + 2 * gxv[instance][1][axis]
+						 + ( -0.7327260304 * gyv[instance][0][axis]) + (  1.6909963769 * gyv[instance][1][axis]);
+			*pFiltData = gyv[instance][2][axis];
+		}
+	}
+}
+//
+//// Low pass filter - 2 poles, cutoff @ 4Hz - use for Gyro
+//static void lp2_4(SpnNineAxisMotion_Raw_Data_Type rawData[], SpnNineAxisMotion_Raw_Data_Type* filtData, uint32_t dataCount)
+//{
+//	#define NZEROS 2
+//	#define NPOLES 2
+//	#define GAIN   2.761148367e+02
+//
+//	static float gxv[NZEROS+1][3], gyv[NPOLES+1][3];
+//
+//	for(uint32_t i = 0; i < dataCount; i++)
+//	{
+//		for(int32_t axis = 0; axis < 3; axis++)
+//		{
+//			float32_t* pRawData;
+//			float32_t* pFiltData;
+//
+//			if(axis == 0) { pRawData = &rawData[i].x_raw; pFiltData = &filtData->x_raw; }
+//			if(axis == 1) { pRawData = &rawData[i].y_raw; pFiltData = &filtData->y_raw; }
+//			if(axis == 2) { pRawData = &rawData[i].z_raw; pFiltData = &filtData->z_raw; }
+//
+//			gxv[0][axis] = gxv[1][axis]; gxv[1][axis] = gxv[2][axis];
+//			gxv[2][axis] = *pRawData / GAIN;
+//			gyv[0][axis] = gyv[1][axis]; gyv[1][axis] = gyv[2][axis];
+//			gyv[2][axis] =   (gxv[0][axis] + gxv[2][axis]) + 2 * gxv[1][axis]
+//						 + ( -0.8371816513 * gyv[0][axis]) + (  1.8226949252 * gyv[1][axis]);
+//			*pFiltData = gyv[2][axis];
+//		}
+//	}
+//}
+//
+//// Low pass filter - 4 poles, cutoff @ 3Hz - use for Gyro
+//static void lp4_3(SpnNineAxisMotion_Raw_Data_Type rawData[], SpnNineAxisMotion_Raw_Data_Type* filtData, uint32_t dataCount)
+//{
+//	#define NZEROS 4
+//	#define NPOLES 4
+//	#define GAIN   2.286922409e+05
+//
+//	static float gxv[NZEROS+1][3], gyv[NPOLES+1][3];
+//
+//	for(uint32_t i = 0; i < dataCount; i++)
+//	{
+//		for(uint32_t axis = 0; axis < 3; axis++)
+//		{
+//			float32_t* pRawData;
+//			float32_t* pFiltData;
+//
+//			if(axis == 0) { pRawData = &rawData[i].x_raw; pFiltData = &filtData->x_raw; }
+//			if(axis == 1) { pRawData = &rawData[i].y_raw; pFiltData = &filtData->y_raw; }
+//			if(axis == 2) { pRawData = &rawData[i].z_raw; pFiltData = &filtData->z_raw; }
+//
+//			gxv[0][axis] = gxv[1][axis]; gxv[1][axis] = gxv[2][axis]; gxv[2][axis] = gxv[3][axis]; gxv[3][axis] = gxv[4][axis];
+//			gxv[4][axis] = *pRawData / GAIN;
+//			gyv[0][axis] = gyv[1][axis]; gyv[1][axis] = gyv[2][axis]; gyv[2][axis] = gyv[3][axis]; gyv[3][axis] = gyv[4][axis];
+//			gyv[4][axis] =   (gxv[0][axis] + gxv[4][axis]) + 4 * (gxv[1][axis] + gxv[3][axis]) + 6 * gxv[2][axis]
+//						 + ( -0.7816187403 * gyv[0][axis]) + (  3.3189386048 * gyv[1][axis])
+//						 + ( -5.2911525842 * gyv[2][axis]) + (  3.7537627567 * gyv[3][axis]);
+//			*pFiltData = gyv[4][axis];
+//		}
+//	}
+//}
+//
+//// Low pass filter - 4 poles, cutoff @ 1Hz - use for Accel
+//static void lp4_1(SpnNineAxisMotion_Raw_Data_Type rawData[], SpnNineAxisMotion_Raw_Data_Type* filtData, uint32_t dataCount)
+//{
+//	#define NZEROS 4
+//	#define NPOLES 4
+//	#define GAIN   1.710822297e+07
+//
+//	static float gxv[NZEROS+1][3], gyv[NPOLES+1][3];
+//
+//	for(uint32_t i = 0; i < dataCount; i++)
+//	{
+//		for(int32_t axis = 0; axis < 3; axis++)
+//		{
+//			float32_t* pRawData;
+//			float32_t* pFiltData;
+//
+//			if(axis == 0) { pRawData = &rawData[i].x_raw; pFiltData = &filtData->x_raw; }
+//			if(axis == 1) { pRawData = &rawData[i].y_raw; pFiltData = &filtData->y_raw; }
+//			if(axis == 2) { pRawData = &rawData[i].z_raw; pFiltData = &filtData->z_raw; }
+//
+//			gxv[0][axis] = gxv[1][axis]; gxv[1][axis] = gxv[2][axis]; gxv[2][axis] = gxv[3][axis]; gxv[3][axis] = gxv[4][axis];
+//			gxv[4][axis] = *pRawData / GAIN;
+//			gyv[0][axis] = gyv[1][axis]; gyv[1][axis] = gyv[2][axis]; gyv[2][axis] = gyv[3][axis]; gyv[3][axis] = gyv[4][axis];
+//			gyv[4][axis] =   (gxv[0][axis] + gxv[4][axis]) + 4 * (gxv[1][axis] + gxv[3][axis]) + 6 * gxv[2][axis]
+//						 + ( -0.9211819292 * gyv[0][axis]) + (  3.7603495077 * gyv[1][axis])
+//						 + ( -5.7570763791 * gyv[2][axis]) + (  3.9179078654 * gyv[3][axis]);
+//			*pFiltData = gyv[4][axis];
+//		}
+//	}
+//}
 
 char SpnNineAxisMotion::readRegister(uint32_t address)
 {
@@ -291,16 +413,14 @@ bool SpnNineAxisMotion::configure(void* cfg)
 			spi_fd = wiringPiSPISetup(chipSelect, speed);
 		}
 
-		accelFiltWindow = mpu9250_config->accelFilterWindow;
-		gyroFiltWindow = mpu9250_config->gyroFilterWindow;
-		magFiltWindow = mpu9250_config->magFilterWindow;
+//		accelFiltWindow = mpu9250_config->accelFilterWindow;
+//		gyroFiltWindow = mpu9250_config->gyroFilterWindow;
+//		magFiltWindow = mpu9250_config->magFilterWindow;
 		magOutlierThresh = mpu9250_config->magOutlierThresh;
 		accFsSel = mpu9250_config->accFsSel;
 		gyroFsSel = mpu9250_config->gyroFsSel;
 		calData = mpu9250_config->calibration;
-		accelDataCount = 0;
-		gyroDataCount = 0;
-		magDataCount = 0;
+		acquireCount = 0;
 
 		// First reset the MPU9250
 		writeRegisterMask(MPU9250_PWR_MGMT_1_ADDR, 0x80, 0x1);
@@ -408,10 +528,10 @@ void SpnNineAxisMotion::acquireData(void)
 {
 	SpnSensor::acquireData();
 
-	// Use the 0th entry. Data is always right shifted after the algorithm
-	SpnNineAxisMotion_Raw_Data_Type* pAccelUnfiltered = &rawAccelDataFifo[0];
-	SpnNineAxisMotion_Raw_Data_Type* pGyroUnfiltered = &rawGyroDataFifo[0];
-//	SpnNineAxisMotion_Raw_Data_Type* pMagUnfiltered = &rawMagDataFifo[0];
+	// Use the next entry.
+	SpnNineAxisMotion_Raw_Data_Type* pAccelUnfiltered = &rawAccelData[acquireCount];
+	SpnNineAxisMotion_Raw_Data_Type* pGyroUnfiltered = &rawGyroData[acquireCount];
+//	SpnNineAxisMotion_Raw_Data_Type* pMagUnfiltered = &rawMagDataFifo[acquireCount];
 
 	//
 	// READ SENSOR DATA
@@ -433,86 +553,8 @@ void SpnNineAxisMotion::acquireData(void)
 
 	temperatureData = ((int16_t)((readRegister(MPU9250_TEMP_OUT_H_ADDR) << 8)|readRegister(MPU9250_TEMP_OUT_L_ADDR)))*1.0;
 
-	if(accelDataCount < accelFiltWindow) accelDataCount++;
-	if(gyroDataCount < gyroFiltWindow) gyroDataCount++;
-	if(magDataCount < magFiltWindow) magDataCount++;
-
-	//
-	// APPLY FILTERING
-	//
-
-	// clear the buffer
-	memset(&filtAccelData, 0, sizeof(filtAccelData));
-	memset(&filtGyroData, 0, sizeof(filtGyroData));
-	memset(&filtMagData, 0, sizeof(filtMagData));
-
-//	// Throw out outliers (maintain previous value)
-//	if(rawDataCount == rollingAvgCount)
-//	{
-//		if(fabsf(pMagUnfiltered->x_raw - pUnfiltered[1].mag.x_raw) > magOutlierThresh)
-//			pMagUnfiltered->x_raw = pUnfiltered[1].mag.x_raw;
-//		if(fabsf(pMagUnfiltered->y_raw - pUnfiltered[1].mag.y_raw) > magOutlierThresh)
-//			pMagUnfiltered->y_raw = pUnfiltered[1].mag.y_raw;
-//		if(fabsf(pMagUnfiltered->z_raw - pUnfiltered[1].mag.z_raw) > magOutlierThresh)
-//			pMagUnfiltered->z_raw = pUnfiltered[1].mag.z_raw;
-//	}
-
-	// sum the raw data
-	for(uint32_t i = 0; i < accelDataCount; i++)
-	{
-		filtAccelData.x_raw += pAccelUnfiltered[i].x_raw;
-		filtAccelData.y_raw += pAccelUnfiltered[i].y_raw;
-		filtAccelData.z_raw += pAccelUnfiltered[i].z_raw;
-	}
-
-	for(uint32_t i = 0; i < gyroDataCount; i++)
-	{
-		filtGyroData.x_raw += pGyroUnfiltered[i].x_raw;
-		filtGyroData.y_raw += pGyroUnfiltered[i].y_raw;
-		filtGyroData.z_raw += pGyroUnfiltered[i].z_raw;
-	}
-
-//	for(uint32_t i = 0; i < magDataCount; i++)
-//	{
-//		filtMagData.x_raw += pMagUnfiltered[i].x_raw;
-//		filtMagData.y_raw += pMagUnfiltered[i].y_raw;
-//		filtMagData.z_raw += pMagUnfiltered[i].z_raw;
-//	}
-
-	// divide by number of samples to get avg
-	filtAccelData.x_raw /= accelDataCount;
-	filtAccelData.y_raw /= accelDataCount;
-	filtAccelData.z_raw /= accelDataCount;
-
-	filtGyroData.x_raw /= gyroDataCount;
-	filtGyroData.y_raw /= gyroDataCount;
-	filtGyroData.z_raw /= gyroDataCount;
-//
-//	filtMagData.x_raw /= magDataCount;
-//	filtMagData.y_raw /= magDataCount;
-//	filtMagData.z_raw /= magDataCount;
-
-
-
-	// Shift un-filtered data right, pushing the oldest data out
-	for(uint32_t i = accelFiltWindow-1; i > 0; i--)
-	{
-		pAccelUnfiltered[i] = pAccelUnfiltered[i-1];
-	}
-	memset(&pAccelUnfiltered[0], 0, sizeof(SpnNineAxisMotion_Raw_Data_Type)); // clear for the next entry
-
-	for(uint32_t i = gyroFiltWindow-1; i > 0; i--)
-	{
-		pGyroUnfiltered[i] = pGyroUnfiltered[i-1];
-	}
-	memset(&pGyroUnfiltered[0], 0, sizeof(SpnNineAxisMotion_Raw_Data_Type)); // clear for the next entry
-
-//	for(uint32_t i = magFiltWindow-1; i > 0; i--)
-//	{
-//		pMagUnfiltered[i] = pMagUnfiltered[i-1];
-//	}
-//	memset(&pMagUnfiltered[0], 0, sizeof(SpnNineAxisMotion_Raw_Data_Type)); // clear for the next entry
-//	//
+	acquireCount++;
+//  //
 //	// APPLY CALIBRATION
 //	//
 //
@@ -532,12 +574,103 @@ void SpnNineAxisMotion::acquireData(void)
 //  filtMagData.z_raw *= calData.mag.z_scale;
 }
 
+bool SpnNineAxisMotion::retrieveData(void* opt, uint32_t* size, void* data)
+{
+	SpnNineAxisMotion_Data_Type output;
+	uint32_t idx = (uint32_t)opt;
+
+	if(SpnSensor::retrieveData(opt, size, data) == EXIT_SUCCESS)
+	{
+		// Converts raw accelerometer data into g
+		output.accel.x = rawAccelData[idx].x_raw / ACCEL_SENSITIVITY[accFsSel];
+		output.accel.y = rawAccelData[idx].y_raw / ACCEL_SENSITIVITY[accFsSel];
+		output.accel.z = rawAccelData[idx].z_raw / ACCEL_SENSITIVITY[accFsSel];
+
+		// Converts raw gyroscope data into º/s
+		output.gyro.x = rawGyroData[idx].x_raw / GYRO_SENSITIVITY[gyroFsSel];
+		output.gyro.y = rawGyroData[idx].y_raw / GYRO_SENSITIVITY[gyroFsSel];
+		output.gyro.z = rawGyroData[idx].z_raw / GYRO_SENSITIVITY[gyroFsSel];
+
+		// Convert uT to mG
+		output.mag.x = rawMagData[idx].x_raw * 10.0;
+		output.mag.y = rawMagData[idx].y_raw * 10.0;
+		output.mag.z = rawMagData[idx].z_raw * 10.0;
+
+		*size = sizeof(output);
+		*(SpnNineAxisMotion_Data_Type*)data = output;
+	}
+
+	return getStatus();
+}
+
 bool SpnNineAxisMotion::retrieveData(uint32_t* size, void* data)
 {
 	SpnNineAxisMotion_Data_Type output;
 
 	if(SpnSensor::retrieveData(size, data) == EXIT_SUCCESS)
 	{
+		//
+		// FILTER THE DATA
+		//
+		SpnNineAxisMotion_Raw_Data_Type gyroNewRaw[16];
+		SpnNineAxisMotion_Raw_Data_Type accelNewRaw[16];
+
+		uint32_t newindex = 0;
+		for(uint32_t i = 0; i < (acquireCount/2); i++)
+		{
+			gyroNewRaw[newindex].x_raw = (rawGyroData[i*2].x_raw + rawGyroData[i*2+1].x_raw)/2;
+//			printf("Avg %i=%f and %i=%f => %i=%f.\n", i*2, rawGyroData[i*2].x_raw, i*2+1, rawGyroData[i*2+1].x_raw,newindex, gyroNewRaw[newindex].x_raw);
+			gyroNewRaw[newindex].y_raw = (rawGyroData[i*2].y_raw + rawGyroData[i*2+1].y_raw)/2;
+			gyroNewRaw[newindex].z_raw = (rawGyroData[i*2].z_raw + rawGyroData[i*2+1].z_raw)/2;
+			accelNewRaw[newindex].x_raw = (rawAccelData[i*2].x_raw + rawAccelData[i*2+1].x_raw)/2;
+			accelNewRaw[newindex].y_raw = (rawAccelData[i*2].y_raw + rawAccelData[i*2+1].y_raw)/2;
+			accelNewRaw[newindex].z_raw = (rawAccelData[i*2].z_raw + rawAccelData[i*2+1].z_raw)/2;
+			newindex++;
+		}
+
+		if(acquireCount%2)
+		{
+			gyroNewRaw[newindex].x_raw = rawGyroData[acquireCount-1].x_raw;
+//			printf("and straggler %i=%f.\n", newindex, gyroNewRaw[newindex].x_raw);
+			gyroNewRaw[newindex].y_raw = rawGyroData[acquireCount-1].y_raw;
+			gyroNewRaw[newindex].z_raw = rawGyroData[acquireCount-1].z_raw;
+			accelNewRaw[newindex].x_raw = rawAccelData[acquireCount-1].x_raw;
+			accelNewRaw[newindex].y_raw = rawAccelData[acquireCount-1].y_raw;
+			accelNewRaw[newindex].z_raw = rawAccelData[acquireCount-1].z_raw;
+			newindex++;
+		}
+		lp2_7(0, accelNewRaw, &filtAccelData, (acquireCount/2)+(acquireCount%2));
+		lp2_7(1, gyroNewRaw, &filtGyroData, (acquireCount/2)+(acquireCount%2));
+
+
+
+//		filtAccelData.x_raw = 0;
+//		filtAccelData.y_raw = 0;
+//		filtAccelData.z_raw = 0;
+//		filtGyroData.x_raw = 0;
+//		filtGyroData.y_raw = 0;
+//		filtGyroData.z_raw = 0;
+//		for(int i = 0; i < newindex; i++)
+//		{
+//			filtAccelData.x_raw += rawAccelData[i].x_raw;
+//			filtAccelData.y_raw += rawAccelData[i].y_raw;
+//			filtAccelData.z_raw += rawAccelData[i].z_raw;
+//			filtGyroData.x_raw += rawGyroData[i].x_raw;
+//			filtGyroData.y_raw += rawGyroData[i].y_raw;
+//			filtGyroData.z_raw += rawGyroData[i].z_raw;
+//		}
+//		filtAccelData.x_raw /= newindex;
+//		filtAccelData.y_raw /= newindex;
+//		filtAccelData.z_raw /= newindex;
+//		filtGyroData.x_raw  /= newindex;
+//		filtGyroData.y_raw  /= newindex;
+//		filtGyroData.z_raw  /= newindex;
+
+//		filtAccelData = rawAccelData[0]; // raw pass through
+//		filtGyroData = rawGyroData[0]; // raw pass through
+
+		acquireCount = 0;
+
 		//
 		// CONVERT TO ENGINEERING UNITS
 		//
