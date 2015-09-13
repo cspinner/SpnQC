@@ -173,12 +173,12 @@ static void userOutputFile(void)
 			intElapsedSec,
 			intElapsedMSec,
 			intElapsedUSec,
-			filtNineAxesData.gyro.x,
-			filtNineAxesData.gyro.y,
-			filtNineAxesData.gyro.z,
-			filtNineAxesData.accel.x,
-			filtNineAxesData.accel.y,
-			filtNineAxesData.accel.z);
+			filtNineAxesData.gyro[X_AXIS],
+			filtNineAxesData.gyro[Y_AXIS],
+			filtNineAxesData.gyro[Z_AXIS],
+			filtNineAxesData.accel[X_AXIS],
+			filtNineAxesData.accel[Y_AXIS],
+			filtNineAxesData.accel[Z_AXIS]);
 
 	spnUtilsWriteToFile(pOutputFile, buf);
 }
@@ -194,12 +194,12 @@ static void userOutputSensorDataFile(void)
 			Yaw,
 			Pitch,
 			Roll,
-			rawNineAxesData.gyro.x,
-			rawNineAxesData.gyro.y,
-			rawNineAxesData.gyro.z,
-			rawNineAxesData.accel.x,
-			rawNineAxesData.accel.y,
-			rawNineAxesData.accel.z,
+			rawNineAxesData.gyro[X_AXIS],
+			rawNineAxesData.gyro[Y_AXIS],
+			rawNineAxesData.gyro[Z_AXIS],
+			rawNineAxesData.accel[X_AXIS],
+			rawNineAxesData.accel[Y_AXIS],
+			rawNineAxesData.accel[Z_AXIS],
 			senElapsedMSec,
 			senElapsedUSec,
 			senS2SElapsedMSec,

@@ -26,33 +26,10 @@ typedef struct
 	struct
 	{
 		// These biases will be added to input data
-		struct
-		{
-			float32_t x_bias; // g
-			float32_t y_bias; // g
-			float32_t z_bias; // g
-		} accel;
-
-		// These biases will be added to input data
-		struct
-		{
-			float32_t x_bias; // º/s
-			float32_t y_bias; // º/s
-			float32_t z_bias; // º/s
-		} gyro;
-
-		struct
-		{
-			// compensates for hard errors:
-			float32_t x_bias; // mG
-			float32_t y_bias; // mG
-			float32_t z_bias; // mG
-
-			// compensates for soft errors:
-			float32_t x_scale;
-			float32_t y_scale;
-			float32_t z_scale;
-		} mag;
+		float32_t accel[3]; // g
+		float32_t gyro[3]; // º/s
+		float32_t magb[3]; // mG
+		float32_t mags[3]; // scale
 
 		float32_t beta;
 		uint32_t accFsSel; // 0 - 3

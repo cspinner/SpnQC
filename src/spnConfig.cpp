@@ -78,62 +78,62 @@ const SpnQC_Config_Entry_Type configEntries[] = {
 	{
 		"ACCXBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.accel.x_bias
+		&spnQcConfig.mpu9250.accel[X_AXIS]
 	},
 	{
 		"ACCYBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.accel.y_bias
+		&spnQcConfig.mpu9250.accel[Y_AXIS]
 	},
 	{
 		"ACCZBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.accel.z_bias
+		&spnQcConfig.mpu9250.accel[Z_AXIS]
 	},
 	{
 		"GYROXBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.gyro.x_bias
+		&spnQcConfig.mpu9250.gyro[X_AXIS]
 	},
 	{
 		"GYROYBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.gyro.y_bias
+		&spnQcConfig.mpu9250.gyro[Y_AXIS]
 	},
 	{
 		"GYROZBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.gyro.z_bias
+		&spnQcConfig.mpu9250.gyro[Z_AXIS]
 	},
 	{
 		"MAGXBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.mag.x_bias
+		&spnQcConfig.mpu9250.magb[X_AXIS]
 	},
 	{
 		"MAGYBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.mag.y_bias
+		&spnQcConfig.mpu9250.magb[Y_AXIS]
 	},
 	{
 		"MAGZBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.mag.z_bias
+		&spnQcConfig.mpu9250.magb[Z_AXIS]
 	},
 	{
 		"MAGXGAIN",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.mag.x_scale
+		&spnQcConfig.mpu9250.mags[X_AXIS]
 	},
 	{
 		"MAGYGAIN",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.mag.y_scale
+		&spnQcConfig.mpu9250.mags[Y_AXIS]
 	},
 	{
 		"MAGZGAIN",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.mag.z_scale
+		&spnQcConfig.mpu9250.mags[Z_AXIS]
 	},
 	{
 		"CHANCOUNT",
