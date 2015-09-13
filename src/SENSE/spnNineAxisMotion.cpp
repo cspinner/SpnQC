@@ -590,8 +590,8 @@ bool SpnNineAxisMotion::retrieveData(uint32_t* size, void* data)
 		//
 		// FILTER THE DATA
 		//
-		float32_t gyroNewRaw[NUM_AXIS][16];
-		float32_t accelNewRaw[NUM_AXIS][16];
+//		float32_t gyroNewRaw[NUM_AXIS][16];
+//		float32_t accelNewRaw[NUM_AXIS][16];
 		uint32_t newindex;
 
 		// Average every pair of samples
@@ -601,8 +601,13 @@ bool SpnNineAxisMotion::retrieveData(uint32_t* size, void* data)
 
 			for(uint32_t i = 0; i < (acquireCount/2); i++)
 			{
-				gyroNewRaw[axis][newindex] = (rawGyroData[axis][i*2] + rawGyroData[axis][i*2+1])/2;
-				accelNewRaw[axis][newindex] = (rawAccelData[axis][i*2] + rawAccelData[axis][i*2+1])/2;
+//				gyroNewRaw[axis][newindex] = (rawGyroData[axis][i*2] + rawGyroData[axis][i*2+1])/2;
+//				accelNewRaw[axis][newindex] = (rawAccelData[axis][i*2] + rawAccelData[axis][i*2+1])/2;
+				float32_t gyroNewRaw = (rawGyroData[axis][i*2] + rawGyroData[axis][i*2+1])/2;
+				lp2_7(0, &gyroNewRaw, &filtGyroData[axis], 1);
+
+				float32_t accelNewRaw = (rawAccelData[axis][i*2] + rawAccelData[axis][i*2+1])/2;
+				lp2_7(1, &accelNewRaw, &filtAccelData[axis], 1);
 				newindex++;
 			}
 		}
@@ -612,17 +617,19 @@ bool SpnNineAxisMotion::retrieveData(uint32_t* size, void* data)
 		{
 			for(uint32_t axis = X_AXIS; axis < NUM_AXIS; axis++)
 			{
-				gyroNewRaw[axis][newindex] = rawGyroData[axis][acquireCount-1];
-				accelNewRaw[axis][newindex] = rawAccelData[axis][acquireCount-1];
+				lp2_7(0, &rawGyroData[axis][acquireCount-1], &filtGyroData[axis], 1);
+				lp2_7(1, &rawAccelData[axis][acquireCount-1], &filtAccelData[axis], 1);
+//				gyroNewRaw[axis][newindex] = rawGyroData[axis][acquireCount-1];
+//				accelNewRaw[axis][newindex] = rawAccelData[axis][acquireCount-1];
 			}
 		}
 
-		// Run data through the filters
-		for(uint32_t axis = X_AXIS; axis < NUM_AXIS; axis++)
-		{
-			lp2_7(0, accelNewRaw[axis], &filtAccelData[axis], (acquireCount/2)+(acquireCount%2));
-			lp2_7(1, gyroNewRaw[axis], &filtGyroData[axis], (acquireCount/2)+(acquireCount%2));
-		}
+//		// Run data through the filters
+//		for(uint32_t axis = X_AXIS; axis < NUM_AXIS; axis++)
+//		{
+//			lp2_7(0, accelNewRaw[axis], &filtAccelData[axis], (acquireCount/2)+(acquireCount%2));
+//			lp2_7(1, gyroNewRaw[axis], &filtGyroData[axis], (acquireCount/2)+(acquireCount%2));
+//		}
 
 
 
