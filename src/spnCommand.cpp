@@ -52,6 +52,7 @@ static SpnPID rollRatePID;
 static SpnPID rollAnglePID;
 static SpnPID yawRatePID;
 static SpnPID yawAnglePID;
+static bool motorEnabled[4];
 
 static void setCommandMode(void);
 static void processCommandMode(void);
@@ -80,6 +81,11 @@ bool spnCommandInit(void)
             (spnMotorsInit() == EXIT_SUCCESS) &&
             (spnTransceiverInit() == EXIT_SUCCESS))
         {
+        	for(uint32_t i = 0; i < pCfg->motor.chanCount; i++)
+        	{
+        		motorEnabled[i] = pCfg->motor.motorEnable[i];
+        	}
+
             return EXIT_SUCCESS;
         }
         else
@@ -231,10 +237,10 @@ static void processCommandMode(void)
 	{
 		// Set output
 		yawPidOut = 0; // tbd
-		spnMotorsSet(0, clamp(throttlePct - pitchPidOut + yawPidOut, 0.0, 100.0));
-		spnMotorsSet(1, clamp(throttlePct + rollPidOut - yawPidOut, 0.0, 100.0));
-		spnMotorsSet(2, clamp(throttlePct + pitchPidOut + yawPidOut, 0.0, 100.0));
-		spnMotorsSet(3, clamp(throttlePct - rollPidOut - yawPidOut, 0.0, 100.0));
+		if(motorEnabled[0]) spnMotorsSet(0, clamp(throttlePct + pitchPidOut + yawPidOut, 0.0, 100.0));
+		if(motorEnabled[1]) spnMotorsSet(1, clamp(throttlePct + rollPidOut - yawPidOut, 0.0, 100.0));
+		if(motorEnabled[2]) spnMotorsSet(2, clamp(throttlePct - pitchPidOut + yawPidOut, 0.0, 100.0));
+		if(motorEnabled[3]) spnMotorsSet(3, clamp(throttlePct - rollPidOut - yawPidOut, 0.0, 100.0));
 	}
 }
 

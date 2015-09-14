@@ -49,7 +49,9 @@ typedef struct
 	uint32_t speed;
 
 	// Filtering
-	uint32_t rollingAvgCount;
+	uint32_t accelFilterWindow;
+	uint32_t gyroFilterWindow;
+	uint32_t magFilterWindow;
 	float32_t magOutlierThresh;
 
 	// Sensor scale
@@ -98,6 +100,7 @@ public:
 	void acquireData(void);
 
 	bool retrieveData(uint32_t* size, void* data);
+	bool retrieveData(void* opt, uint32_t* size, void* data);
 
 private:
 	char readRegister(uint32_t address);

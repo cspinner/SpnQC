@@ -41,9 +41,19 @@ const SpnQC_Config_Entry_Type configEntries[] = {
 		&spnQcConfig.spi.speed
 	},
 	{
-		"AVGSIZE",
+		"ACCFILTWD",
 		UINT_E,
-		&spnQcConfig.mpu9250.rollingAvgCount
+		&spnQcConfig.mpu9250.accelFilterWindow
+	},
+	{
+		"GYRFILTWD",
+		UINT_E,
+		&spnQcConfig.mpu9250.gyroFilterWindow
+	},
+	{
+		"MAGFILTWD",
+		UINT_E,
+		&spnQcConfig.mpu9250.magFilterWindow
 	},
 	{
 		"MAXSMPDIFF",
@@ -221,6 +231,46 @@ const SpnQC_Config_Entry_Type configEntries[] = {
         &spnQcConfig.motor.gpioPin[7]
     },
     {	
+        "M1ENABLE",
+        INT_E,
+        &spnQcConfig.motor.motorEnable[0]
+    },
+    {
+        "M2ENABLE",
+        INT_E,
+        &spnQcConfig.motor.motorEnable[1]
+    },
+    {
+        "M3ENABLE",
+        INT_E,
+        &spnQcConfig.motor.motorEnable[2]
+    },
+    {
+        "M4ENABLE",
+        INT_E,
+        &spnQcConfig.motor.motorEnable[3]
+    },
+    {
+        "M5ENABLE",
+        INT_E,
+        &spnQcConfig.motor.motorEnable[4]
+    },
+    {
+        "M6ENABLE",
+        INT_E,
+        &spnQcConfig.motor.motorEnable[5]
+    },
+    {
+        "M7ENABLE",
+        INT_E,
+        &spnQcConfig.motor.motorEnable[6]
+    },
+    {
+        "M8ENABLE",
+        INT_E,
+        &spnQcConfig.motor.motorEnable[7]
+    },
+    {
         "PWZEROTH",
         FLOAT_E,
         &spnQcConfig.motor.pulseWidthZeroThrottle

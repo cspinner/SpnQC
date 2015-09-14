@@ -58,7 +58,9 @@ typedef struct
 		uint32_t accFsSel; // 0 - 3
 		uint32_t gyroFsSel; // 0 - 3
 		float32_t magOutlierThresh;
-		uint32_t rollingAvgCount; // 1 - 128
+		uint32_t accelFilterWindow; // 1 - 128
+		uint32_t gyroFilterWindow; // 1 - 128
+		uint32_t magFilterWindow; // 1 - 128
 	} mpu9250;
 
 	struct
@@ -72,6 +74,7 @@ typedef struct
 	{
 		uint32_t chanCount; // 0 - 32
 		uint32_t gpioPin[USER_GPIO_MAX]; // BCM number
+		bool motorEnable[USER_GPIO_MAX];
         float32_t pulseWidthZeroThrottle;
         float32_t pulseWidthFullThrottle;
 	} motor;

@@ -16,12 +16,13 @@
 // Header files
 
 #include "MadgwickAHRS.h"
+
 #include <math.h>
 
 //---------------------------------------------------------------------------------------------------
 // Definitions
 
-#define sampleFreq	33.33f		// sample frequency in Hz
+#define sampleFreq	200.0f		// sample frequency in Hz
 #define betaDef		0.1f		// 2 * proportional gain
 
 //---------------------------------------------------------------------------------------------------
