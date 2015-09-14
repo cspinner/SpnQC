@@ -5,16 +5,19 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/SENSE/spnCompass.cpp \
+../src/SENSE/spnFilter.cpp \
 ../src/SENSE/spnNineAxisMotion.cpp \
 ../src/SENSE/spnSensor.cpp 
 
 OBJS += \
 ./src/SENSE/spnCompass.o \
+./src/SENSE/spnFilter.o \
 ./src/SENSE/spnNineAxisMotion.o \
 ./src/SENSE/spnSensor.o 
 
 CPP_DEPS += \
 ./src/SENSE/spnCompass.d \
+./src/SENSE/spnFilter.d \
 ./src/SENSE/spnNineAxisMotion.d \
 ./src/SENSE/spnSensor.d 
 
