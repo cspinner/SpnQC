@@ -37,18 +37,14 @@ static bool initMPU9250(void)
 	cfg_mpu9250.accelFilterWindow = pCfg->mpu9250.accelFilterWindow;
 	cfg_mpu9250.gyroFilterWindow = pCfg->mpu9250.gyroFilterWindow;
 	cfg_mpu9250.magFilterWindow = pCfg->mpu9250.magFilterWindow;
-	cfg_mpu9250.calibration.accel.x_bias = pCfg->mpu9250.accel.x_bias;
-	cfg_mpu9250.calibration.accel.y_bias = pCfg->mpu9250.accel.y_bias;
-	cfg_mpu9250.calibration.accel.z_bias = pCfg->mpu9250.accel.z_bias;
-	cfg_mpu9250.calibration.gyro.x_bias = pCfg->mpu9250.gyro.x_bias;
-	cfg_mpu9250.calibration.gyro.y_bias = pCfg->mpu9250.gyro.y_bias;
-	cfg_mpu9250.calibration.gyro.z_bias = pCfg->mpu9250.gyro.z_bias;
-	cfg_mpu9250.calibration.mag.x_bias = pCfg->mpu9250.mag.x_bias;
-	cfg_mpu9250.calibration.mag.y_bias = pCfg->mpu9250.mag.y_bias;
-	cfg_mpu9250.calibration.mag.z_bias = pCfg->mpu9250.mag.z_bias;
-	cfg_mpu9250.calibration.mag.x_scale = pCfg->mpu9250.mag.x_scale;
-	cfg_mpu9250.calibration.mag.y_scale = pCfg->mpu9250.mag.y_scale;
-	cfg_mpu9250.calibration.mag.z_scale = pCfg->mpu9250.mag.z_scale;
+
+	for(uint32_t axis = X_AXIS; axis < NUM_AXIS; axis++)
+	{
+		cfg_mpu9250.calibration.accel[axis] = pCfg->mpu9250.accel[axis];
+		cfg_mpu9250.calibration.gyro[axis] = pCfg->mpu9250.gyro[axis];
+		cfg_mpu9250.calibration.magb[axis] = pCfg->mpu9250.magb[axis];
+		cfg_mpu9250.calibration.mags[axis] = pCfg->mpu9250.mags[axis];
+	}
 
 	beta = pCfg->mpu9250.beta;
 
@@ -138,12 +134,12 @@ void spnSensorManagerUpdate(void)
 	//
 	// Update quaternions
 	MadgwickAHRSupdateIMU(
-				SpnNineAxisMotionData.gyro.x,
-				SpnNineAxisMotionData.gyro.y,
-				SpnNineAxisMotionData.gyro.z,
-				SpnNineAxisMotionData.accel.x,
-				SpnNineAxisMotionData.accel.y,
-				SpnNineAxisMotionData.accel.z);
+				SpnNineAxisMotionData.gyro[X_AXIS],
+				SpnNineAxisMotionData.gyro[Y_AXIS],
+				SpnNineAxisMotionData.gyro[Z_AXIS],
+				SpnNineAxisMotionData.accel[X_AXIS],
+				SpnNineAxisMotionData.accel[Y_AXIS],
+				SpnNineAxisMotionData.accel[Z_AXIS]);
 
 	// Define output variables from updated quaternion---these are Tait-Bryan angles, commonly used in aircraft orientation.
 	// In this coordinate system, the positive z-axis is down toward Earth.
@@ -169,12 +165,12 @@ void spnSensorManagerUpdate(void)
 //	// In this installation, yaw progresses from 0 to 180, then -180 to 0. Compensate for this:
 //	Yaw = (Yaw + 180.0)/2.0;
 	complementaryFilter(
-			SpnNineAxisMotionData.gyro.x,
-			SpnNineAxisMotionData.gyro.y,
-			SpnNineAxisMotionData.gyro.z,
-			SpnNineAxisMotionData.accel.x,
-			SpnNineAxisMotionData.accel.y,
-			SpnNineAxisMotionData.accel.z,
+			SpnNineAxisMotionData.gyro[X_AXIS],
+			SpnNineAxisMotionData.gyro[Y_AXIS],
+			SpnNineAxisMotionData.gyro[Z_AXIS],
+			SpnNineAxisMotionData.accel[X_AXIS],
+			SpnNineAxisMotionData.accel[Y_AXIS],
+			SpnNineAxisMotionData.accel[Z_AXIS],
 			&Pitch, &Roll,
 			0.99, 0.01,
 			0.030);

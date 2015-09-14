@@ -10,36 +10,21 @@
 
 #include "spnSensor.h"
 
+enum
+{
+	X_AXIS,
+	Y_AXIS,
+	Z_AXIS,
+	NUM_AXIS,
+};
+
 typedef struct
 {
 	// These biases will be added to input data
-	struct
-	{
-		float32_t x_bias; // g
-		float32_t y_bias; // g
-		float32_t z_bias; // g
-	} accel;
-
-	// These biases will be added to input data
-	struct
-	{
-		float32_t x_bias; // º/s
-		float32_t y_bias; // º/s
-		float32_t z_bias; // º/s
-	} gyro;
-
-	struct
-	{
-		// compensates for hard errors:
-		float32_t x_bias; // mG
-		float32_t y_bias; // mG
-		float32_t z_bias; // mG
-
-		// compensates for soft errors:
-		float32_t x_scale;
-		float32_t y_scale;
-		float32_t z_scale;
-	} mag;
+	float32_t accel[NUM_AXIS]; // g
+	float32_t gyro[NUM_AXIS]; // º/s
+	float32_t magb[NUM_AXIS]; // mG
+	float32_t mags[NUM_AXIS]; // scale
 } SpnNineAxisMotion_Calibration_Type;
 
 typedef struct
@@ -64,27 +49,9 @@ typedef struct
 
 typedef struct
 {
-	struct
-	{
-		float32_t x; // g
-		float32_t y; // g
-		float32_t z; // g
-	} accel;
-
-	struct
-	{
-		float32_t x; // º/s
-		float32_t y; // º/s
-		float32_t z; // º/s
-	} gyro;
-
-	struct
-	{
-		float32_t x; // mG
-		float32_t y; // mG
-		float32_t z; // mG
-	} mag;
-
+	float32_t accel[NUM_AXIS]; // g
+	float32_t gyro[NUM_AXIS]; // º/s
+	float32_t mag[NUM_AXIS]; // mG
 	float32_t temperature; // ºF
 } SpnNineAxisMotion_Data_Type;
 
