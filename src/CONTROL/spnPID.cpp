@@ -16,9 +16,8 @@ using namespace std;
 
 SpnPID::SpnPID(void)
 {
-	Kp = 1.0;
-	Ki = 0.0;
-	Kd = 0.0;
+	m_ErrorPrev = 0.0;
+    m_Integral = 0.0;
 }
 
 bool SpnPID::configure(float32_t minOut, float32_t maxOut, float32_t interval,
@@ -26,12 +25,10 @@ bool SpnPID::configure(float32_t minOut, float32_t maxOut, float32_t interval,
 {
 	if(interval > 0.0)
 	{
-		MinOut = minOut;
-		MaxOut = maxOut;
-		Interval = interval;
-		Kp = KpIn;
-		Ki = KiIn;
-		Kd = KdIn;
+		m_MinOut = minOut;
+		m_MaxOut = maxOut;
+		m_Interval = interval;
+        setGains(KpIn, KiIn, KdIn);
 
 		return EXIT_SUCCESS;
 	}
@@ -43,16 +40,20 @@ bool SpnPID::configure(float32_t minOut, float32_t maxOut, float32_t interval,
 
 void SpnPID::setGains(float32_t KpIn, float32_t KiIn, float32_t KdIn)
 {
-	Kp = KpIn;
-	Ki = KiIn;
-	Kd = KdIn;
+	m_Kp = KpIn;
+	m_Ki = KiIn;
+	m_Kd = KdIn;
+}
+
+void getGains(float32_t* KpOut, float32_t* KiOut, float32_t* KdOut)
+{
+    *KpOut = m_Kp;
+    *KiOut = m_Ki;
+    *KdOut = m_Kd;
 }
 
 float32_t SpnPID::update(float32_t setPoint, float32_t feedback)
 {
-	static float32_t errorPrev = 0;
-	static float32_t integral = 0;
-
 	float32_t error;
 	float32_t derivative;
 	float32_t output;
@@ -63,26 +64,26 @@ float32_t SpnPID::update(float32_t setPoint, float32_t feedback)
 	// In case of error too small then stop integration
 	if(fabsf(error) > FLT_EPSILON)
 	{
-		integral = integral + error*Interval;
-		integral = clamp(integral, MinOut, MaxOut);
+		m_Integral = m_Integral + error*m_Interval;
+		m_Integral = clamp(m_Integral, m_MinOut, m_MaxOut);
 	}
 
-	derivative = (error - errorPrev)/Interval;
+	derivative = (error - m_ErrorPrev)/m_Interval;
 
-	output = Kp*error + Ki*integral + Kd*derivative;
+	output = Kp*error + Ki*m_Integral + Kd*derivative;
 
 	// Saturation Filter
-	if(output > MaxOut)
+	if(output > m_MaxOut)
 	{
-		output = MaxOut;
+		output = m_MaxOut;
 	}
-	else if(output < MinOut)
+	else if(output < m_MinOut)
 	{
-		output = MinOut;
+		output = m_MinOut;
 	}
 
 	// Update error
-	errorPrev = error;
+	m_ErrorPrev = error;
 
 	return output;
 }
