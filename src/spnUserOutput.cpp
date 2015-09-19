@@ -59,8 +59,10 @@ bool spnUserOutputInit(void)
 
 		// write all headings and units
 		spnUtilsWriteToFile(pOutputFile,
+//				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,KP,KI,KD,TEMP_F,INPW0,MOTCMD0,MOTCMD1,MOTCMD2,MOTCMD3,THROT,ELEV,AILER,RUDD,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US\n");
 				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,TEMP_F,INPW0,MOTCMD0,MOTCMD1,MOTCMD2,MOTCMD3,THROT,ELEV,AILER,RUDD,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US\n");
 		spnUtilsWriteToFile(pOutputFile,
+//				",,,DEGREES,DEGREES,DEGREES,,,,DEG_F,USEC,PCT,PCT,PCT,PCT,PCT,DEGREES,DEGREES,DEGREES,SEC,MSEC,USEC,SEC,MSEC,USEC\n");
 				",,,DEGREES,DEGREES,DEGREES,DEG_F,USEC,PCT,PCT,PCT,PCT,PCT,DEGREES,DEGREES,DEGREES,SEC,MSEC,USEC,SEC,MSEC,USEC\n");
 
 		// write all headings and units
@@ -144,6 +146,19 @@ static void userOutputConsole(void)
 	printf("Elevator Cmd: %.1f degrees\n", spnTransceiverGetElevatorAngle());
 	printf("Aileron Cmd: %.1f degrees\n", spnTransceiverGetAileronAngle());
 	printf("Rudder Cmd: %.1f degrees\n", spnTransceiverGetRudderAngle());
+
+//	float32_t kp, ki, kd;
+//	float32_t pterm, iterm, dterm, sumTotal;
+//	rollAnglePID.getGains(&kp, &ki, &kd);
+//	rollAnglePID.getTerms(&pterm, &iterm, &dterm, &sumTotal);
+//	printf("KP=%.3f\n", kp);
+//	printf("KI=%.3f\n", ki);
+//	printf("KD=%.3f\n\n", kd);
+//
+//	printf("P=%.5f\n", kp*pterm);
+//	printf("I=%.5f\n", ki*iterm);
+//	printf("D=%.5f\n", kd*dterm);
+//	printf("T=%.5f\n\n", sumTotal);
 }
 
 static void userOutputFile(void)

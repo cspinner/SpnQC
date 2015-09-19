@@ -207,6 +207,17 @@ static void processCommandMode(void)
 		case CMD_MODE_CLOSED_LOOP_E:
 			if(throttlePct > 0.0)
 			{
+//				float32_t kp, ki, kd;
+//				char userInput = spnUserInputCharGet(false);
+//				rollAnglePID.getGains(&kp, &ki, &kd);
+//				if(userInput == '1') { kp -= 0.01; }
+//				if(userInput == '2') { ki -= 0.01; }
+//				if(userInput == '3') { kd -= 0.001; }
+//				if(userInput == '7') { kp += 0.01; }
+//				if(userInput == '8') { ki += 0.01; }
+//				if(userInput == '9') { kd += 0.001; }
+//				rollAnglePID.setGains(kp, ki, kd);
+
 				pitchPidOut = pitchAnglePID.update(elevatorAngle, pitch);
 				rollPidOut = rollAnglePID.update(aileronAngle, roll);
 				yawPidOut = yawAnglePID.update(rudderAngle, yaw);

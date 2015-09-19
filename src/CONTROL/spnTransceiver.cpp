@@ -55,10 +55,12 @@ float32_t spnTransceiverGetElevatorAngle(void)
 
         char userInput = spnUserInputCharGet(false);
 
-        if(userInput == 't') ovrInput -= 2.0;
-        else if (userInput == 'y') ovrInput += 2.0;
+        if(userInput == 't') ovrInput -= 1.0;
+		else if (userInput == 'y') ovrInput += 1.0;
+		else if (userInput == 'u') ovrInput -= 45.0;
+		else if (userInput == 'i') ovrInput += 45.0;
 
-        ovrInput = clamp(ovrInput, -90.0, 90.0);
+        ovrInput = clamp(ovrInput, -45.0, 45.0);
         
         elevAngle = ovrInput;
     }
@@ -81,10 +83,12 @@ float32_t spnTransceiverGetAileronAngle(void)
 
         char userInput = spnUserInputCharGet(false);
 
-        if(userInput == 'g') ovrInput -= 2.0;
-        else if (userInput == 'b') ovrInput += 2.0;
+        if(userInput == 'g') ovrInput -= 1.0;
+        else if (userInput == 'b') ovrInput += 1.0;
+        else if (userInput == 'h') ovrInput -= 45.0;
+        else if (userInput == 'n') ovrInput += 45.0;
 
-        ovrInput = clamp(ovrInput, -90.0, 90.0);
+        ovrInput = clamp(ovrInput, -45.0, 45.0);
         
         ailAngle = ovrInput;
     }

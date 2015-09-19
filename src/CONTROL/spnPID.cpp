@@ -17,7 +17,10 @@ using namespace std;
 SpnPID::SpnPID(void)
 {
 	m_ErrorPrev = 0.0;
+	m_Proportional = 0.0;
     m_Integral = 0.0;
+    m_Derivative = 0.0;
+    m_Output = 0.0;
 }
 
 bool SpnPID::configure(float32_t minOut, float32_t maxOut, float32_t interval,
@@ -45,18 +48,24 @@ void SpnPID::setGains(float32_t KpIn, float32_t KiIn, float32_t KdIn)
 	m_Kd = KdIn;
 }
 
-void getGains(float32_t* KpOut, float32_t* KiOut, float32_t* KdOut)
+void SpnPID::getGains(float32_t* KpOut, float32_t* KiOut, float32_t* KdOut)
 {
     *KpOut = m_Kp;
     *KiOut = m_Ki;
     *KdOut = m_Kd;
 }
 
+void SpnPID::getTerms(float32_t* pOut, float32_t* iOut, float32_t* dOut, float32_t* sumOut)
+{
+	*pOut = m_Proportional;
+	*iOut = m_Integral;
+	*dOut = m_Derivative;
+	*sumOut = m_Output;
+}
+
 float32_t SpnPID::update(float32_t setPoint, float32_t feedback)
 {
 	float32_t error;
-	float32_t derivative;
-	float32_t output;
 
 	// Calculate P, I and D terms
 	error = setPoint - feedback;
@@ -65,25 +74,26 @@ float32_t SpnPID::update(float32_t setPoint, float32_t feedback)
 	if(fabsf(error) > FLT_EPSILON)
 	{
 		m_Integral = m_Integral + error*m_Interval;
-		m_Integral = clamp(m_Integral, m_MinOut, m_MaxOut);
+		m_Integral = clamp(m_Integral, m_MinOut/m_Ki, m_MaxOut/m_Ki);
 	}
 
-	derivative = (error - m_ErrorPrev)/m_Interval;
+	m_Derivative = (error - m_ErrorPrev)/m_Interval;
+	m_Proportional = error;
 
-	output = Kp*error + Ki*m_Integral + Kd*derivative;
+	m_Output = m_Kp*m_Proportional + m_Ki*m_Integral + m_Kd*m_Derivative;
 
 	// Saturation Filter
-	if(output > m_MaxOut)
+	if(m_Output > m_MaxOut)
 	{
-		output = m_MaxOut;
+		m_Output = m_MaxOut;
 	}
-	else if(output < m_MinOut)
+	else if(m_Output < m_MinOut)
 	{
-		output = m_MinOut;
+		m_Output = m_MinOut;
 	}
 
 	// Update error
 	m_ErrorPrev = error;
 
-	return output;
+	return m_Output;
 }
