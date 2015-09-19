@@ -9,6 +9,7 @@
 #define SPNCONFIG_H_
 
 #include <stdint.h>
+#include <time.h>
 
 #define USER_GPIO_MAX 32
 
@@ -45,6 +46,9 @@ typedef struct
 		uint32_t chanCount; // 0 - 32
 		uint32_t gpioPin[USER_GPIO_MAX]; // BCM number
         bool useTerminal; 
+        bool useNetwork;
+        uint16_t netPort;
+        timeval netHeartbeatInterval;
 	} transceiver;
 
 	struct

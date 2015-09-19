@@ -185,6 +185,21 @@ const SpnQC_Config_Entry_Type configEntries[] = {
         INT_E,
         &spnQcConfig.transceiver.useTerminal
     },	
+    {
+        "NETINPUT",
+        INT_E,
+        &spnQcConfig.transceiver.useNetwork
+    },
+    {
+        "NETPORT",
+        USHORT_E,
+        &spnQcConfig.transceiver.netPort
+    },
+    {
+        "NETHBINT",
+        INT_E,
+        &spnQcConfig.transceiver.netHeartbeatInterval.tv_sec
+    },
 	{
 		"MOTCOUNT",
 		UINT_E,

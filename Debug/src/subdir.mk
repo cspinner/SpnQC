@@ -12,6 +12,7 @@ CPP_SRCS += \
 ../src/spnMode.cpp \
 ../src/spnScheduler.cpp \
 ../src/spnSensorManager.cpp \
+../src/spnServer.cpp \
 ../src/spnUserInput.cpp \
 ../src/spnUserOutput.cpp \
 ../src/spnUtils.cpp 
@@ -25,6 +26,7 @@ OBJS += \
 ./src/spnMode.o \
 ./src/spnScheduler.o \
 ./src/spnSensorManager.o \
+./src/spnServer.o \
 ./src/spnUserInput.o \
 ./src/spnUserOutput.o \
 ./src/spnUtils.o 
@@ -38,6 +40,7 @@ CPP_DEPS += \
 ./src/spnMode.d \
 ./src/spnScheduler.d \
 ./src/spnSensorManager.d \
+./src/spnServer.d \
 ./src/spnUserInput.d \
 ./src/spnUserOutput.d \
 ./src/spnUtils.d 

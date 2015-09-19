@@ -17,7 +17,7 @@ typedef enum
 	CMD_MODE_STOP_E,
 	CMD_MODE_CALIBRATE_HIGH_E,
 	CMD_MODE_CALIBRATE_LOW_E,
-	CMD_MODE_CALIBRATE_CENTER_E,
+	CMD_MODE_EMERGENCY_LANDING_E,
 	CMD_MODE_COUNT_E
 } SpnCommand_Mode_Type;
 
@@ -41,8 +41,8 @@ const char* CMD_MODE_STRINGS[CMD_MODE_COUNT_E] =
 		//CMD_MODE_CALIBRATE_LOW_E:
 		"CMD CAL LOW MODE",
 
-		//CMD_MODE_CALIBRATE_CENTER_E:
-		"CMD CAL CENTER MODE"
+		//CMD_MODE_EMERGENCY_LANDING_E:
+		"CMD EMERGENCY LANDING"
 };
 
 static SpnCommand_Mode_Type commandMode = CMD_MODE_STANDBY_E;
@@ -53,30 +53,31 @@ static SpnPID rollAnglePID;
 static SpnPID yawRatePID;
 static SpnPID yawAnglePID;
 static bool motorEnabled[4];
+static float32_t cmdInterval;
 
 static void setCommandMode(void);
 static void processCommandMode(void);
 
 bool spnCommandInit(void)
 {
-	float32_t pid_interval = MINOR_FRAME_TIME_USEC/1000000.0;
+	cmdInterval = MINOR_FRAME_TIME_USEC/1000000.0;
 
 	const SpnQC_Config_Type* const pCfg = spnConfigGet();
     
     if(spnServoInit(pCfg->transceiver.chanCount, &pCfg->transceiver.gpioPin[0], pCfg->motor.chanCount, &pCfg->motor.gpioPin[0]) == EXIT_SUCCESS)
     {
         // Configure controller PIDs, Motor Outputs, Transceiver Inputs
-        if( (pitchRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+        if( (pitchRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, cmdInterval,
                 pCfg->command.pidPitchKp, pCfg->command.pidPitchKi, pCfg->command.pidPitchKd) == EXIT_SUCCESS) &&
-            (pitchAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+            (pitchAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, cmdInterval,
                     pCfg->command.pidPitchKp, pCfg->command.pidPitchKi, pCfg->command.pidPitchKd) == EXIT_SUCCESS) &&
-            (rollRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+            (rollRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, cmdInterval,
                     pCfg->command.pidRollKp, pCfg->command.pidRollKi, pCfg->command.pidRollKd) == EXIT_SUCCESS) &&
-            (rollAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+            (rollAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, cmdInterval,
                     pCfg->command.pidRollKp, pCfg->command.pidRollKi, pCfg->command.pidRollKd) == EXIT_SUCCESS) &&
-            (yawRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+            (yawRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, cmdInterval,
                     pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == EXIT_SUCCESS) &&
-            (yawAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, pid_interval,
+            (yawAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, cmdInterval,
                     pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == EXIT_SUCCESS) &&
             (spnMotorsInit() == EXIT_SUCCESS) &&
             (spnTransceiverInit() == EXIT_SUCCESS))
@@ -155,11 +156,6 @@ static void setCommandMode(void)
 					commandMode = CMD_MODE_CALIBRATE_HIGH_E;
 					break;
 
-				case 'c':
-				case 'C':
-					commandMode = CMD_MODE_CALIBRATE_CENTER_E;
-					break;
-
 				default:
 					break;
 			}
@@ -167,6 +163,10 @@ static void setCommandMode(void)
 
 		case MODE_STANDBY_E:
 			if(previousMode != currentMode) commandMode = CMD_MODE_STANDBY_E;
+			break;
+
+		case MODE_LOST_COMM_E:
+			commandMode = CMD_MODE_EMERGENCY_LANDING_E;
 			break;
 
 		case MODE_STOP_E:
@@ -181,6 +181,7 @@ static void setCommandMode(void)
 
 static void processCommandMode(void)
 {
+	static float32_t prevThrottlePct;
 	float32_t throttlePct = spnTransceiverGetThrottlePct();
 	float32_t elevatorAngle = spnTransceiverGetElevatorAngle();
 	float32_t aileronAngle = spnTransceiverGetAileronAngle();
@@ -232,8 +233,13 @@ static void processCommandMode(void)
 			spnMotorsCalibrateDrive(2);
 			break;
 
-		case CMD_MODE_CALIBRATE_CENTER_E:
-			spnMotorsCalibrateDrive(1);
+		case CMD_MODE_EMERGENCY_LANDING_E:
+			// reduce previous throttle by 5% per second
+			elevatorAngle = 0.0;
+			aileronAngle = 0.0;
+			rudderAngle = 0.0;
+			throttlePct = clamp(prevThrottlePct-5*cmdInterval, 0.0, 100.0);
+			if(throttlePct < 0.0001) commandMode = CMD_MODE_STOP_E;
 			break;
 
 		case CMD_MODE_STANDBY_E:
@@ -244,7 +250,8 @@ static void processCommandMode(void)
 	}
 
 	if((CMD_MODE_OPEN_LOOP_E == commandMode) ||
-       (CMD_MODE_CLOSED_LOOP_E == commandMode))
+       (CMD_MODE_CLOSED_LOOP_E == commandMode) ||
+	   (CMD_MODE_EMERGENCY_LANDING_E == commandMode))
 	{
 		// Set output
 		yawPidOut = 0; // tbd
@@ -253,6 +260,8 @@ static void processCommandMode(void)
 		if(motorEnabled[2]) spnMotorsSet(2, clamp(throttlePct - pitchPidOut + yawPidOut, 0.0, 100.0));
 		if(motorEnabled[3]) spnMotorsSet(3, clamp(throttlePct - rollPidOut - yawPidOut, 0.0, 100.0));
 	}
+
+	prevThrottlePct = throttlePct;
 }
 
 

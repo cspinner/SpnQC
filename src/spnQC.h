@@ -8,7 +8,7 @@
 #ifndef SPNQC_H_
 #define SPNQC_H_
 
-#include "SpnConfig.h"
+#include "spnConfig.h"
 #include "spnNineAxisMotion.h"
 #include <time.h>
 #include <stdio.h>
@@ -61,6 +61,7 @@ typedef enum
 	MODE_RUN_E,
 	MODE_STOP_E,
 	MODE_CALIBRATE_E,
+	MODE_LOST_COMM_E,
 	MODE_COUNT_E
 } System_Mode_Type;
 
@@ -144,6 +145,7 @@ void spnUserOutputSensorUpdate(uint32_t frame);
 bool spnUserInputInit(void);
 void spnUserInputUpdate(void);
 char spnUserInputCharGet(bool consume);
+bool spnUserInputCheckHeartbeat(void);
 
 bool spnMotorsInit(void);
 void spnMotorsSet(uint32_t motorNum, float32_t cmdPct);
@@ -162,5 +164,10 @@ float32_t spnTransceiverGetThrottlePct(void);
 float32_t spnTransceiverGetElevatorAngle(void);
 float32_t spnTransceiverGetAileronAngle(void);
 float32_t spnTransceiverGetRudderAngle(void);
+
+bool spnServerInit(uint16_t port);
+void spnServerWaitForGroundStation(void);
+uint32_t spnServerReadMessage(char* buf, uint32_t maxReadBytes);
+void spnServerWriteMessage(char* buf, uint32_t sizeBytes);
 
 #endif /* SPNQC_H_ */

@@ -6,6 +6,7 @@
  */
 
 #include "spnQC.h"
+#include <stdlib.h>
 
 const char* GBL_MODE_STRINGS[MODE_COUNT_E] =
 {
@@ -22,7 +23,10 @@ const char* GBL_MODE_STRINGS[MODE_COUNT_E] =
 		"STOP MODE",
 
 		//MODE_CALIBRATE_E:
-		"CALIBRATION MODE"
+		"CALIBRATION MODE",
+
+		//MODE_LOST_COMM_E:
+		"LOST COMMUNICATION"
 };
 
 static System_Mode_Type spnGlobalMode = MODE_INIT_E;
@@ -49,11 +53,7 @@ void spnModeUpdate(void)
 			break;
 
 		case MODE_STANDBY_E:
-			if((spnSchedulerGetFrameCount()*MINOR_FRAME_TIME_USEC)/1000000 > 10)
-			{
-				spnGlobalMode = MODE_RUN_E;
-			}
-			else if((userInput == 'z' ) || (userInput == 'Z'))
+			if((userInput == 'z' ) || (userInput == 'Z'))
 			{
 				spnGlobalMode = MODE_CALIBRATE_E;
 			}
@@ -61,7 +61,8 @@ void spnModeUpdate(void)
 
 		case MODE_RUN_E:
 		case MODE_CALIBRATE_E:
-			if((userInput == 's' ) || (userInput == 'S'))
+			// check for stop requests
+			if(((userInput == 's' ) || (userInput == 'S')))
 			{
 				spnGlobalMode = MODE_STOP_E;
 			}
@@ -69,6 +70,15 @@ void spnModeUpdate(void)
 			{
 				spnGlobalMode = MODE_RUN_E;
 			}
+
+			// check for failed heartbeat
+			if(spnUserInputCheckHeartbeat() == EXIT_FAILURE)
+			{
+				spnGlobalMode = MODE_LOST_COMM_E;
+			}
+			break;
+
+		case MODE_LOST_COMM_E:
 			break;
 
 		case MODE_STOP_E:
