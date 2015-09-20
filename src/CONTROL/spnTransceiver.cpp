@@ -8,14 +8,15 @@
 #include "spnQC.h"
 #include <stdlib.h>
 
-static bool terminalOverride = false;
+static bool overrideModeEnabled = false;
 
 bool spnTransceiverInit(void)
 {
     const SpnQC_Config_Type* const pCfg = spnConfigGet();
     
-    terminalOverride = pCfg->transceiver.useTerminal;
-    
+    overrideModeEnabled = pCfg->transceiver.useTerminal ||
+    				      pCfg->transceiver.useNetworkInput;
+
 	return EXIT_SUCCESS;
 }
 
@@ -23,7 +24,7 @@ float32_t spnTransceiverGetThrottlePct(void)
 {
     float32_t throttlePct = 0.0;
     
-    if(terminalOverride)
+    if(overrideModeEnabled)
     {
         static float32_t ovrInput = 0.0;
 
@@ -49,7 +50,7 @@ float32_t spnTransceiverGetElevatorAngle(void)
 {
 	float32_t elevAngle = 0.0;
 
-    if(terminalOverride)
+    if(overrideModeEnabled)
     {
         static float32_t ovrInput = 0.0;
 
@@ -77,7 +78,7 @@ float32_t spnTransceiverGetAileronAngle(void)
 {
 	static float32_t ailAngle = 0.0;
 
-    if(terminalOverride)
+    if(overrideModeEnabled)
     {
         static float32_t ovrInput = 0.0;
 
@@ -85,8 +86,8 @@ float32_t spnTransceiverGetAileronAngle(void)
 
         if(userInput == 'g') ovrInput -= 1.0;
         else if (userInput == 'b') ovrInput += 1.0;
-        else if (userInput == 'h') ovrInput -= 45.0;
-        else if (userInput == 'n') ovrInput += 45.0;
+        else if (userInput == 'f') ovrInput -= 45.0;
+        else if (userInput == 'v') ovrInput += 45.0;
 
         ovrInput = clamp(ovrInput, -45.0, 45.0);
         
@@ -105,7 +106,7 @@ float32_t spnTransceiverGetRudderAngle(void)
 {
 	static float32_t rudAngle = 0.0;
 
-    if(terminalOverride)
+    if(overrideModeEnabled)
     {
         static float32_t ovrInput = 0.0;
 

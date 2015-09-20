@@ -46,7 +46,8 @@ typedef struct
 		uint32_t chanCount; // 0 - 32
 		uint32_t gpioPin[USER_GPIO_MAX]; // BCM number
         bool useTerminal; 
-        bool useNetwork;
+        bool useNetworkInput;
+        bool outputToNetwork;
         uint16_t netPort;
         timeval netHeartbeatInterval;
 	} transceiver;

@@ -188,7 +188,12 @@ const SpnQC_Config_Entry_Type configEntries[] = {
     {
         "NETINPUT",
         INT_E,
-        &spnQcConfig.transceiver.useNetwork
+        &spnQcConfig.transceiver.useNetworkInput
+    },
+    {
+        "NETOUTPUT",
+        INT_E,
+        &spnQcConfig.transceiver.outputToNetwork
     },
     {
         "NETPORT",

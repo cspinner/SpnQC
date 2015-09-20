@@ -42,7 +42,10 @@ const uint32_t LED_STATUS_PATTERN[MODE_COUNT_E][LED_STATUS_STEP_COUNT] =
 	{1,1,1,1,1,1,1,1,1,1},
 
 	//MODE_CALIBRATE_E:
-	{1,0,1,0,1,0,1,0,1,0}
+	{1,0,1,0,1,0,1,0,1,0},
+
+	//MODE_LOST_COMM_E:
+	{1,0,1,0,1,0,0,0,0,0},
 };
 
 void spnSchedulerPollSensors(void)
@@ -145,6 +148,7 @@ void spnSchedulerForeground(void)
 	spnCommandUpdate();
 
 	// consume the input character
+//	printf("char: %c\n", spnUserInputCharGet(true));
 	spnUserInputCharGet(true);
 
 	// Print outputs

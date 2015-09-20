@@ -6,6 +6,8 @@
  */
 
 #include "spnQC.h"
+#include "spnConfig.h"
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -41,6 +43,7 @@ static float32_t Yaw;
 static float32_t Temperature;
 static SpnNineAxisMotion_Data_Type rawNineAxesData;
 static SpnNineAxisMotion_Data_Type filtNineAxesData;
+static bool networkOutputEnabled;
 
 static void userOutputOnExit(void);
 static void userOutputConsole(void);
@@ -49,6 +52,10 @@ static void userOutputSensorDataFile(void);
 
 bool spnUserOutputInit(void)
 {
+	const SpnQC_Config_Type* const pCfg = spnConfigGet();
+
+	networkOutputEnabled = pCfg->transceiver.outputToNetwork;
+
 	// open the files
 	spnUtilsCreateFileForWrite(&pOutputFile, "outputData.csv");
 	spnUtilsCreateFileForWrite(&pOutputSensorFile, "outputSensorData.csv");
@@ -56,20 +63,6 @@ bool spnUserOutputInit(void)
 	if(pOutputFile != NULL)
 	{
 		atexit(&userOutputOnExit);
-
-		// write all headings and units
-		spnUtilsWriteToFile(pOutputFile,
-//				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,KP,KI,KD,TEMP_F,INPW0,MOTCMD0,MOTCMD1,MOTCMD2,MOTCMD3,THROT,ELEV,AILER,RUDD,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US\n");
-				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,TEMP_F,INPW0,MOTCMD0,MOTCMD1,MOTCMD2,MOTCMD3,THROT,ELEV,AILER,RUDD,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US\n");
-		spnUtilsWriteToFile(pOutputFile,
-//				",,,DEGREES,DEGREES,DEGREES,,,,DEG_F,USEC,PCT,PCT,PCT,PCT,PCT,DEGREES,DEGREES,DEGREES,SEC,MSEC,USEC,SEC,MSEC,USEC\n");
-				",,,DEGREES,DEGREES,DEGREES,DEG_F,USEC,PCT,PCT,PCT,PCT,PCT,DEGREES,DEGREES,DEGREES,SEC,MSEC,USEC,SEC,MSEC,USEC\n");
-
-		// write all headings and units
-		spnUtilsWriteToFile(pOutputSensorFile,
-				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,GYROX,GYROY,GYROZ,ACCX,ACCY,ACCZ,SEN_TIME_MS,SEN_TIME_US,SEN_S2S_TIME_MS,SEN_S2S_TIME_US\n");
-		spnUtilsWriteToFile(pOutputSensorFile,
-				",,,DEGREES,DEGREES,DEGREES,DEG/S,DEG/S,DEG/S,G,G,G,MSEC,USEC,MSEC,USEC\n");
 
 		return EXIT_SUCCESS;
 	}
@@ -113,39 +106,55 @@ void spnUserOutputSensorUpdate(uint32_t frame)
 
 static void userOutputConsole(void)
 {
+	char buffer[65536];
+	char tempBuf[1024];
+
+	bzero(buffer, sizeof(buffer));
+
+	sprintf(tempBuf, "BEGINCONOUT"); strcat(buffer, tempBuf);
+
 	// Clear screen
-	for(uint32_t i = 0; i < 200; i++) printf("\n");
+	for(uint32_t i = 0; i < 200; i++) { sprintf(tempBuf, "\n"); strcat(buffer, tempBuf); }
 
-	printf("System Mode: %s - Command Mode: %s\n", spnModeGetString(), spnCommandGetModeString());
-	printf("Frame count: %i\n", spnSchedulerGetFrameCount());
-	printf("Sensor time: %u sec, %u msec, %u usec\n", senElapsedSec, senElapsedMSec, senElapsedUSec);
-	printf("Frame time: %u sec, %u msec, %u usec\n", fgElapsedSec, fgElapsedMSec, fgElapsedUSec);
+	sprintf(tempBuf, "System Mode: %s - Command Mode: %s\n", spnModeGetString(), spnCommandGetModeString()); strcat(buffer, tempBuf);
+	sprintf(tempBuf, "Frame count: %i\n", spnSchedulerGetFrameCount()); strcat(buffer, tempBuf);
+	sprintf(tempBuf, "Sensor time: %u sec, %u msec, %u usec\n", senElapsedSec, senElapsedMSec, senElapsedUSec); strcat(buffer, tempBuf);
+	sprintf(tempBuf, "Frame time: %u sec, %u msec, %u usec\n", fgElapsedSec, fgElapsedMSec, fgElapsedUSec); strcat(buffer, tempBuf);
 
-	printf("\n");
+	sprintf(tempBuf, "\n"); strcat(buffer, tempBuf);
 
-	printf("Temperature (F): %f\n", Temperature);
-	printf("%-5s: Yaw: %10f, Pitch: %10f, Roll: %10f\n", "Pos", Yaw, Pitch, Roll);
-//	printf("%-6.3f, %-6.3f, %-6.3f - %-6.3f, %-6.3f, %-6.3f\n",
+	sprintf(tempBuf, "Temperature (F): %f\n", Temperature); strcat(buffer, tempBuf);
+	sprintf(tempBuf, "%-5s: Yaw: %10f, Pitch: %10f, Roll: %10f\n", "Pos", Yaw, Pitch, Roll); strcat(buffer, tempBuf);
+//	sprintf(tempBuf, "%-6.3f, %-6.3f, %-6.3f - %-6.3f, %-6.3f, %-6.3f\n",
 //			filtNineAxesData.gyro.x,
 //			filtNineAxesData.gyro.y,
 //			filtNineAxesData.gyro.z,
 //			filtNineAxesData.accel.x,
 //			filtNineAxesData.accel.y,
-//			filtNineAxesData.accel.z);
+//			filtNineAxesData.accel.z);  strcat(buffer, tempBuf);
 
-	printf("\n");
-	printf("Input Pulse 0: %u\n", spnServoGetPulseWidth(0));
+	sprintf(tempBuf, "\n"); strcat(buffer, tempBuf);
+	sprintf(tempBuf, "Input Pulse 0: %u\n", spnServoGetPulseWidth(0)); strcat(buffer, tempBuf);
 
 	for(uint32_t i = 0; i < 4; i++)
 	{
-		printf("Motor Cmd %i: %.1f\n", i, spnMotorsGet(i));
+		sprintf(tempBuf, "Motor Cmd %i: %.1f\n", i, spnMotorsGet(i)); strcat(buffer, tempBuf);
 	}
 
-	printf("\n");
-	printf("Throttle Cmd: %.1f %%\n", spnTransceiverGetThrottlePct());
-	printf("Elevator Cmd: %.1f degrees\n", spnTransceiverGetElevatorAngle());
-	printf("Aileron Cmd: %.1f degrees\n", spnTransceiverGetAileronAngle());
-	printf("Rudder Cmd: %.1f degrees\n", spnTransceiverGetRudderAngle());
+	sprintf(tempBuf, "\n"); strcat(buffer, tempBuf);
+	sprintf(tempBuf, "Throttle Cmd: %.1f %%\n", spnTransceiverGetThrottlePct()); strcat(buffer, tempBuf);
+	sprintf(tempBuf, "Elevator Cmd: %.1f degrees\n", spnTransceiverGetElevatorAngle()); strcat(buffer, tempBuf);
+	sprintf(tempBuf, "Aileron Cmd: %.1f degrees\n", spnTransceiverGetAileronAngle()); strcat(buffer, tempBuf);
+	sprintf(tempBuf, "Rudder Cmd: %.1f degrees\n", spnTransceiverGetRudderAngle()); strcat(buffer, tempBuf);
+
+	// Finally, print the data
+	printf("%s", buffer);
+
+	// Send to network if configured
+	if(networkOutputEnabled)
+	{
+		spnServerWriteMessage(buffer, strlen(buffer));
+	}
 
 //	float32_t kp, ki, kd;
 //	float32_t pterm, iterm, dterm, sumTotal;
@@ -163,9 +172,23 @@ static void userOutputConsole(void)
 
 static void userOutputFile(void)
 {
+	static bool isFirstOutput = true;
+	char tempBuf[1024];
+
+	if(isFirstOutput)
+	{
+		// write all headings and units
+		sprintf(tempBuf, "SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,TEMP_F,INPW0,MOTCMD0,MOTCMD1,MOTCMD2,MOTCMD3,THROT,ELEV,AILER,RUDD,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US,GYROX,GYROY,GYROZ,ACCELX,ACCELY,ACCELZ\n");
+		spnUtilsWriteToFile(pOutputFile, tempBuf);
+
+		sprintf(tempBuf, ",,,DEGREES,DEGREES,DEGREES,DEG_F,USEC,PCT,PCT,PCT,PCT,PCT,DEGREES,DEGREES,DEGREES,SEC,MSEC,USEC,SEC,MSEC,USEC,DEG/S,DEG/S,DEG/S,G,G,G\n");
+		spnUtilsWriteToFile(pOutputFile, tempBuf);
+
+		isFirstOutput = false;
+	}
+
 	// write data to file
-	char buf[1024];
-	sprintf(buf, "%s,%s,%i,%.1f,%.1f,%.1f,%.1f,%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%u,%u,%u,%u,%u,%u,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f\n",
+	sprintf(tempBuf, "%s,%s,%i,%.1f,%.1f,%.1f,%.1f,%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%u,%u,%u,%u,%u,%u,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f\n",
 			spnModeGetString(),
 			spnCommandGetModeString(),
 			spnSchedulerGetFrameCount(),
@@ -195,11 +218,24 @@ static void userOutputFile(void)
 			filtNineAxesData.accel[Y_AXIS],
 			filtNineAxesData.accel[Z_AXIS]);
 
-	spnUtilsWriteToFile(pOutputFile, buf);
+	spnUtilsWriteToFile(pOutputFile, tempBuf);
 }
 
 static void userOutputSensorDataFile(void)
 {
+	static bool isFirstOutput = true;
+
+	if(isFirstOutput)
+	{
+		// write all headings and units
+		spnUtilsWriteToFile(pOutputSensorFile,
+				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,GYROX,GYROY,GYROZ,ACCX,ACCY,ACCZ,SEN_TIME_MS,SEN_TIME_US,SEN_S2S_TIME_MS,SEN_S2S_TIME_US\n");
+		spnUtilsWriteToFile(pOutputSensorFile,
+				",,,DEGREES,DEGREES,DEGREES,DEG/S,DEG/S,DEG/S,G,G,G,MSEC,USEC,MSEC,USEC\n");
+
+		isFirstOutput = false;
+	}
+
 	// write data to file
 	char buf[1024];
 	sprintf(buf, "%s,%s,%i,%.1f,%.1f,%.1f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%u,%u,%u,%u\n",
