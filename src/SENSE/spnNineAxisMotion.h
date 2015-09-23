@@ -9,6 +9,7 @@
 #define SENSE_SPNNINEAXISMOTION_H_
 
 #include "spnSensor.h"
+#include "spnFilter.h"
 
 enum
 {
@@ -55,6 +56,37 @@ typedef struct
 	float32_t temperature; // ºF
 } SpnNineAxisMotion_Data_Type;
 
+typedef struct
+{
+	union
+	{
+		struct
+		{
+			char WIA;
+			char INFO;
+			char ST1;
+			char HXL;
+			char HXH;
+			char HYL;
+			char HYH;
+			char HZL;
+			char HZH;
+			char ST2;
+			char CNTL1;
+			char CNTL2;
+			char ASTC;
+			char TS1;
+			char TS2;
+			char I2CDIS;
+			char ASAX;
+			char ASAY;
+			char ASAZ;
+		} regByName;
+		char regByIndex[19];
+	};
+
+} Mag_Register_Set_Type;
+
 // For the MPU-9250 sensor
 class SpnNineAxisMotion : public SpnSensor
 {
@@ -79,6 +111,32 @@ private:
 	void writeMagRegisterMask(uint32_t address, char mask, char data);
 	void readMagRegisterSet(uint32_t startAddress, char readCount, char* pOut);
 	void applyCalibration(void);
+
+	int32_t spi_fd;
+	uint32_t chipSelect;
+	uint32_t speed;
+	uint32_t accFsSel;
+	uint32_t gyroFsSel;
+
+	SpnNineAxisMotion_Calibration_Type calData;
+
+	uint32_t acquireCount;
+	float32_t magOutlierThresh;
+
+	float32_t rawAccelData[NUM_AXIS][128]; // max 128 sample window
+	float32_t rawGyroData[NUM_AXIS][128]; // max 128 sample window
+	float32_t rawMagData[NUM_AXIS][128]; // max 128 sample window
+	float32_t filtAccelData[NUM_AXIS];
+	float32_t filtGyroData[NUM_AXIS];
+	float32_t filtMagData[NUM_AXIS];
+
+	float32_t temperatureData;
+
+	SpnFilter accelDataFilter[NUM_AXIS];
+	SpnFilter gyroDataFilter[NUM_AXIS];
+	SpnFilter magDataFilter[NUM_AXIS];
+
+	Mag_Register_Set_Type mag_registers;
 };
 
 

@@ -91,7 +91,7 @@ void spnUtilsOpenFileForRead(FILE **pFile, const char *pPathname)
 //	char cwd[1024];
 //	   if (getcwd(cwd, sizeof(cwd)) != NULL)
 //	       printf("Current working dir: %s\n", cwd);
-//
+
 //	   system("ls -l /home/pi/calibration");
 
 	// open the file for reading

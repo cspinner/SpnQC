@@ -57,8 +57,8 @@ bool spnUserOutputInit(void)
 	networkOutputEnabled = pCfg->transceiver.outputToNetwork;
 
 	// open the files
-	spnUtilsCreateFileForWrite(&pOutputFile, "outputData.csv");
-	spnUtilsCreateFileForWrite(&pOutputSensorFile, "outputSensorData.csv");
+	spnUtilsCreateFileForWrite(&pOutputFile, WORKING_DIRECTORY"/outputData.csv");
+	spnUtilsCreateFileForWrite(&pOutputSensorFile, WORKING_DIRECTORY"/outputSensorData.csv");
 
 	if(pOutputFile != NULL)
 	{
@@ -111,7 +111,7 @@ static void userOutputConsole(void)
 
 	bzero(buffer, sizeof(buffer));
 
-	sprintf(tempBuf, "BEGINCONOUT"); strcat(buffer, tempBuf);
+	sprintf(buffer, "BEGINCONOUT");
 
 	// Clear screen
 	for(uint32_t i = 0; i < 200; i++) { sprintf(tempBuf, "\n"); strcat(buffer, tempBuf); }

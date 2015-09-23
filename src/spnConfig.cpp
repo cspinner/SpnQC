@@ -369,7 +369,7 @@ bool spnConfigInit(void)
 	//
 
 	// open the file
-	spnUtilsOpenFileForRead(&pInputFile, "SpnQC.cfg");
+	spnUtilsOpenFileForRead(&pInputFile, WORKING_DIRECTORY"/SpnQC.cfg");
 
 	// If file exists, parse the data and populate config structure
 	if(pInputFile != NULL)

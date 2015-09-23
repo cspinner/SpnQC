@@ -16,6 +16,7 @@
 
 static bool useTerminal = false;
 static bool useNetwork = false;
+static bool isCommEstablished = false;
 static bool isTerminalStateSet = false;
 static struct termios ttystateold;
 static char charInput = 0;
@@ -35,7 +36,6 @@ bool spnUserInputInit(void)
 
 	tsHeartbeatInterval.tv_sec = pCfg->transceiver.netHeartbeatInterval.tv_sec;
 	tsHeartbeatInterval.tv_usec = 0;
-	spnUtilsMarkTimestamp(&tsHeartbeat); // initial heartbeat timestamp
 
 	// Inputs come from RPI2 terminal
 	if(useTerminal)
@@ -46,6 +46,7 @@ bool spnUserInputInit(void)
 		if(isTerminalStateSet)
 		{
 			atexit(&restoreTerminalState);
+			isCommEstablished = true;
 
 			return EXIT_SUCCESS;
 		}
@@ -59,8 +60,6 @@ bool spnUserInputInit(void)
 	{
 		if(spnServerInit(pCfg->transceiver.netPort) == EXIT_SUCCESS)
 		{
-			printf("Waiting for ground station connection...\n");
-			spnServerWaitForGroundStation();
 			return EXIT_SUCCESS;
 		}
 		else
@@ -86,7 +85,21 @@ void spnUserInputUpdate(void)
 	}
 	else if(useNetwork)
 	{
-		spnServerReadMessage(&charInput, 1);
+		// Is it time to establish comm?
+		if(spnModeGet() == MODE_ESTABLISH_COMM_E)
+		{
+			printf("Waiting for ground station connection...\n");
+			spnHandleHaltTimer(); // temporarily halt timer interrupts before entering the blocking state
+			spnServerWaitForGroundStation();
+			spnUtilsMarkTimestamp(&tsHeartbeat); // initial heartbeat timestamp
+			isCommEstablished = true;
+			spnHandleStartTimer(); // restore timer interrupts
+		}
+		else
+		{
+			spnServerReadMessage(&charInput, 1);
+			spnUserInputCheckHeartbeat();
+		}
 	}
 }
 
@@ -109,6 +122,8 @@ bool spnUserInputCheckHeartbeat(void)
 	{
 		// record new timestamp
 		spnUtilsMarkTimestamp(&tsHeartbeat);
+		isCommEstablished = true;
+
 		return EXIT_SUCCESS;
 	}
 	else // no input received
@@ -117,6 +132,8 @@ bool spnUserInputCheckHeartbeat(void)
 		if((tsElapsed.tv_sec >= tsHeartbeatInterval.tv_sec) && (tsElapsed.tv_usec >= 0))
 		{
 			// timed out
+			isCommEstablished = false;
+
 			return EXIT_FAILURE;
 		}
 		else
@@ -125,6 +142,11 @@ bool spnUserInputCheckHeartbeat(void)
 			return EXIT_SUCCESS;
 		}
 	}
+}
+
+bool spnUserInputCommEstablished(void)
+{
+	return isCommEstablished;
 }
 
 static uint32_t getKeyboardHit(void)

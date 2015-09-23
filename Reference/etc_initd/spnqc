@@ -1,0 +1,41 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          spnqc
+# Required-Start:    $all
+# Required-Stop:
+# Should-Start:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start/stop spnqc.
+# Description:       This script starts/stops spnqc.
+### END INIT INFO
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+. /lib/init/vars.sh
+
+OPTS=""
+
+res=0
+
+case "$1" in
+  start)
+	taskset -c 3 /home/pi/Projects/SpnQC/Debug/SpnQC
+	;;
+  restart|reload|force-reload)
+	killall spnqc
+	taskset -c 3 /home/pi/Projects/SpnQC/Debug/SpnQC
+	;;
+  stop)
+	killall SpnQC
+	;;
+  status)
+	
+	;;
+  *)
+	echo "Usage: spnqc [start|stop|restart]" >&2
+	res=3
+	;;
+esac
+
+exit $res
+

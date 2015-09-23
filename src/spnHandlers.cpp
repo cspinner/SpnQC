@@ -9,6 +9,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #ifdef SIGALRM_DEBUG
 #include <sys/time.h>
@@ -20,6 +21,41 @@ static void sigalrm_debug(void);
 
 static __sighandler_t pCallbacks[CALLBACKS_MAX];
 static uint32_t CallbackIndex = 0;
+static struct sigaction sa = { 0 };
+static struct itimerval timer = { 0 };
+
+bool spnHandleInit(void)
+{
+	// Set the minor frame timer
+	sa.sa_handler = &spnHandleSignal;
+	sigaction (SIGALRM, &sa, NULL);
+	timer.it_value.tv_sec = 0;
+	timer.it_value.tv_usec = MINOR_FRAME_TIME_USEC;
+	timer.it_interval.tv_sec = 0;
+	timer.it_interval.tv_usec = MINOR_FRAME_TIME_USEC;
+
+	// Register the handler to catch exits
+	signal(SIGINT, &spnHandleSignal);
+	signal(SIGQUIT, &spnHandleSignal);
+	signal(SIGTSTP, &spnHandleSignal);
+
+	// Ignore pipe errors
+	signal(SIGPIPE, SIG_IGN);
+
+	return EXIT_SUCCESS;
+}
+
+void spnHandleStartTimer(void)
+{
+	// Start the minor frame timer
+	setitimer (ITIMER_REAL, &timer, NULL);
+}
+
+void spnHandleHaltTimer(void)
+{
+	// Halt the minor frame timer
+	setitimer (ITIMER_REAL, NULL, NULL);
+}
 
 void spnHandleRegisterCallback(__sighandler_t pCallback)
 {

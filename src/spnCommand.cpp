@@ -11,7 +11,6 @@
 
 typedef enum
 {
-	CMD_MODE_STANDBY_E,
 	CMD_MODE_OPEN_LOOP_E,
 	CMD_MODE_CLOSED_LOOP_E,
 	CMD_MODE_STOP_E,
@@ -23,9 +22,6 @@ typedef enum
 
 const char* CMD_MODE_STRINGS[CMD_MODE_COUNT_E] =
 {
-		//CMD_MODE_STANDBY_E:
-		"CMD STANDBY MODE",
-
 		//CMD_MODE_OPEN_LOOP_E:
 		"CMD OPEN LOOP",
 
@@ -45,7 +41,7 @@ const char* CMD_MODE_STRINGS[CMD_MODE_COUNT_E] =
 		"CMD EMERGENCY LANDING"
 };
 
-static SpnCommand_Mode_Type commandMode = CMD_MODE_STANDBY_E;
+static SpnCommand_Mode_Type commandMode = CMD_MODE_STOP_E;
 static SpnPID pitchRatePID;
 static SpnPID pitchAnglePID;
 static SpnPID rollRatePID;
@@ -161,14 +157,12 @@ static void setCommandMode(void)
 			}
 			break;
 
-		case MODE_STANDBY_E:
-			if(previousMode != currentMode) commandMode = CMD_MODE_STANDBY_E;
-			break;
-
 		case MODE_LOST_COMM_E:
 			commandMode = CMD_MODE_EMERGENCY_LANDING_E;
 			break;
 
+		case MODE_ESTABLISH_COMM_E:
+		case MODE_STANDBY_E:
 		case MODE_STOP_E:
 		default:
 			commandMode = CMD_MODE_STOP_E;
@@ -242,7 +236,6 @@ static void processCommandMode(void)
 			if(throttlePct < 0.0001) commandMode = CMD_MODE_STOP_E;
 			break;
 
-		case CMD_MODE_STANDBY_E:
 		case CMD_MODE_STOP_E:
 		default:
 			spnMotorsStopAll();

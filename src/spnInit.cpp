@@ -11,6 +11,8 @@
 
 using namespace std;
 
+bool isInitCompleted = false;
+
 bool spnInit(void)
 {
 	bool status = EXIT_FAILURE;
@@ -24,6 +26,7 @@ bool spnInit(void)
 			// Configure CPU peripherals
 			wiringPiSetup() ;
 			pinMode (OUTPUT_PIN_STATUS_LED, OUTPUT) ; // LED
+			digitalWrite (OUTPUT_PIN_STATUS_LED, 1);
 
 			// Configure sensors, motors, console/file output
 			if( (spnSensorManagerInit() == EXIT_SUCCESS) &&
@@ -31,6 +34,8 @@ bool spnInit(void)
 				(spnUserOutputInit() == EXIT_SUCCESS) &&
 				(spnUserInputInit() == EXIT_SUCCESS))
 			{
+				isInitCompleted = true;
+
 				status = EXIT_SUCCESS;
 			}
 			else
@@ -49,5 +54,10 @@ bool spnInit(void)
 	}
 
 	return status;
+}
+
+bool spnInitCompleted(void)
+{
+	return isInitCompleted;
 }
 

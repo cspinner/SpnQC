@@ -99,37 +99,6 @@ typedef enum
 	AK8963_RSV_ADDR = 0x13
 } AK8963;
 
-typedef struct
-{
-	union
-	{
-		struct
-		{
-			char WIA;
-			char INFO;
-			char ST1;
-			char HXL;
-			char HXH;
-			char HYL;
-			char HYH;
-			char HZL;
-			char HZH;
-			char ST2;
-			char CNTL1;
-			char CNTL2;
-			char ASTC;
-			char TS1;
-			char TS2;
-			char I2CDIS;
-			char ASAX;
-			char ASAY;
-			char ASAZ;
-		} regByName;
-		char regByIndex[19];
-	};
-
-} Mag_Register_Set_Type;
-
 // LSB/(º/s) - indexed by FS_SEL
 const float32_t GYRO_SENSITIVITY[4] =
 {
@@ -141,35 +110,6 @@ const float32_t ACCEL_SENSITIVITY[4] =
 {
 	16384.0, 8192.0, 4096.0, 2048.0
 };
-
-int32_t spi_fd;
-uint32_t chipSelect;
-uint32_t speed;
-uint32_t accFsSel;
-uint32_t gyroFsSel;
-
-SpnNineAxisMotion_Calibration_Type calData;
-
-//uint32_t accelFiltWindow;
-//uint32_t gyroFiltWindow;
-//uint32_t magFiltWindow;
-uint32_t acquireCount;
-float32_t magOutlierThresh;
-
-float32_t rawAccelData[NUM_AXIS][128]; // max 128 sample window
-float32_t rawGyroData[NUM_AXIS][128]; // max 128 sample window
-float32_t rawMagData[NUM_AXIS][128]; // max 128 sample window
-float32_t filtAccelData[NUM_AXIS];
-float32_t filtGyroData[NUM_AXIS];
-float32_t filtMagData[NUM_AXIS];
-
-float32_t temperatureData;
-
-SpnFilter accelDataFilter[NUM_AXIS];
-SpnFilter gyroDataFilter[NUM_AXIS];
-SpnFilter magDataFilter[NUM_AXIS];
-
-Mag_Register_Set_Type mag_registers;
 
 char SpnNineAxisMotion::readRegister(uint32_t address)
 {

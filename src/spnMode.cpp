@@ -13,6 +13,9 @@ const char* GBL_MODE_STRINGS[MODE_COUNT_E] =
 		//MODE_INIT_E:
 		"INITIALIZATION MODE",
 
+		//MODE_ESTABLISH_COMM_E:
+		"ESTABLISH COMM MODE",
+
 		//MODE_STANDBY_E:
 		"STANDBY MODE",
 
@@ -49,13 +52,34 @@ void spnModeUpdate(void)
 	switch(spnGlobalMode)
 	{
 		case MODE_INIT_E:
-			spnGlobalMode = MODE_STANDBY_E;
+			if(spnInitCompleted())
+			{
+				spnGlobalMode = MODE_ESTABLISH_COMM_E;
+			}
+			break;
+
+		case MODE_ESTABLISH_COMM_E:
+			if(spnUserInputCommEstablished())
+			{
+				spnGlobalMode = MODE_STANDBY_E;
+			}
 			break;
 
 		case MODE_STANDBY_E:
 			if((userInput == 'z' ) || (userInput == 'Z'))
 			{
 				spnGlobalMode = MODE_CALIBRATE_E;
+			}
+			// check for stop requests
+			if(((userInput == 's' ) || (userInput == 'S')))
+			{
+				spnGlobalMode = MODE_STOP_E;
+			}
+
+			// check for disconnection - not necessarily an error
+			if(spnUserInputCommEstablished() == false)
+			{
+				spnGlobalMode = MODE_ESTABLISH_COMM_E;
 			}
 			break;
 
@@ -71,17 +95,29 @@ void spnModeUpdate(void)
 				spnGlobalMode = MODE_RUN_E;
 			}
 
-			// check for failed heartbeat
-			if(spnUserInputCheckHeartbeat() == EXIT_FAILURE)
+			// check for disconnection - error condition
+			if(spnUserInputCommEstablished() == false)
 			{
 				spnGlobalMode = MODE_LOST_COMM_E;
 			}
 			break;
 
 		case MODE_LOST_COMM_E:
+			spnGlobalMode = MODE_LOST_COMM_E;
 			break;
 
 		case MODE_STOP_E:
+		{
+			spnGlobalMode = MODE_STOP_E;
+
+			// check for disconnection - not necessarily an error
+			if(spnUserInputCommEstablished() == false)
+			{
+				spnGlobalMode = MODE_ESTABLISH_COMM_E;
+			}
+		}
+		break;
+
 		default:
 			spnGlobalMode = MODE_STOP_E;
 			break;

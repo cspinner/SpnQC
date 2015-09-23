@@ -20,6 +20,7 @@
 // DEFINES
 //
 //#define NO_FILTER 1
+#define WORKING_DIRECTORY "/home/pi/Projects/SpnQC/"
 #define SENSOR_FRAME_TIME_USEC 5000
 #define MINOR_FRAME_TIME_USEC 30000
 
@@ -57,6 +58,7 @@
 typedef enum
 {
 	MODE_INIT_E,
+	MODE_ESTABLISH_COMM_E,
 	MODE_STANDBY_E,
 	MODE_RUN_E,
 	MODE_STOP_E,
@@ -76,8 +78,13 @@ typedef double float64_t;
 // METHODS
 //
 bool spnInit(void);
+bool spnInitCompleted(void);
+
 void spnHandleRegisterCallback(__sighandler_t pCallback);
 void spnHandleSignal(int32_t);
+bool spnHandleInit(void);
+void spnHandleStartTimer(void);
+void spnHandleHaltTimer(void);
 
 void spnSchedulerForeground(void);
 void spnSchedulerPollSensors(void);
@@ -146,6 +153,7 @@ bool spnUserInputInit(void);
 void spnUserInputUpdate(void);
 char spnUserInputCharGet(bool consume);
 bool spnUserInputCheckHeartbeat(void);
+bool spnUserInputCommEstablished(void);
 
 bool spnMotorsInit(void);
 void spnMotorsSet(uint32_t motorNum, float32_t cmdPct);
