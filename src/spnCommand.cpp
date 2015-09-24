@@ -233,7 +233,20 @@ static void processCommandMode(void)
 			aileronAngle = 0.0;
 			rudderAngle = 0.0;
 			throttlePct = clamp(prevThrottlePct-5*cmdInterval, 0.0, 100.0);
-			if(throttlePct < 0.0001) commandMode = CMD_MODE_STOP_E;
+
+			// When throttle % nears zero, just transition to stop... we assume the craft is close/on
+			//  the ground at this point
+			if(throttlePct < 0.0001)
+			{
+				commandMode = CMD_MODE_STOP_E;
+			}
+			else
+			{
+				// Keep the craft level while decelerating.
+				pitchPidOut = pitchAnglePID.update(0.0, pitch);
+				rollPidOut = rollAnglePID.update(0.0, roll);
+				yawPidOut = 0.0; // do not care about yaw
+			}
 			break;
 
 		case CMD_MODE_STOP_E:
@@ -247,7 +260,6 @@ static void processCommandMode(void)
 	   (CMD_MODE_EMERGENCY_LANDING_E == commandMode))
 	{
 		// Set output
-		yawPidOut = 0; // tbd
 		if(motorEnabled[0]) spnMotorsSet(0, clamp(throttlePct + pitchPidOut + yawPidOut, 0.0, 100.0));
 		if(motorEnabled[1]) spnMotorsSet(1, clamp(throttlePct + rollPidOut - yawPidOut, 0.0, 100.0));
 		if(motorEnabled[2]) spnMotorsSet(2, clamp(throttlePct - pitchPidOut + yawPidOut, 0.0, 100.0));
