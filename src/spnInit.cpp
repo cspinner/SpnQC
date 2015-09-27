@@ -6,7 +6,7 @@
  */
 
 #include "spnQC.h"
-#include "wiringPi.h"
+#include "HAL.h"
 #include <stdlib.h>
 
 using namespace std;
@@ -18,15 +18,12 @@ bool spnInit(void)
 	bool status = EXIT_FAILURE;
 
 	// Attempt to increase program's scheduling priority
-	if(piHiPri(99) == 0)
+	if(HAL_INIT() == EXIT_SUCCESS)
 	{
 		// Retrieve configuration
 		if(spnConfigInit() == EXIT_SUCCESS)
 		{
-			// Configure CPU peripherals
-			wiringPiSetup() ;
-			pinMode (OUTPUT_PIN_STATUS_LED, OUTPUT) ; // LED
-			digitalWrite (OUTPUT_PIN_STATUS_LED, 1);
+			HAL_STATUS_LED_SET(LED_ON);
 
 			// Configure sensors, motors, console/file output
 			if( (spnSensorManagerInit() == EXIT_SUCCESS) &&

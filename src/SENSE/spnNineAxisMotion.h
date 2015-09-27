@@ -35,9 +35,6 @@ typedef struct
 	uint32_t speed;
 
 	// Filtering
-	uint32_t accelFilterWindow;
-	uint32_t gyroFilterWindow;
-	uint32_t magFilterWindow;
 	float32_t magOutlierThresh;
 
 	// Sensor scale

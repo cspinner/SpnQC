@@ -41,8 +41,8 @@ static float32_t Pitch;
 static float32_t Roll;
 static float32_t Yaw;
 static float32_t Temperature;
-static SpnNineAxisMotion_Data_Type rawNineAxesData;
-static SpnNineAxisMotion_Data_Type filtNineAxesData;
+static float32_t AccelInRaw[NUM_AXIS], GyroInRaw[NUM_AXIS], MagInRaw[NUM_AXIS];
+static float32_t AccelIn[NUM_AXIS], GyroIn[NUM_AXIS], MagIn[NUM_AXIS];
 static bool networkOutputEnabled;
 
 static void userOutputOnExit(void);
@@ -80,8 +80,8 @@ void spnUserOutputUpdate(uint32_t frame)
 	spnSchedulerGetIntTime(&intElapsedSec, &intElapsedMSec, &intElapsedUSec);
 	spnSchedulerGetMaxIntTime(&intElapsedMaxSec, &intElapsedMaxMSec, &intElapsedMaxUSec);
 	spnSensorGetPrincipalAxes(&Pitch, &Roll, &Yaw);
-	spnSensorGetNineAxesData(&filtNineAxesData);
-	Temperature = spnSensorGetTemperature();
+	spnSensorGetNineAxesData(AccelIn, GyroIn, MagIn);
+	spnSensorGetTemperature(&Temperature);
 
 	// Output the data
 	if((frame % 2) == 0)
@@ -95,7 +95,7 @@ void spnUserOutputUpdate(uint32_t frame)
 void spnUserOutputSensorUpdate(uint32_t frame)
 {
 	spnSensorGetPrincipalAxes(&Pitch, &Roll, &Yaw);
-	spnSensorGetRawNineAxesData(&rawNineAxesData, frame);
+	spnSensorGetRawNineAxesData(AccelInRaw, GyroInRaw, MagInRaw, frame);
 	spnSchedulerGetSensorPollTime(&senElapsedSec, &senElapsedMSec, &senElapsedUSec);
 	spnSchedulerGetMaxSensorPollTime(&senElapsedMaxSec, &senElapsedMaxMSec, &senElapsedMaxUSec);
 	spnSchedulerGetSenStart2StartTime(&senS2SElapsedSec, &senS2SElapsedMSec, &senS2SElapsedUSec);
@@ -134,7 +134,7 @@ static void userOutputConsole(void)
 //			filtNineAxesData.accel.z);  strcat(buffer, tempBuf);
 
 	sprintf(tempBuf, "\n"); strcat(buffer, tempBuf);
-	sprintf(tempBuf, "Input Pulse 0: %u\n", spnServoGetPulseWidth(0)); strcat(buffer, tempBuf);
+//	sprintf(tempBuf, "Input Pulse 0: %u\n", HAL_SERVO_PULSE_WIDTH_GET(0)); strcat(buffer, tempBuf);
 
 	for(uint32_t i = 0; i < 4; i++)
 	{
@@ -188,7 +188,7 @@ static void userOutputFile(void)
 	}
 
 	// write data to file
-	sprintf(tempBuf, "%s,%s,%i,%.1f,%.1f,%.1f,%.1f,%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%u,%u,%u,%u,%u,%u,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f\n",
+	sprintf(tempBuf, "%s,%s,%i,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%u,%u,%u,%u,%u,%u,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f\n",
 			spnModeGetString(),
 			spnCommandGetModeString(),
 			spnSchedulerGetFrameCount(),
@@ -196,7 +196,6 @@ static void userOutputFile(void)
 			Pitch,
 			Roll,
 			Temperature,
-			spnServoGetPulseWidth(0),
 			spnMotorsGet(0),
 			spnMotorsGet(1),
 			spnMotorsGet(2),
@@ -211,12 +210,12 @@ static void userOutputFile(void)
 			intElapsedSec,
 			intElapsedMSec,
 			intElapsedUSec,
-			filtNineAxesData.gyro[X_AXIS],
-			filtNineAxesData.gyro[Y_AXIS],
-			filtNineAxesData.gyro[Z_AXIS],
-			filtNineAxesData.accel[X_AXIS],
-			filtNineAxesData.accel[Y_AXIS],
-			filtNineAxesData.accel[Z_AXIS]);
+			GyroIn[X_AXIS],
+			GyroIn[Y_AXIS],
+			GyroIn[Z_AXIS],
+			AccelIn[X_AXIS],
+			AccelIn[Y_AXIS],
+			AccelIn[Z_AXIS]);
 
 	spnUtilsWriteToFile(pOutputFile, tempBuf);
 }
@@ -245,12 +244,12 @@ static void userOutputSensorDataFile(void)
 			Yaw,
 			Pitch,
 			Roll,
-			rawNineAxesData.gyro[X_AXIS],
-			rawNineAxesData.gyro[Y_AXIS],
-			rawNineAxesData.gyro[Z_AXIS],
-			rawNineAxesData.accel[X_AXIS],
-			rawNineAxesData.accel[Y_AXIS],
-			rawNineAxesData.accel[Z_AXIS],
+			GyroInRaw[X_AXIS],
+			GyroInRaw[Y_AXIS],
+			GyroInRaw[Z_AXIS],
+			AccelInRaw[X_AXIS],
+			AccelInRaw[Y_AXIS],
+			AccelInRaw[Z_AXIS],
 			senElapsedMSec,
 			senElapsedUSec,
 			senS2SElapsedMSec,

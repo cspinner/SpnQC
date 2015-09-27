@@ -7,6 +7,7 @@
 
 #include "spnQC.h"
 #include "spnPID.h"
+#include "HAL.h"
 #include <stdlib.h>
 
 typedef enum
@@ -60,7 +61,7 @@ bool spnCommandInit(void)
 
 	const SpnQC_Config_Type* const pCfg = spnConfigGet();
     
-    if(spnServoInit(pCfg->transceiver.chanCount, &pCfg->transceiver.gpioPin[0], pCfg->motor.chanCount, &pCfg->motor.gpioPin[0]) == EXIT_SUCCESS)
+    if(spnMotorsInit() == EXIT_SUCCESS)
     {
         // Configure controller PIDs, Motor Outputs, Transceiver Inputs
         if( (pitchRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, cmdInterval,
@@ -75,7 +76,6 @@ bool spnCommandInit(void)
                     pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == EXIT_SUCCESS) &&
             (yawAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, cmdInterval,
                     pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == EXIT_SUCCESS) &&
-            (spnMotorsInit() == EXIT_SUCCESS) &&
             (spnTransceiverInit() == EXIT_SUCCESS))
         {
         	for(uint32_t i = 0; i < pCfg->motor.chanCount; i++)

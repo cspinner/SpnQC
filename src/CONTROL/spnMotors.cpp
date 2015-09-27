@@ -6,6 +6,7 @@
  */
 
 #include "spnQC.h"
+#include "HAL.h"
 #include <stdlib.h>
 
 // y = mc + b  --- linear relationship between command % and pulse width
@@ -24,6 +25,9 @@ bool spnMotorsInit(void)
     intercept = pCfg->motor.pulseWidthZeroThrottle;
     motorCount = pCfg->motor.chanCount;
     
+    // Initialize servo outputs
+    HAL_SERVO_OUTPUT_INIT(pCfg->motor.chanCount, &pCfg->motor.gpioPin[0]);
+
     atexit(&motorsOnExit);
     
 	return EXIT_SUCCESS;
@@ -35,13 +39,15 @@ void spnMotorsSet(uint32_t motorNum, float32_t cmdPct)
 	uint32_t pulseWidthUsec = (uint32_t)(slope*cmdPct + intercept);
 
 	// command the servo driver
-	spnServoSetPulseWidth(motorNum, pulseWidthUsec);
+	HAL_SERVO_PULSE_WIDTH_SET(motorNum, pulseWidthUsec);
 }
 
 // Get motor pct 0-100%
 float32_t spnMotorsGet(uint32_t motorNum)
 {
-	uint32_t pulseWidthUsec = spnServoGetCommandedPulseWidth(motorNum);
+	uint32_t pulseWidthUsec;
+	HAL_SERVO_GET_COMMANDED_PULSE_WIDTH(motorNum, &pulseWidthUsec);
+
 	float32_t cmdPct = (((float32_t)pulseWidthUsec - intercept)/slope);
 
 	return clamp(cmdPct, 0.0, 100.0);
@@ -58,18 +64,18 @@ void spnMotorsCalibrateDrive(uint32_t level)
 	{
 		for(uint32_t i = 0; i < motorCount; i++)
 		{
-			spnServoSetPulseWidth(i, pulseWidths[level]);
+			HAL_SERVO_PULSE_WIDTH_SET(i, pulseWidths[level]);
 		}
 	}
 	else
 	{
-		spnServoStopAllPulses();
+		HAL_SERVO_PULSES_STOP();
 	}
 }
 
 void spnMotorsStopAll(void)
 {
-	spnServoStopAllPulses();
+	HAL_SERVO_PULSES_STOP();
 }
 
 static void motorsOnExit(void)

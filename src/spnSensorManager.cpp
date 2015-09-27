@@ -6,7 +6,7 @@
  */
 
 #include "spnQC.h"
-#include "spnNineAxisMotion.h"
+#include "HAL.h"
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
@@ -18,38 +18,7 @@ extern "C"
 
 using namespace std;
 
-static SpnNineAxisMotion MPU9250;
-static SpnNineAxisMotion_Data_Type SpnNineAxisMotionData;
 static float32_t Pitch, Yaw, Roll;
-
-static bool initMPU9250(void)
-{
-	const SpnQC_Config_Type* const pCfg = spnConfigGet();
-
-	SpnNineAxisMotion_Cfg_Type cfg_mpu9250;
-
-	// Copy config data
-	cfg_mpu9250.chipSelect = pCfg->spi.chipSelect;
-	cfg_mpu9250.speed = pCfg->spi.speed;
-	cfg_mpu9250.accFsSel = pCfg->mpu9250.accFsSel;
-	cfg_mpu9250.gyroFsSel = pCfg->mpu9250.gyroFsSel;
-	cfg_mpu9250.magOutlierThresh = pCfg->mpu9250.magOutlierThresh;
-	cfg_mpu9250.accelFilterWindow = pCfg->mpu9250.accelFilterWindow;
-	cfg_mpu9250.gyroFilterWindow = pCfg->mpu9250.gyroFilterWindow;
-	cfg_mpu9250.magFilterWindow = pCfg->mpu9250.magFilterWindow;
-
-	for(uint32_t axis = X_AXIS; axis < NUM_AXIS; axis++)
-	{
-		cfg_mpu9250.calibration.accel[axis] = pCfg->mpu9250.accel[axis];
-		cfg_mpu9250.calibration.gyro[axis] = pCfg->mpu9250.gyro[axis];
-		cfg_mpu9250.calibration.magb[axis] = pCfg->mpu9250.magb[axis];
-		cfg_mpu9250.calibration.mags[axis] = pCfg->mpu9250.mags[axis];
-	}
-
-	beta = pCfg->mpu9250.beta;
-
-	return MPU9250.configure(&cfg_mpu9250);
-}
 
 static void quaternionToEuler(float32_t* quat0, float32_t* quat1, float32_t* quat2, float32_t* quat3,
 						      float32_t* yawRad, float32_t* pitchRad, float32_t* rollRad)
@@ -108,8 +77,13 @@ bool spnSensorManagerInit(void)
 {
 	bool status = EXIT_FAILURE;
 
+	const SpnQC_Config_Type* const pCfg = spnConfigGet();
+
 	// Configure sensors
-	status = initMPU9250();
+	status = HAL_IMU_INIT();
+
+	// Set beta used in Madgwick
+	beta = pCfg->mpu9250.beta;
 
 	return status;
 }
@@ -117,29 +91,23 @@ bool spnSensorManagerInit(void)
 void spnSensorManagerPollSensors(void)
 {
 	// Acquire Sensor Data
-	MPU9250.acquireData();
+	HAL_IMU_UPDATE();
 }
 
-void spnSensorManagerUpdate(void)
+void spnSensorManagerProcessData(void)
 {
-	uint32_t phNineAxisDataSize;
-
-	// Convert Sensor Data
-	MPU9250.retrieveData(&phNineAxisDataSize, &SpnNineAxisMotionData);
-
 	float32_t yawRad, pitchRad, rollRad;
+	float32_t accelIn[NUM_AXIS], gyroIn[NUM_AXIS], magIn[NUM_AXIS];
+
+	// Retrieve the sensor data
+	spnSensorGetNineAxesData(accelIn, gyroIn, magIn);
 
 	//
 	// MADGWICK
 	//
 	// Update quaternions
-	MadgwickAHRSupdateIMU(
-				SpnNineAxisMotionData.gyro[X_AXIS],
-				SpnNineAxisMotionData.gyro[Y_AXIS],
-				SpnNineAxisMotionData.gyro[Z_AXIS],
-				SpnNineAxisMotionData.accel[X_AXIS],
-				SpnNineAxisMotionData.accel[Y_AXIS],
-				SpnNineAxisMotionData.accel[Z_AXIS]);
+	MadgwickAHRSupdateIMU(gyroIn[X_AXIS], gyroIn[Y_AXIS], gyroIn[Z_AXIS],
+						  accelIn[X_AXIS], accelIn[Y_AXIS], accelIn[Z_AXIS]);
 
 	// Define output variables from updated quaternion---these are Tait-Bryan angles, commonly used in aircraft orientation.
 	// In this coordinate system, the positive z-axis is down toward Earth.
@@ -164,16 +132,9 @@ void spnSensorManagerUpdate(void)
 //
 //	// In this installation, yaw progresses from 0 to 180, then -180 to 0. Compensate for this:
 //	Yaw = (Yaw + 180.0)/2.0;
-	complementaryFilter(
-			SpnNineAxisMotionData.gyro[X_AXIS],
-			SpnNineAxisMotionData.gyro[Y_AXIS],
-			SpnNineAxisMotionData.gyro[Z_AXIS],
-			SpnNineAxisMotionData.accel[X_AXIS],
-			SpnNineAxisMotionData.accel[Y_AXIS],
-			SpnNineAxisMotionData.accel[Z_AXIS],
-			&Pitch, &Roll,
-			0.99, 0.01,
-			0.030);
+	complementaryFilter(gyroIn[X_AXIS], gyroIn[Y_AXIS], gyroIn[Z_AXIS],
+					    accelIn[X_AXIS], accelIn[Y_AXIS], accelIn[Z_AXIS],
+						&Pitch, &Roll, 0.99, 0.01, 0.030);
 }
 
 void spnSensorGetPrincipalAxes(float32_t* pPitch, float32_t* pRoll, float32_t* pYaw)
@@ -183,19 +144,17 @@ void spnSensorGetPrincipalAxes(float32_t* pPitch, float32_t* pRoll, float32_t* p
 	*pYaw = Yaw;
 }
 
-void spnSensorGetRawNineAxesData(SpnNineAxisMotion_Data_Type* pSensorData, uint32_t index)
+void spnSensorGetNineAxesData(float32_t* accel, float32_t* gyro, float32_t* mag)
 {
-	uint32_t phNineAxisDataSize;
-
-	MPU9250.retrieveData((void*)index, &phNineAxisDataSize, pSensorData);
+	HAL_IMU_READ(accel, gyro, mag);
 }
 
-void spnSensorGetNineAxesData(SpnNineAxisMotion_Data_Type* pSensorData)
+void spnSensorGetRawNineAxesData(float32_t* accel, float32_t* gyro, float32_t* mag, uint32_t frame)
 {
-	*pSensorData = SpnNineAxisMotionData;
+	HAL_IMU_READ_RAW(accel, gyro, mag, frame);
 }
 
-float32_t spnSensorGetTemperature(void)
+void spnSensorGetTemperature(float32_t* temperature)
 {
-	return SpnNineAxisMotionData.temperature;
+	HAL_IMU_TEMPERATURE_GET(temperature);
 }

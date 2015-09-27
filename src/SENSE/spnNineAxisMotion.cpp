@@ -209,7 +209,14 @@ void SpnNineAxisMotion::writeMagRegisterMask(uint32_t address, char mask, char d
 SpnNineAxisMotion::SpnNineAxisMotion(void)
 :SpnSensor()
 {
-
+	spi_fd = 0;
+	chipSelect = 0;
+	speed = 0;
+	accFsSel = 0;
+	gyroFsSel = 0;
+	acquireCount = 0;
+	magOutlierThresh = 0;
+	temperatureData = 0;
 }
 
 bool SpnNineAxisMotion::configure(void* cfg)
@@ -435,7 +442,7 @@ bool SpnNineAxisMotion::retrieveData(uint32_t* size, void* data)
 		// Average every pair of samples
 		for(uint32_t axis = X_AXIS; axis < NUM_AXIS; axis++)
 		{
-		    newindex = 0;
+			newindex = 0;
 
 			for(uint32_t i = 0; i < (acquireCount/2); i++)
 			{

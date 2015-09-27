@@ -6,6 +6,7 @@
  */
 
 #include "spnQC.h"
+#include "HAL.h"
 #include <stdlib.h>
 
 static bool overrideModeEnabled = false;
@@ -16,6 +17,9 @@ bool spnTransceiverInit(void)
     
     overrideModeEnabled = pCfg->transceiver.useTerminal ||
     				      pCfg->transceiver.useNetworkInput;
+
+    // Initialize servo inputs
+    HAL_SERVO_INPUT_INIT(pCfg->transceiver.chanCount, &pCfg->transceiver.gpioPin[0]);
 
 	return EXIT_SUCCESS;
 }

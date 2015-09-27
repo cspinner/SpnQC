@@ -24,8 +24,6 @@
 #define SENSOR_FRAME_TIME_USEC 5000
 #define MINOR_FRAME_TIME_USEC 30000
 
-#define OUTPUT_PIN_STATUS_LED 27
-
 #define PI 3.1415926538
 
 #define min(a,b) \
@@ -115,12 +113,12 @@ void spnSchedulerGetMaxIntTime(uint32_t* pSec,
 uint32_t spnSchedulerGetFrameCount(void);
 
 bool spnSensorManagerInit(void);
-void spnSensorManagerUpdate(void);
+void spnSensorManagerProcessData(void);
 void spnSensorManagerPollSensors(void);
 void spnSensorGetPrincipalAxes(float32_t* pPitch, float32_t* pRoll, float32_t* pYaw);
-void spnSensorGetRawNineAxesData(SpnNineAxisMotion_Data_Type* pSensorData, uint32_t index);
-void spnSensorGetNineAxesData(SpnNineAxisMotion_Data_Type* pSensorData);
-float32_t spnSensorGetTemperature(void);
+void spnSensorGetNineAxesData(float32_t* accel, float32_t* gyro, float32_t* mag);
+void spnSensorGetRawNineAxesData(float32_t* accel, float32_t* gyro, float32_t* mag, uint32_t frame);
+void spnSensorGetTemperature(float32_t* temperature);
 
 bool spnCommandInit(void);
 void spnCommandUpdate(void);
@@ -160,12 +158,6 @@ void spnMotorsSet(uint32_t motorNum, float32_t cmdPct);
 float32_t spnMotorsGet(uint32_t motorNum);
 void spnMotorsCalibrateDrive(uint32_t level);
 void spnMotorsStopAll(void);
-
-bool spnServoInit(uint32_t inputCount, const uint32_t* gpioInputList, uint32_t outputCount, const uint32_t* gpioOutputList);
-uint32_t spnServoGetPulseWidth(uint32_t gpioIndex);
-bool spnServoSetPulseWidth(uint32_t gpioIndex, uint32_t pulseWidthUsec);
-uint32_t spnServoGetCommandedPulseWidth(uint32_t gpioIndex);
-bool spnServoStopAllPulses(void);
 
 bool spnTransceiverInit(void);
 float32_t spnTransceiverGetThrottlePct(void);

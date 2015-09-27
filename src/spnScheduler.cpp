@@ -5,7 +5,7 @@
  *      Author: cspinner
  */
 #include "spnQC.h"
-#include "wiringPi.h"
+#include "HAL.h"
 #include <sys/time.h>
 
 using namespace std;
@@ -142,12 +142,11 @@ void spnSchedulerForeground(void)
 	if(spnMinorFrameCount %
 			(uint32_t)((2000/(MINOR_FRAME_TIME_USEC/1000))/LED_STATUS_STEP_COUNT) == 0)
 	{
-		digitalWrite (OUTPUT_PIN_STATUS_LED,
-				LED_STATUS_PATTERN[spnModeGet()][pinLevelPosition]) ;
+		HAL_STATUS_LED_SET(LED_STATUS_PATTERN[spnModeGet()][pinLevelPosition]) ;
 		pinLevelPosition = (pinLevelPosition+1) % LED_STATUS_STEP_COUNT;
 	}
 
-	spnSensorManagerUpdate();
+	spnSensorManagerProcessData();
 	spnCommandUpdate();
 
 	// consume the input character

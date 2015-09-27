@@ -14,11 +14,13 @@ using namespace std;
 SpnSensor::SpnSensor(void)
 {
 	isConfigured = false;
+	sensorStatus = EXIT_FAILURE;
 }
 
 bool SpnSensor::configure(void)
 {
 	isConfigured = true;
+	sensorStatus = EXIT_SUCCESS;
 
 	return EXIT_SUCCESS;
 }

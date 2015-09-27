@@ -5,7 +5,7 @@
  *      Author: cspinner
  */
 
-#include "SpnQC.h"
+#include "spnQC.h"
 #include "spnFilter.h"
 #include <stdint.h>
 #include <stdlib.h>
@@ -15,7 +15,7 @@ static float32_t lp2_7_200(float32_t rawData[], uint32_t dataCount, float32_t fi
 
 SpnFilter::SpnFilter(void)
 {
-
+	pFilterFunc = NULL;
 }
 
 bool SpnFilter::configure(SpnFilter_Select_Type filterSel)
@@ -43,14 +43,21 @@ static float32_t lp2_7_200(float32_t rawData[], uint32_t dataCount, float32_t gx
 
 	float32_t filtData = 0.0;
 
-	for(uint32_t i = 0; i < dataCount; i++)
+	if(dataCount == 0)
 	{
-		gxv[0] = gxv[1]; gxv[1] = gxv[2];
-		gxv[2] = rawData[i] / GAIN;
-		gyv[0] = gyv[1]; gyv[1] = gyv[2];
-		gyv[2] =   (gxv[0] + gxv[2]) + 2 * gxv[1]
-					 + ( -0.7327260304 * gyv[0]) + (  1.6909963769 * gyv[1]);
-		filtData = gyv[2];
+		for(uint32_t i = 0; i < dataCount; i++)
+		{
+			gxv[0] = gxv[1]; gxv[1] = gxv[2];
+			gxv[2] = rawData[i] / GAIN;
+			gyv[0] = gyv[1]; gyv[1] = gyv[2];
+			gyv[2] =   (gxv[0] + gxv[2]) + 2 * gxv[1]
+						 + ( -0.7327260304 * gyv[0]) + (  1.6909963769 * gyv[1]);
+			filtData = gyv[2];
+		}
+	}
+	else
+	{
+		filtData = gyv[2]; // maintain last value
 	}
 
 	return filtData;
