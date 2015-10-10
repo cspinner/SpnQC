@@ -16,11 +16,17 @@ using namespace std;
 
 SpnPID::SpnPID(void)
 {
-	m_ErrorPrev = 0.0;
-	m_Proportional = 0.0;
-    m_Integral = 0.0;
-    m_Derivative = 0.0;
-    m_Output = 0.0;
+	m_Kp = 0;
+	m_Ki = 0;
+	m_Kd = 0;
+	m_MinOut = 0;
+	m_MaxOut = 0;
+	m_Proportional = 0;
+	m_Interval = 0;
+	m_Derivative = 0;
+	m_Output = 0;
+	m_ErrorPrev = 0;
+	m_Integral = 0;
 }
 
 bool SpnPID::configure(float32_t minOut, float32_t maxOut, float32_t interval,

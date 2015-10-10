@@ -9,18 +9,15 @@
 #define SPNQC_H_
 
 #include "spnConfig.h"
-#include "spnNineAxisMotion.h"
-#include <time.h>
+#include "OSAL.h"
 #include <stdio.h>
 #include <stddef.h>
-#include <signal.h>
 #include <stdint.h>
 
 //
 // DEFINES
 //
 //#define NO_FILTER 1
-#define WORKING_DIRECTORY "/home/pi/Projects/SpnQC/"
 #define SENSOR_FRAME_TIME_USEC 5000
 #define MINOR_FRAME_TIME_USEC 30000
 
@@ -78,8 +75,6 @@ typedef double float64_t;
 bool spnInit(void);
 bool spnInitCompleted(void);
 
-void spnHandleRegisterCallback(__sighandler_t pCallback);
-void spnHandleSignal(int32_t);
 bool spnHandleInit(void);
 void spnHandleStartTimer(void);
 void spnHandleHaltTimer(void);
@@ -128,20 +123,21 @@ const char* spnModeGetString(void);
 System_Mode_Type spnModeGet(void);
 void spnModeUpdate(void);
 
-bool spnUtilsTimedOut(struct timeval* pTsEnd);
+bool spnUtilsTimedOut(OSAL_Time_Type* pTsEnd);
 void spnUtilsWaitUsec(uint32_t delayUsec);
-struct timeval spnUtilsAddToTimestamp(struct timeval* pTimeStamp, __time_t sec, __suseconds_t usec);
-void spnUtilsMarkTimestamp(struct timeval* pTimeStamp);
-struct timeval spnUtilsGetElapsedTime(struct timeval* pTimeStamp);
-bool spnUtilsTimeCompare(struct timeval* pTsA, struct timeval* pTsB);
-void spnUtilsOpenFileForRead(FILE **pFile, const char *pPathname);
-size_t spnUtilsReadLine(FILE *pFile, char* pDest, size_t destSizeBytes);
-bool spnUtilsReadNextFloatFromFile(FILE* pFile, float32_t* pDest);
-bool spnUtilsReadNextIntFromFile(FILE* pFile, int32_t* pDest);
-void spnUtilsOpenFileForAppend(FILE **pFile, const char *pPathname);
-void spnUtilsCreateFileForWrite(FILE **pFile, const char *pPathname);
-void spnUtilsWriteToFile(FILE *pFile, const char *pBuf);
-void spnUtilsCloseFile(FILE *pFile);
+OSAL_Time_Type spnUtilsAddToTimestamp(OSAL_Time_Type* pTimeStamp, uint32_t sec, uint32_t usec);
+void spnUtilsMarkTimestamp(OSAL_Time_Type* pTimeStamp);
+OSAL_Time_Type spnUtilsGetElapsedTime(OSAL_Time_Type* pTimeStamp);
+bool spnUtilsTimeCompare(OSAL_Time_Type* pTsA, OSAL_Time_Type* pTsB);
+bool spnUtilsOpenFileForRead(uint32_t* pFileId, const char *pPathname);
+uint32_t spnUtilsReadLine(uint32_t fileId, char* pDest, size_t destSizeBytes);
+bool spnUtilsReadNextFloatFromFile(uint32_t fileId, float32_t* pDest);
+bool spnUtilsReadNextIntFromFile(uint32_t fileId, int32_t* pDest);
+bool spnUtilsOpenFileForAppend(uint32_t* pFileId, const char *pPathname);
+bool spnUtilsCreateFileForWrite(uint32_t* pFileId, const char *pPathname);
+void spnUtilsWriteToFile(uint32_t fileId, const char *pBuf);
+void spnUtilsCloseInputFile(uint32_t fileId);
+void spnUtilsCloseOutputFile(uint32_t fileId);
 
 bool spnUserOutputInit(void);
 void spnUserOutputUpdate(uint32_t frame);

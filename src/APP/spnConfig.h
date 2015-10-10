@@ -8,8 +8,8 @@
 #ifndef SPNCONFIG_H_
 #define SPNCONFIG_H_
 
+#include "OSAL.h"
 #include <stdint.h>
-#include <time.h>
 
 #define USER_GPIO_MAX 32
 
@@ -49,7 +49,7 @@ typedef struct
         bool useNetworkInput;
         bool outputToNetwork;
         uint16_t netPort;
-        timeval netHeartbeatInterval;
+        OSAL_Time_Type netHeartbeatInterval;
 	} transceiver;
 
 	struct

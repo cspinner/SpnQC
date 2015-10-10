@@ -10,11 +10,9 @@ CPP_SRCS += \
 ../src/spnHandlers.cpp \
 ../src/spnInit.cpp \
 ../src/spnMode.cpp \
-../src/spnMotors.cpp \
 ../src/spnScheduler.cpp \
 ../src/spnSensorManager.cpp \
 ../src/spnServer.cpp \
-../src/spnTransceiver.cpp \
 ../src/spnUserInput.cpp \
 ../src/spnUserOutput.cpp \
 ../src/spnUtils.cpp 
@@ -26,11 +24,9 @@ OBJS += \
 ./src/spnHandlers.o \
 ./src/spnInit.o \
 ./src/spnMode.o \
-./src/spnMotors.o \
 ./src/spnScheduler.o \
 ./src/spnSensorManager.o \
 ./src/spnServer.o \
-./src/spnTransceiver.o \
 ./src/spnUserInput.o \
 ./src/spnUserOutput.o \
 ./src/spnUtils.o 
@@ -42,11 +38,9 @@ CPP_DEPS += \
 ./src/spnHandlers.d \
 ./src/spnInit.d \
 ./src/spnMode.d \
-./src/spnMotors.d \
 ./src/spnScheduler.d \
 ./src/spnSensorManager.d \
 ./src/spnServer.d \
-./src/spnTransceiver.d \
 ./src/spnUserInput.d \
 ./src/spnUserOutput.d \
 ./src/spnUtils.d 
@@ -55,8 +49,8 @@ CPP_DEPS += \
 # Each subdirectory must supply rules for building sources it contributes
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
-	@echo 'Invoking: Cross G++ Compiler'
-	arm-none-linux-gnueabi-g++ -I"/Users/cspinner/Documents/workspace/pigpio" -I"/Users/cspinner/Documents/workspace/SpnQC/src" -I"/Users/cspinner/Documents/workspace/SpnQC/src/HAL" -I"/Users/cspinner/Documents/workspace/SpnQC/src/OSAL" -I"/Users/cspinner/Documents/workspace/wiringPi/wiringPi/include" -I"/Users/cspinner/Documents/workspace/SpnQC/src/SUPPORT" -I/Volumes/xtools/arm-none-linux-gnueabi/arm-none-linux-gnueabi/include/c++/4.8.2 -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	@echo 'Invoking: GCC C++ Compiler'
+	g++ -IZ:\Documents\workspace\pigpio -IZ:\Documents\workspace\SpnQC\src -IZ:\Documents\workspace\SpnQC\src\HAL -IZ:\Documents\workspace\SpnQC\src\OSAL -IZ:\Documents\workspace\wiringpi\include -IZ:\Documents\workspace\SpnQC\src\SUPPORT -IZ:\Documents\workspace\SpnQC\src\SENSE -IZ:\Documents\workspace\SpnQC\src\CONTROL -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

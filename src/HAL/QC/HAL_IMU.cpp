@@ -5,12 +5,12 @@
  *      Author: cspinner
  */
 
+#include "nineAxisMotionSensor.h"
 #include "spnConfig.h"
-#include "spnNineAxisMotion.h"
 #include <stdlib.h>
 #include <stdint.h>
 
-static SpnNineAxisMotion MPU9250;
+static NineAxisMotionSensor MPU9250;
 static float Temperature;
 
 

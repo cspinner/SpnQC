@@ -5,8 +5,8 @@
  *      Author: cspinner
  */
 
-#ifndef SENSE_SPNNINEAXISMOTION_H_
-#define SENSE_SPNNINEAXISMOTION_H_
+#ifndef SENSE_NINEAXISMOTIONSENSOR_H_
+#define SENSE_NINEAXISMOTIONSENSOR_H_
 
 #include "spnSensor.h"
 #include "spnFilter.h"
@@ -85,11 +85,11 @@ typedef struct
 } Mag_Register_Set_Type;
 
 // For the MPU-9250 sensor
-class SpnNineAxisMotion : public SpnSensor
+class NineAxisMotionSensor : public SpnSensor
 {
 
 public:
-	SpnNineAxisMotion(void);
+	NineAxisMotionSensor(void);
 
 	bool configure(void* cfg);
 
@@ -138,4 +138,4 @@ private:
 
 
 
-#endif /* SENSE_SPNNINEAXISMOTION_H_ */
+#endif /* SENSE_NINEAXISMOTIONSENSOR_H_ */

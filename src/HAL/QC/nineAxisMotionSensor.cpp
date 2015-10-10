@@ -7,9 +7,9 @@
 
 #include "spnQC.h"
 #include "spnSensor.h"
-#include "spnNineAxisMotion.h"
 #include "wiringPiSPI.h"
 #include "spnFilter.h"
+#include "nineAxisMotionSensor.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -111,7 +111,7 @@ const float32_t ACCEL_SENSITIVITY[4] =
 	16384.0, 8192.0, 4096.0, 2048.0
 };
 
-char SpnNineAxisMotion::readRegister(uint32_t address)
+char NineAxisMotionSensor::readRegister(uint32_t address)
 {
 	char spiTransfer[2];
 
@@ -123,7 +123,7 @@ char SpnNineAxisMotion::readRegister(uint32_t address)
 	return spiTransfer[1];
 }
 
-void SpnNineAxisMotion::writeRegister(uint32_t address, char data)
+void NineAxisMotionSensor::writeRegister(uint32_t address, char data)
 {
 	char spiTransfer[2];
 
@@ -133,7 +133,7 @@ void SpnNineAxisMotion::writeRegister(uint32_t address, char data)
 	wiringPiSPIDataRW(spi_fd, (uint8_t*)&spiTransfer, sizeof(spiTransfer));
 }
 
-char SpnNineAxisMotion::readRegisterMask(uint32_t address, char mask)
+char NineAxisMotionSensor::readRegisterMask(uint32_t address, char mask)
 {
 	char maskIn = mask;
 	char valueRead = readRegister(address) & mask;
@@ -147,7 +147,7 @@ char SpnNineAxisMotion::readRegisterMask(uint32_t address, char mask)
 	return valueRead;
 }
 
-void SpnNineAxisMotion::writeRegisterMask(uint32_t address, char mask, char data)
+void NineAxisMotionSensor::writeRegisterMask(uint32_t address, char mask, char data)
 {
 	char maskIn = mask;
 	char writeData = data;
@@ -162,7 +162,7 @@ void SpnNineAxisMotion::writeRegisterMask(uint32_t address, char mask, char data
 	writeRegister(address, ((readData & ~mask) | writeData));
 }
 
-void SpnNineAxisMotion::readMagRegisterSet(uint32_t startAddress, char readCount, char* pOut)
+void NineAxisMotionSensor::readMagRegisterSet(uint32_t startAddress, char readCount, char* pOut)
 {
 	uint32_t i;
 
@@ -179,7 +179,7 @@ void SpnNineAxisMotion::readMagRegisterSet(uint32_t startAddress, char readCount
 	}
 }
 
-void SpnNineAxisMotion::writeMagRegister(char address, char data)
+void NineAxisMotionSensor::writeMagRegister(char address, char data)
 {
 	writeRegister(MPU9250_I2C_SLV0_ADDR_ADDR, 0x0C); // Write to I2C address 12
 	writeRegister(MPU9250_I2C_SLV0_REG_ADDR, address); // Reg address
@@ -190,7 +190,7 @@ void SpnNineAxisMotion::writeMagRegister(char address, char data)
 	spnUtilsWaitUsec(1000);
 }
 
-void SpnNineAxisMotion::writeMagRegisterMask(uint32_t address, char mask, char data)
+void NineAxisMotionSensor::writeMagRegisterMask(uint32_t address, char mask, char data)
 {
 	char maskIn = mask;
 	char writeData = data;
@@ -206,7 +206,7 @@ void SpnNineAxisMotion::writeMagRegisterMask(uint32_t address, char mask, char d
 }
 
 // For the MPU9250 sensor
-SpnNineAxisMotion::SpnNineAxisMotion(void)
+NineAxisMotionSensor::NineAxisMotionSensor(void)
 :SpnSensor()
 {
 	spi_fd = 0;
@@ -219,7 +219,7 @@ SpnNineAxisMotion::SpnNineAxisMotion(void)
 	temperatureData = 0;
 }
 
-bool SpnNineAxisMotion::configure(void* cfg)
+bool NineAxisMotionSensor::configure(void* cfg)
 {
 	SpnNineAxisMotion_Cfg_Type* mpu9250_config = (SpnNineAxisMotion_Cfg_Type*)cfg;
 	bool status = EXIT_SUCCESS;
@@ -353,7 +353,7 @@ bool SpnNineAxisMotion::configure(void* cfg)
 	return status;
 }
 
-void SpnNineAxisMotion::acquireData(void)
+void NineAxisMotionSensor::acquireData(void)
 {
 	SpnSensor::acquireData();
 
@@ -400,7 +400,7 @@ void SpnNineAxisMotion::acquireData(void)
 //  filtMagData[Z_AXIS] *= calData.mags[Z_AXIS];
 }
 
-bool SpnNineAxisMotion::retrieveData(void* opt, uint32_t* size, void* data)
+bool NineAxisMotionSensor::retrieveData(void* opt, uint32_t* size, void* data)
 {
 	SpnNineAxisMotion_Data_Type output;
 	uint32_t idx = (uint32_t)opt;
@@ -426,7 +426,7 @@ bool SpnNineAxisMotion::retrieveData(void* opt, uint32_t* size, void* data)
 	return getStatus();
 }
 
-bool SpnNineAxisMotion::retrieveData(uint32_t* size, void* data)
+bool NineAxisMotionSensor::retrieveData(uint32_t* size, void* data)
 {
 	SpnNineAxisMotion_Data_Type output;
 

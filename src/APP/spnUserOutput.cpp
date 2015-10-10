@@ -6,13 +6,15 @@
  */
 
 #include "spnQC.h"
+#include "HAL.h"
+#include "OSAL.h"
 #include "spnConfig.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-static FILE* pOutputFile = NULL; // output file descriptor
-static FILE* pOutputSensorFile = NULL; // output file descriptor
+static uint32_t OutputFile; // output file descriptor
+static uint32_t OutputSensorFile; // output file descriptor
 static uint32_t senElapsedSec;
 static uint32_t senElapsedMSec;
 static uint32_t senElapsedUSec;
@@ -57,10 +59,8 @@ bool spnUserOutputInit(void)
 	networkOutputEnabled = pCfg->transceiver.outputToNetwork;
 
 	// open the files
-	spnUtilsCreateFileForWrite(&pOutputFile, WORKING_DIRECTORY"/outputData.csv");
-	spnUtilsCreateFileForWrite(&pOutputSensorFile, WORKING_DIRECTORY"/outputSensorData.csv");
-
-	if(pOutputFile != NULL)
+	if((spnUtilsCreateFileForWrite(&OutputFile, "outputData.csv") == EXIT_SUCCESS) &&
+	   (spnUtilsCreateFileForWrite(&OutputSensorFile, "outputSensorData.csv") == EXIT_SUCCESS))
 	{
 		atexit(&userOutputOnExit);
 
@@ -109,7 +109,7 @@ static void userOutputConsole(void)
 	char buffer[65536];
 	char tempBuf[1024];
 
-	bzero(buffer, sizeof(buffer));
+	memset(buffer, 0, sizeof(buffer));
 
 	sprintf(buffer, "BEGINCONOUT");
 
@@ -179,10 +179,10 @@ static void userOutputFile(void)
 	{
 		// write all headings and units
 		sprintf(tempBuf, "SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,TEMP_F,INPW0,MOTCMD0,MOTCMD1,MOTCMD2,MOTCMD3,THROT,ELEV,AILER,RUDD,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US,GYROX,GYROY,GYROZ,ACCELX,ACCELY,ACCELZ\n");
-		spnUtilsWriteToFile(pOutputFile, tempBuf);
+		spnUtilsWriteToFile(OutputFile, tempBuf);
 
 		sprintf(tempBuf, ",,,DEGREES,DEGREES,DEGREES,DEG_F,USEC,PCT,PCT,PCT,PCT,PCT,DEGREES,DEGREES,DEGREES,SEC,MSEC,USEC,SEC,MSEC,USEC,DEG/S,DEG/S,DEG/S,G,G,G\n");
-		spnUtilsWriteToFile(pOutputFile, tempBuf);
+		spnUtilsWriteToFile(OutputFile, tempBuf);
 
 		isFirstOutput = false;
 	}
@@ -217,7 +217,7 @@ static void userOutputFile(void)
 			AccelIn[Y_AXIS],
 			AccelIn[Z_AXIS]);
 
-	spnUtilsWriteToFile(pOutputFile, tempBuf);
+	spnUtilsWriteToFile(OutputFile, tempBuf);
 }
 
 static void userOutputSensorDataFile(void)
@@ -227,9 +227,9 @@ static void userOutputSensorDataFile(void)
 	if(isFirstOutput)
 	{
 		// write all headings and units
-		spnUtilsWriteToFile(pOutputSensorFile,
+		spnUtilsWriteToFile(OutputSensorFile,
 				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,GYROX,GYROY,GYROZ,ACCX,ACCY,ACCZ,SEN_TIME_MS,SEN_TIME_US,SEN_S2S_TIME_MS,SEN_S2S_TIME_US\n");
-		spnUtilsWriteToFile(pOutputSensorFile,
+		spnUtilsWriteToFile(OutputSensorFile,
 				",,,DEGREES,DEGREES,DEGREES,DEG/S,DEG/S,DEG/S,G,G,G,MSEC,USEC,MSEC,USEC\n");
 
 		isFirstOutput = false;
@@ -255,13 +255,13 @@ static void userOutputSensorDataFile(void)
 			senS2SElapsedMSec,
 			senS2SElapsedUSec);
 
-	spnUtilsWriteToFile(pOutputSensorFile, buf);
+	spnUtilsWriteToFile(OutputSensorFile, buf);
 }
 
 static void userOutputOnExit(void)
 {
 	printf("Closing Output Files...\n");
-	spnUtilsCloseFile(pOutputFile);
-	spnUtilsCloseFile(pOutputSensorFile);
+	spnUtilsCloseOutputFile(OutputFile);
+	spnUtilsCloseOutputFile(OutputSensorFile);
 }
 

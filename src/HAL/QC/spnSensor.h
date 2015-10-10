@@ -8,6 +8,8 @@
 #ifndef SENSE_SPNSENSOR_H_
 #define SENSE_SPNSENSOR_H_
 
+#include <stdint.h>
+
 class SpnSensor
 {
 public:

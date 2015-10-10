@@ -7,25 +7,18 @@
 
 #include "spnQC.h"
 #include "spnConfig.h"
-#include <unistd.h>
-#include <termios.h>
-#include <signal.h>
-#include <errno.h>
+#include "OSAL.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 static bool useTerminal = false;
 static bool useNetwork = false;
 static bool isCommEstablished = false;
-static bool isTerminalStateSet = false;
-static struct termios ttystateold;
 static char charInput = 0;
-static timeval tsHeartbeatInterval;
-static timeval tsHeartbeat;
+static OSAL_Time_Type tsHeartbeatInterval;
+static OSAL_Time_Type tsHeartbeat;
 
-static uint32_t getKeyboardHit(void);
-static void setTerminalState(void);
-static void restoreTerminalState(void);
+static void userInputRestore(void);
 
 bool spnUserInputInit(void)
 {
@@ -34,26 +27,20 @@ bool spnUserInputInit(void)
 	useTerminal = pCfg->transceiver.useTerminal;
 	useNetwork = pCfg->transceiver.useNetworkInput;
 
-	tsHeartbeatInterval.tv_sec = pCfg->transceiver.netHeartbeatInterval.tv_sec;
-	tsHeartbeatInterval.tv_usec = 0;
+	tsHeartbeatInterval.seconds = pCfg->transceiver.netHeartbeatInterval.seconds;
+	tsHeartbeatInterval.microSeconds = 0;
 
 	// Inputs come from RPI2 terminal
 	if(useTerminal)
 	{
 		// Set terminal to non-canonical mode, no echo
-		setTerminalState();
+		OSAL_INPUT_KB_INIT();
 
-		if(isTerminalStateSet)
-		{
-			atexit(&restoreTerminalState);
-			isCommEstablished = true;
+		atexit(&userInputRestore);
 
-			return EXIT_SUCCESS;
-		}
-		else
-		{
-			return EXIT_FAILURE;
-		}
+		isCommEstablished = true;
+
+		return EXIT_SUCCESS;
 	}
 	// Inputs come from a networked ground station
 	else if(useNetwork)
@@ -78,10 +65,7 @@ void spnUserInputUpdate(void)
 {
 	if(useTerminal)
 	{
-		if(getKeyboardHit() != 0)
-		{
-			charInput = fgetc(stdin);
-		}
+		OSAL_INPUT_KB_GET_HIT(&charInput);
 	}
 	else if(useNetwork)
 	{
@@ -115,7 +99,7 @@ char spnUserInputCharGet(bool consume)
 
 bool spnUserInputCheckHeartbeat(void)
 {
-	struct timeval tsElapsed = spnUtilsGetElapsedTime(&tsHeartbeat);
+	OSAL_Time_Type tsElapsed = spnUtilsGetElapsedTime(&tsHeartbeat);
 
 	// Check for input from client
 	if(charInput != 0)
@@ -129,7 +113,7 @@ bool spnUserInputCheckHeartbeat(void)
 	else // no input received
 	{
 		// no input received in configured seconds?
-		if((tsElapsed.tv_sec >= tsHeartbeatInterval.tv_sec) && (tsElapsed.tv_usec >= 0))
+		if((tsElapsed.seconds >= tsHeartbeatInterval.seconds) && (tsElapsed.microSeconds >= 0))
 		{
 			// timed out
 			isCommEstablished = false;
@@ -149,50 +133,7 @@ bool spnUserInputCommEstablished(void)
 	return isCommEstablished;
 }
 
-static uint32_t getKeyboardHit(void)
+static void userInputRestore(void)
 {
-	struct timeval tv;
-	fd_set fds;
-	tv.tv_sec = 0;
-	tv.tv_usec = 0;
-	FD_ZERO(&fds);
-	FD_SET(STDIN_FILENO, &fds); //STDIN_FILENO is 0
-	select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
-
-	return FD_ISSET(STDIN_FILENO, &fds);
-}
-
-static void setTerminalState(void)
-{
-	if(!isTerminalStateSet)
-	{
-		struct termios ttystate;
-
-		//get the terminal state
-		tcgetattr(STDIN_FILENO, &ttystate);
-
-		// Save to "old" state data struct to be used for restore
-		ttystateold = ttystate;
-
-		//turn off canonical mode and echo
-		ttystate.c_lflag &= ~(ICANON|ECHO|ECHOE|ECHOK|ECHONL);
-
-		//minimum of number input read.
-		ttystate.c_cc[VMIN] = 1;
-
-		//set the terminal attributes.
-		tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
-
-		isTerminalStateSet = true;
-	}
-}
-
-static void restoreTerminalState(void)
-{
-	if(isTerminalStateSet)
-	{
-		//restore the terminal attributes.
-		printf("Restoring STDIN state...\n");
-		tcsetattr(STDIN_FILENO, TCSANOW, &ttystateold);
-	}
+	OSAL_INPUT_KB_RESTORE();
 }

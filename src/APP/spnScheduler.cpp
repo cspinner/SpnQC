@@ -6,7 +6,7 @@
  */
 #include "spnQC.h"
 #include "HAL.h"
-#include <sys/time.h>
+#include "OSAL.h"
 
 using namespace std;
 
@@ -15,16 +15,16 @@ using namespace std;
 static uint32_t spnSenFrameCount = 0;
 static uint32_t spnMinorFrameCount = 0;
 
-static struct timeval tsSenStart;
-static struct timeval tsSenElapsed;
-static struct timeval tsFgStart;
-static struct timeval tsFgElapsed;
-static struct timeval tsSenS2SElapsed;
-static struct timeval tsIntElapsed;
-static struct timeval tsSenElapsedMax = {0};
-static struct timeval tsFgElapsedMax = {0};
-static struct timeval tsSenS2SElapsedMax = {0};
-static struct timeval tsIntElapsedMax = {0};
+static OSAL_Time_Type tsSenStart;
+static OSAL_Time_Type tsSenElapsed;
+static OSAL_Time_Type tsFgStart;
+static OSAL_Time_Type tsFgElapsed;
+static OSAL_Time_Type tsSenS2SElapsed;
+static OSAL_Time_Type tsIntElapsed;
+static OSAL_Time_Type tsSenElapsedMax = {0};
+static OSAL_Time_Type tsFgElapsedMax = {0};
+static OSAL_Time_Type tsSenS2SElapsedMax = {0};
+static OSAL_Time_Type tsIntElapsedMax = {0};
 static uint32_t pinLevelPosition = 0;
 
 const uint32_t LED_STATUS_PATTERN[MODE_COUNT_E][LED_STATUS_STEP_COUNT] =
@@ -56,8 +56,8 @@ void spnSchedulerPollSensors(void)
 	static uint32_t spnFrameCountStart = 0;
 	static uint32_t sensorAcquireIndex = 0;
 
-	struct timeval tsEnd = spnUtilsAddToTimestamp(&tsSenStart, 0, SENSOR_FRAME_TIME_USEC);
-	struct timeval tsMid;
+	OSAL_Time_Type tsEnd = spnUtilsAddToTimestamp(&tsSenStart, 0, SENSOR_FRAME_TIME_USEC);
+	OSAL_Time_Type tsMid;
 
 	// wait for at least SENSOR_FRAME_TIME_USEC to elapse since the last time this function ran
 	while(!spnUtilsTimedOut(&tsEnd)) {}
@@ -174,72 +174,72 @@ void spnSchedulerGetFrameTime(uint32_t* pSec,
 						      uint32_t* pMSec,
 							  uint32_t* pUSec)
 {
-	*pSec = tsFgElapsed.tv_sec;
-	*pMSec = tsFgElapsed.tv_usec/1000;
-	*pUSec = tsFgElapsed.tv_usec%1000;
+	*pSec = tsFgElapsed.seconds;
+	*pMSec = tsFgElapsed.microSeconds/1000;
+	*pUSec = tsFgElapsed.microSeconds%1000;
 }
 
 void spnSchedulerGetSensorPollTime(uint32_t* pSec,
 								   uint32_t* pMSec,
 								   uint32_t* pUSec)
 {
-	*pSec = tsSenElapsed.tv_sec;
-	*pMSec = tsSenElapsed.tv_usec/1000;
-	*pUSec = tsSenElapsed.tv_usec%1000;
+	*pSec = tsSenElapsed.seconds;
+	*pMSec = tsSenElapsed.microSeconds/1000;
+	*pUSec = tsSenElapsed.microSeconds%1000;
 }
 
 void spnSchedulerGetMaxSensorPollTime(uint32_t* pSec,
 								   uint32_t* pMSec,
 								   uint32_t* pUSec)
 {
-	*pSec = tsSenElapsedMax.tv_sec;
-	*pMSec = tsSenElapsedMax.tv_usec/1000;
-	*pUSec = tsSenElapsedMax.tv_usec%1000;
+	*pSec = tsSenElapsedMax.seconds;
+	*pMSec = tsSenElapsedMax.microSeconds/1000;
+	*pUSec = tsSenElapsedMax.microSeconds%1000;
 }
 
 void spnSchedulerGetSenStart2StartTime(uint32_t* pSec,
 								   uint32_t* pMSec,
 								   uint32_t* pUSec)
 {
-	*pSec = tsSenS2SElapsed.tv_sec;
-	*pMSec = tsSenS2SElapsed.tv_usec/1000;
-	*pUSec = tsSenS2SElapsed.tv_usec%1000;
+	*pSec = tsSenS2SElapsed.seconds;
+	*pMSec = tsSenS2SElapsed.microSeconds/1000;
+	*pUSec = tsSenS2SElapsed.microSeconds%1000;
 }
 
 void spnSchedulerGetMaxSenStart2StartTime(uint32_t* pSec,
 								   uint32_t* pMSec,
 								   uint32_t* pUSec)
 {
-	*pSec = tsSenS2SElapsedMax.tv_sec;
-	*pMSec = tsSenS2SElapsedMax.tv_usec/1000;
-	*pUSec = tsSenS2SElapsedMax.tv_usec%1000;
+	*pSec = tsSenS2SElapsedMax.seconds;
+	*pMSec = tsSenS2SElapsedMax.microSeconds/1000;
+	*pUSec = tsSenS2SElapsedMax.microSeconds%1000;
 }
 
 void spnSchedulerGetMaxFrameTime(uint32_t* pSec,
 						         uint32_t* pMSec,
 							     uint32_t* pUSec)
 {
-	*pSec = tsFgElapsedMax.tv_sec;
-	*pMSec = tsFgElapsedMax.tv_usec/1000;
-	*pUSec = tsFgElapsedMax.tv_usec%1000;
+	*pSec = tsFgElapsedMax.seconds;
+	*pMSec = tsFgElapsedMax.microSeconds/1000;
+	*pUSec = tsFgElapsedMax.microSeconds%1000;
 }
 
 void spnSchedulerGetIntTime(uint32_t* pSec,
 						      uint32_t* pMSec,
 							  uint32_t* pUSec)
 {
-	*pSec = tsIntElapsed.tv_sec;
-	*pMSec = tsIntElapsed.tv_usec/1000;
-	*pUSec = tsIntElapsed.tv_usec%1000;
+	*pSec = tsIntElapsed.seconds;
+	*pMSec = tsIntElapsed.microSeconds/1000;
+	*pUSec = tsIntElapsed.microSeconds%1000;
 }
 
 void spnSchedulerGetMaxIntTime(uint32_t* pSec,
 						         uint32_t* pMSec,
 							     uint32_t* pUSec)
 {
-	*pSec = tsIntElapsedMax.tv_sec;
-	*pMSec = tsIntElapsedMax.tv_usec/1000;
-	*pUSec = tsIntElapsedMax.tv_usec%1000;
+	*pSec = tsIntElapsedMax.seconds;
+	*pMSec = tsIntElapsedMax.microSeconds/1000;
+	*pUSec = tsIntElapsedMax.microSeconds%1000;
 }
 
 uint32_t spnSchedulerGetFrameCount(void)

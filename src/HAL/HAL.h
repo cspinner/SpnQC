@@ -13,6 +13,14 @@
 #define LED_ON 1
 #define LED_OFF 0
 
+enum
+{
+	X_AXIS,
+	Y_AXIS,
+	Z_AXIS,
+	NUM_AXIS,
+};
+
 bool HAL_INIT(void);
 
 bool HAL_STATUS_LED_SET(uint32_t state);

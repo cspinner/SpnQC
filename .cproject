@@ -23,7 +23,7 @@
 							<builder buildPath="${workspace_loc:/HelloRPiWorld}/Debug" id="cdt.managedbuild.builder.gnu.cross.38024165" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Pi2"/>
-									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Sim-OSX"/>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Sim-Win"/>
 								</outputEntries>
 							</builder>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.523798769" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
@@ -32,13 +32,20 @@
 								<option id="gnu.c.compiler.option.dialect.std.1131631424" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.791820020" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/pigpio}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/HAL}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/wiringPi/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/SUPPORT}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/SENSE}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/CONTROL}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/APP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/APP/SUPPORT}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/HAL}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/OSAL}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/wiringPi/include}&quot;"/>
 									<listOptionValue builtIn="false" value="/Volumes/xtools/arm-none-linux-gnueabi/arm-none-linux-gnueabi/include/c++/4.8.2"/>
+									<listOptionValue builtIn="false" value="../SpnQC/pigpio"/>
+									<listOptionValue builtIn="false" value="../SpnQC/SpnQC/src/HAL"/>
+									<listOptionValue builtIn="false" value="../SpnQC/wiringPi/include"/>
+									<listOptionValue builtIn="false" value="../SpnQC/SpnQC/src/SUPPORT"/>
+									<listOptionValue builtIn="false" value="../SpnQC/SpnQC/src/SENSE"/>
+									<listOptionValue builtIn="false" value="../SpnQC/SpnQC/src/CONTROL"/>
+									<listOptionValue builtIn="false" value="../SpnQC/SpnQC/src"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.270741585" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -47,13 +54,12 @@
 								<option id="gnu.cpp.compiler.option.debugging.level.1638113969" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1507300933" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/pigpio}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiringPi/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/APP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/APP/SUPPORT}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/HAL}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/OSAL}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiringPi/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/SUPPORT}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/SENSE}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/CONTROL}&quot;"/>
 									<listOptionValue builtIn="false" value="/Volumes/xtools/arm-none-linux-gnueabi/arm-none-linux-gnueabi/include/c++/4.8.2"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1258049645" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false"/>
@@ -63,12 +69,12 @@
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1834647210" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1422480064" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
 								<option id="gnu.cpp.link.option.paths.649471987" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/pigpio}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/wiringPi/lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/pigpio}&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.1030588853" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" value="pthread"/>
 									<listOptionValue builtIn="false" value="pigpiod_if"/>
+									<listOptionValue builtIn="false" value="pthread"/>
 									<listOptionValue builtIn="false" value="wiringpi"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1901096681" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
@@ -80,13 +86,20 @@
 							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.548775989" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
 								<option id="gnu.both.asm.option.include.paths.2110604376" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/pigpio}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/HAL}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/wiringPi/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/SUPPORT}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/SENSE}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/CONTROL}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/APP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/APP/SUPPORT}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/HAL}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/OSAL}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/wiringPi/include}&quot;"/>
 									<listOptionValue builtIn="false" value="/Volumes/xtools/arm-none-linux-gnueabi/arm-none-linux-gnueabi/include/c++/4.8.2"/>
+									<listOptionValue builtIn="false" value="../SpnQC/pigpio"/>
+									<listOptionValue builtIn="false" value="../SpnQC/SpnQC/src/HAL"/>
+									<listOptionValue builtIn="false" value="../SpnQC/wiringPi/include"/>
+									<listOptionValue builtIn="false" value="../SpnQC/SpnQC/src/SUPPORT"/>
+									<listOptionValue builtIn="false" value="../SpnQC/SpnQC/src/SENSE"/>
+									<listOptionValue builtIn="false" value="../SpnQC/SpnQC/src/CONTROL"/>
+									<listOptionValue builtIn="false" value="../SpnQC/SpnQC/src"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.972752592" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -100,11 +113,11 @@
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
-		<cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.debug.407347742.723686572">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.debug.407347742.723686572" moduleId="org.eclipse.cdt.core.settings" name="Sim-OSX">
+		<cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.debug.407347742.1274487012">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.debug.407347742.1274487012" moduleId="org.eclipse.cdt.core.settings" name="Sim-Win">
 				<externalSettings/>
 				<extensions>
-					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.PE" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
@@ -113,46 +126,78 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cross.exe.debug.407347742.723686572" name="Sim-OSX" parent="cdt.managedbuild.config.gnu.cross.exe.debug" postannouncebuildStep="" postbuildStep="scp SpnQC pi@10.0.1.14:/home/pi/Projects/SpnQC/Debug">
-					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.407347742.723686572." name="/" resourcePath="">
-						<toolChain id="cdt.managedbuild.toolchain.gnu.macosx.base.1132082369" name="MacOSX GCC" superClass="cdt.managedbuild.toolchain.gnu.macosx.base">
-							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.MachO64" id="cdt.managedbuild.target.gnu.platform.macosx.base.1270361535" name="Debug Platform" osList="macosx" superClass="cdt.managedbuild.target.gnu.platform.macosx.base"/>
-							<builder buildPath="${workspace_loc:/SpnQC}/Sim-OSX" id="cdt.managedbuild.target.gnu.builder.macosx.base.235385874" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.macosx.base"/>
-							<tool id="cdt.managedbuild.tool.macosx.c.linker.macosx.base.581035309" name="MacOS X C Linker" superClass="cdt.managedbuild.tool.macosx.c.linker.macosx.base"/>
-							<tool id="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base.540484988" name="MacOS X C++ Linker" superClass="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base">
-								<option id="macosx.cpp.link.option.libs.2140728690" name="Libraries (-l)" superClass="macosx.cpp.link.option.libs" valueType="libs"/>
-								<option id="macosx.cpp.link.option.paths.1310289184" name="Library search path (-L)" superClass="macosx.cpp.link.option.paths" valueType="libPaths"/>
-								<inputType id="cdt.managedbuild.tool.macosx.cpp.linker.input.623928897" superClass="cdt.managedbuild.tool.macosx.cpp.linker.input">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cross.exe.debug.407347742.1274487012" name="Sim-Win" parent="cdt.managedbuild.config.gnu.cross.exe.debug" postannouncebuildStep="" postbuildStep="scp SpnQC pi@10.0.1.14:/home/pi/Projects/SpnQC/Debug">
+					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.407347742.1274487012." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.base.1012118570" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.base">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.PE" id="cdt.managedbuild.target.gnu.platform.mingw.base.1675443131" name="Debug Platform" osList="win32" superClass="cdt.managedbuild.target.gnu.platform.mingw.base"/>
+							<builder buildPath="${workspace_loc:/SpnQC}/Sim-Win" id="cdt.managedbuild.builder.gnu.cross.1459046978" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.base.62474554" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.base">
+								<option id="gnu.both.asm.option.include.paths.1362757085" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/pigpio}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/HAL}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/wiringPi/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/SUPPORT}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/SENSE}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/CONTROL}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src}&quot;"/>
+									<listOptionValue builtIn="false" value="/Volumes/xtools/arm-none-linux-gnueabi/arm-none-linux-gnueabi/include/c++/4.8.2"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.714512868" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.mingw.base.1785267793" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.mingw.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.220097894" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base">
+								<option id="gnu.cpp.compiler.option.include.paths.449150905" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="Z:\Documents\workspace\pigpio"/>
+									<listOptionValue builtIn="false" value="Z:\Documents\workspace\SpnQC\src"/>
+									<listOptionValue builtIn="false" value="Z:\Documents\workspace\SpnQC\src\HAL"/>
+									<listOptionValue builtIn="false" value="Z:\Documents\workspace\SpnQC\src\OSAL"/>
+									<listOptionValue builtIn="false" value="Z:\Documents\workspace\wiringpi\include"/>
+									<listOptionValue builtIn="false" value="Z:\Documents\workspace\SpnQC\src\SUPPORT"/>
+									<listOptionValue builtIn="false" value="Z:\Documents\workspace\SpnQC\src\SENSE"/>
+									<listOptionValue builtIn="false" value="Z:\Documents\workspace\SpnQC\src\CONTROL"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.optimization.level.2106323868" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.96723623" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.dialect.std.1597982658" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1312980697" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.mingw.base.1385047177" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.mingw.base">
+								<option id="gnu.c.compiler.option.include.paths.765432568" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/pigpio}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/HAL}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/wiringPi/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/SUPPORT}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/SENSE}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src/CONTROL}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SpnQC/SpnQC/src}&quot;"/>
+									<listOptionValue builtIn="false" value="/Volumes/xtools/arm-none-linux-gnueabi/arm-none-linux-gnueabi/include/c++/4.8.2"/>
+								</option>
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.1277271917" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.debugging.level.1219588116" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.dialect.std.580909946" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1625499505" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.mingw.base.1524626711" name="MinGW C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.mingw.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.mingw.base.412152592" name="MinGW C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.mingw.base">
+								<option id="gnu.cpp.link.option.libs.713470030" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="pthread"/>
+									<listOptionValue builtIn="false" value="pigpiod_if"/>
+									<listOptionValue builtIn="false" value="wiringpi"/>
+								</option>
+								<option id="gnu.cpp.link.option.paths.1916926357" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;Z:\Documents\workspace\SpnQC\wiringpi\wiringpi\lib&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;Z:\Documents\workspace\pigpio&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.856550400" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
 								</inputType>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.assembler.macosx.base.1937289187" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.macosx.base">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.415401529" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.2134082805" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.1427209861" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base">
-								<option id="gnu.cpp.compiler.option.include.paths.1210249047" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/SUPPORT}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/SENSE}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/CONTROL}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
-								</option>
-								<option id="gnu.cpp.compiler.option.optimization.level.478231137" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.debugging.level.368025959" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.dialect.std.1714080416" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
-								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.198639719" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1410393784" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base">
-								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.2074866656" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.debugging.level.554074762" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1133898186" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
 						<entry excluding="WIN|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-						<entry excluding="OSAL/WIN|HAL/WIN|RPIO/c_gpio|RPIO/c_pwm/servod.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="OSAL/WIN|RPIO/c_gpio|RPIO/c_pwm/servod.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/OSAL/WIN"/>
 					</sourceEntries>
 				</configuration>
@@ -180,6 +225,9 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Sim-Win">
+			<resource resourceType="PROJECT" workspacePath="/SpnQC"/>
+		</configuration>
 		<configuration configurationName="Pi2"/>
 		<configuration configurationName="Sim-OSX"/>
 		<configuration configurationName="Debug">

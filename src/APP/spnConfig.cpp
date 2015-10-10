@@ -78,62 +78,62 @@ const SpnQC_Config_Entry_Type configEntries[] = {
 	{
 		"ACCXBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.accel[X_AXIS]
+		&spnQcConfig.mpu9250.accel[0]
 	},
 	{
 		"ACCYBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.accel[Y_AXIS]
+		&spnQcConfig.mpu9250.accel[1]
 	},
 	{
 		"ACCZBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.accel[Z_AXIS]
+		&spnQcConfig.mpu9250.accel[2]
 	},
 	{
 		"GYROXBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.gyro[X_AXIS]
+		&spnQcConfig.mpu9250.gyro[0]
 	},
 	{
 		"GYROYBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.gyro[Y_AXIS]
+		&spnQcConfig.mpu9250.gyro[1]
 	},
 	{
 		"GYROZBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.gyro[Z_AXIS]
+		&spnQcConfig.mpu9250.gyro[2]
 	},
 	{
 		"MAGXBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.magb[X_AXIS]
+		&spnQcConfig.mpu9250.magb[0]
 	},
 	{
 		"MAGYBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.magb[Y_AXIS]
+		&spnQcConfig.mpu9250.magb[1]
 	},
 	{
 		"MAGZBIAS",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.magb[Z_AXIS]
+		&spnQcConfig.mpu9250.magb[2]
 	},
 	{
 		"MAGXGAIN",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.mags[X_AXIS]
+		&spnQcConfig.mpu9250.mags[0]
 	},
 	{
 		"MAGYGAIN",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.mags[Y_AXIS]
+		&spnQcConfig.mpu9250.mags[1]
 	},
 	{
 		"MAGZGAIN",
 		FLOAT_E,
-		&spnQcConfig.mpu9250.mags[Z_AXIS]
+		&spnQcConfig.mpu9250.mags[2]
 	},
 	{
 		"CHANCOUNT",
@@ -203,7 +203,7 @@ const SpnQC_Config_Entry_Type configEntries[] = {
     {
         "NETHBINT",
         INT_E,
-        &spnQcConfig.transceiver.netHeartbeatInterval.tv_sec
+        &spnQcConfig.transceiver.netHeartbeatInterval.seconds
     },
 	{
 		"MOTCOUNT",
@@ -362,21 +362,19 @@ const uint32_t configEntriesCount = sizeof(configEntries)/sizeof(SpnQC_Config_En
 bool spnConfigInit(void)
 {
 	bool status = EXIT_SUCCESS;
-	FILE* pInputFile = NULL; // input file descriptor
+	uint32_t InputFile; // input file descriptor
 
 	//
 	// ATTEMPT TO READ CONFIG FILE
 	//
 
 	// open the file
-	spnUtilsOpenFileForRead(&pInputFile, WORKING_DIRECTORY"/SpnQC.cfg");
-
 	// If file exists, parse the data and populate config structure
-	if(pInputFile != NULL)
+	if(spnUtilsOpenFileForRead(&InputFile, "SpnQC.cfg") == EXIT_SUCCESS)
 	{
 		char buf[128];
 
-		while(spnUtilsReadLine(pInputFile, buf, 128) && (status == EXIT_SUCCESS))
+		while((spnUtilsReadLine(InputFile, buf, 128) > 0) && (status == EXIT_SUCCESS))
 		{
 			char entryNameRead[64];
 			char entryValueRead[64];
@@ -438,7 +436,7 @@ bool spnConfigInit(void)
 		}
 
 		// close the file
-		spnUtilsCloseFile(pInputFile);
+		spnUtilsCloseInputFile(InputFile);
 	}
 	else
 	{
