@@ -13,6 +13,9 @@ RM := rm -rf
 -include src/APP/SUPPORT/subdir.mk
 -include src/APP/subdir.mk
 -include MinGW/subdir.mk
+-include Debug/src/SUPPORT/subdir.mk
+-include Debug/src/SENSE/subdir.mk
+-include Debug/src/subdir.mk
 -include subdir.mk
 -include objects.mk
 
