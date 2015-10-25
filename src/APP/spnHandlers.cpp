@@ -13,6 +13,8 @@
 
 bool spnHandleInit(void)
 {
+	PRINT("start spnHandleInit");
+
 	OSAL_HANDLE_INIT();
 	OSAL_HANDLE_SET_ITMR_CB(spnSchedulerForeground);
 
@@ -23,6 +25,8 @@ bool spnHandleInit(void)
 
 void spnHandleStartTimer(void)
 {
+	PRINT("start spnHandleStartTimer");
+
 	// Start the minor frame timer
 	OSAL_TIME_INT_START();
 }

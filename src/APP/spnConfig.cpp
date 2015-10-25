@@ -361,6 +361,8 @@ const uint32_t configEntriesCount = sizeof(configEntries)/sizeof(SpnQC_Config_En
 
 bool spnConfigInit(void)
 {
+	PRINT("start spnConfigInit");
+
 	bool status = EXIT_SUCCESS;
 	uint32_t InputFile; // input file descriptor
 

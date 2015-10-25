@@ -449,6 +449,7 @@ bool NineAxisMotionSensor::retrieveData(uint32_t* size, void* data)
 				gyroNewRaw[axis][newindex] = (rawGyroData[axis][i*2] + rawGyroData[axis][i*2+1])/2;
 				accelNewRaw[axis][newindex] = (rawAccelData[axis][i*2] + rawAccelData[axis][i*2+1])/2;
 				newindex++;
+
 			}
 		}
 
@@ -466,6 +467,7 @@ bool NineAxisMotionSensor::retrieveData(uint32_t* size, void* data)
 		for(uint32_t axis = X_AXIS; axis < NUM_AXIS; axis++)
 		{
 			filtAccelData[axis] = accelDataFilter[axis].update(accelNewRaw[axis],  (acquireCount/2)+(acquireCount%2));
+//			if(acquireCount>0)printf("%f\n",filtAccelData[2]);
 			filtGyroData[axis] = gyroDataFilter[axis].update(gyroNewRaw[axis], (acquireCount/2)+(acquireCount%2));
 //			filtMagData[axis] = magDataFilter[axis].update(magNewRaw[axis], &filtMagData[axis], (acquireCount/2)+(acquireCount%2));
 		}

@@ -75,6 +75,8 @@ static void complementaryFilter(float gx, float gy, float gz,
 
 bool spnSensorManagerInit(void)
 {
+	PRINT("start spnSensorManagerInit");
+
 	bool status = EXIT_FAILURE;
 
 	const SpnQC_Config_Type* const pCfg = spnConfigGet();
@@ -135,6 +137,7 @@ void spnSensorManagerProcessData(void)
 	complementaryFilter(gyroIn[X_AXIS], gyroIn[Y_AXIS], gyroIn[Z_AXIS],
 					    accelIn[X_AXIS], accelIn[Y_AXIS], accelIn[Z_AXIS],
 						&Pitch, &Roll, 0.99, 0.01, 0.030);
+
 }
 
 void spnSensorGetPrincipalAxes(float32_t* pPitch, float32_t* pRoll, float32_t* pYaw)

@@ -84,11 +84,20 @@ bool spnUtilsTimeCompare(OSAL_Time_Type* pTsA, OSAL_Time_Type* pTsB)
 
 bool spnUtilsOpenFileForRead(uint32_t* pFileId, const char *pPathname)
 {
-	return OSAL_INPUT_FILE_OPEN(pFileId, strcat(WORKING_DIRECTORY,pPathname));
+	PRINT("start spnUtilsOpenFileForRead");
+	printf("az");
+
+	char path[128];
+	strcpy(path, WORKING_DIRECTORY);
+	strcat(path, pPathname);
+
+	return OSAL_INPUT_FILE_OPEN(pFileId, path);
 }
 
 uint32_t spnUtilsReadLine(uint32_t fileId, char* pDest, size_t destSizeBytes)
 {
+	PRINT("start spnUtilsReadLine");
+
 	uint32_t bytesRead = 0;
 
 	OSAL_INPUT_FILE_READ_LINE(fileId, pDest, destSizeBytes, &bytesRead);
@@ -144,12 +153,20 @@ bool spnUtilsReadNextIntFromFile(uint32_t fileId, int32_t* pDest)
 
 bool spnUtilsOpenFileForAppend(uint32_t* pFileId, const char *pPathname)
 {
-	return OSAL_OUTPUT_FILE_OPEN(pFileId, strcat(WORKING_DIRECTORY,pPathname), OSAL_FILE_APPEND_E);
+	char path[128];
+	strcpy(path, WORKING_DIRECTORY);
+	strcat(path, pPathname);
+
+	return OSAL_OUTPUT_FILE_OPEN(pFileId, path, OSAL_FILE_APPEND_E);
 }
 
 bool spnUtilsCreateFileForWrite(uint32_t* pFileId, const char *pPathname)
 {
-	return OSAL_OUTPUT_FILE_OPEN(pFileId, strcat(WORKING_DIRECTORY,pPathname), OSAL_FILE_CREATE_E);
+	char path[128];
+	strcpy(path, WORKING_DIRECTORY);
+	strcat(path, pPathname);
+
+	return OSAL_OUTPUT_FILE_OPEN(pFileId, path, OSAL_FILE_CREATE_E);
 }
 
 void spnUtilsWriteToFile(uint32_t fileId, const char *pBuf)
@@ -164,5 +181,7 @@ void spnUtilsCloseOutputFile(uint32_t fileId)
 
 void spnUtilsCloseInputFile(uint32_t fileId)
 {
+	PRINT("start spnUtilsCloseInputFile");
+
 	OSAL_INPUT_FILE_CLOSE(fileId);
 }

@@ -54,6 +54,8 @@ static void userOutputSensorDataFile(void);
 
 bool spnUserOutputInit(void)
 {
+	PRINT("start spnUserOutputInit");
+
 	const SpnQC_Config_Type* const pCfg = spnConfigGet();
 
 	networkOutputEnabled = pCfg->transceiver.outputToNetwork;

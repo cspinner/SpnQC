@@ -6,6 +6,8 @@ using namespace std;
 
 int32_t main (void)
 {
+	PRINT("start main");
+
 	if((OSAL_INIT() == EXIT_SUCCESS) &&
 	   (spnHandleInit() == EXIT_SUCCESS) &&
 	   (spnInit() == EXIT_SUCCESS))
@@ -27,6 +29,8 @@ int32_t main (void)
 	{
 		return EXIT_FAILURE;
 	}
+
+	PRINT("end main");
 
 }
 

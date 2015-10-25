@@ -127,15 +127,15 @@ static void servoInOnExit(void)
 {
 	printf("Disconnecting Servos Input ...\n");
 
-    // cancel any registered callbacks
-    for(uint32_t i = 0; i < gpioInputCount; i++)
-    {
-        callback_cancel(inputCallbackIds[i]);
-    }
+	// cancel any registered callbacks
+	for(uint32_t i = 0; i < gpioInputCount; i++)
+	{
+		callback_cancel(inputCallbackIds[i]);
+	}
 
-    // disconnect from the daemon if still running
-    if(isDaemonStarted)
-    {
+	if(isDaemonStarted)
+	{
+		// disconnect from the daemon if still running
     	pigpio_stop();
     	isDaemonStarted = false;
     }
@@ -145,12 +145,12 @@ static void servoOutOnExit(void)
 {
 	printf("Disconnecting Servos Output ...\n");
     
-    // stop all outputs
-    HAL_SERVO_PULSES_STOP();
-    
     // disconnect from the daemon if still running
     if(isDaemonStarted)
     {
+    	 // stop all outputs
+		HAL_SERVO_PULSES_STOP();
+
     	pigpio_stop();
     	isDaemonStarted = false;
     }
@@ -216,13 +216,16 @@ bool HAL_SERVO_PULSES_STOP(void)
 {
     bool rtnStatus = EXIT_SUCCESS;
     
-    // write pulse width of 0 to stop each of the output gpios
-    for(uint32_t index = 0; index < gpioOutputCount; index++)
+    if(isDaemonStarted)
     {
-        if(HAL_SERVO_PULSE_WIDTH_SET(index, PI_SERVO_OFF) != EXIT_SUCCESS)
-        {
-            rtnStatus = EXIT_FAILURE;
-        }
+		// write pulse width of 0 to stop each of the output gpios
+		for(uint32_t index = 0; index < gpioOutputCount; index++)
+		{
+			if(HAL_SERVO_PULSE_WIDTH_SET(index, PI_SERVO_OFF) != EXIT_SUCCESS)
+			{
+				rtnStatus = EXIT_FAILURE;
+			}
+		}
     }
     
     return rtnStatus;

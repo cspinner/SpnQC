@@ -17,6 +17,12 @@
 //
 // DEFINES
 //
+#ifdef TRACEPOINT
+#define PRINT(S) printf("%s\n", S);
+#else
+#define PRINT(S)
+#endif
+
 //#define NO_FILTER 1
 #define SENSOR_FRAME_TIME_USEC 5000
 #define MINOR_FRAME_TIME_USEC 30000

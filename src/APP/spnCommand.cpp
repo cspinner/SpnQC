@@ -57,6 +57,8 @@ static void processCommandMode(void);
 
 bool spnCommandInit(void)
 {
+	PRINT("start spnCommandInit");
+
 	cmdInterval = MINOR_FRAME_TIME_USEC/1000000.0;
 
 	const SpnQC_Config_Type* const pCfg = spnConfigGet();

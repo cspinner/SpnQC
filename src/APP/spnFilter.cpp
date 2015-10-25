@@ -43,7 +43,7 @@ static float32_t lp2_7_200(float32_t rawData[], uint32_t dataCount, float32_t gx
 
 	float32_t filtData = 0.0;
 
-	if(dataCount == 0)
+	if(dataCount > 0)
 	{
 		for(uint32_t i = 0; i < dataCount; i++)
 		{

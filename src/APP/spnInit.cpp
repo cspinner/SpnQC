@@ -15,6 +15,8 @@ bool isInitCompleted = false;
 
 bool spnInit(void)
 {
+	PRINT("start spnInit");
+
 	bool status = EXIT_FAILURE;
 
 	// Attempt to increase program's scheduling priority

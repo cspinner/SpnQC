@@ -17,6 +17,8 @@ static void serverOnExit(void);
 
 bool spnServerInit(uint16_t port)
 {
+	PRINT("start spnServerInit");
+
 	// create socket
 	if(OSAL_SOCKET_CREATE(&sockfd, OSAL_SOCKET_STREAM_E) == EXIT_FAILURE)
 	{

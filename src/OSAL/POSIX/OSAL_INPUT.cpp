@@ -79,24 +79,24 @@ bool OSAL_INPUT_FILE_OPEN(uint32_t* pFileId, const char *pPathname)
 	//	       printf("Current working dir: %s\n", cwd);
 
 	//	   system("ls -l /home/pi/calibration");
-
+printf("a");
 	// open the file for reading
 	FilePtrArray[FileArrayNextIndex] = fopen(pPathname, "r");
 	//
 	//
 	//		perror("OpenFileForRead Error");
-
+	printf("b");
 	if(FilePtrArray[FileArrayNextIndex] == NULL)
 	{
 		perror("OpenFileForRead Error");
-
+		printf("c");
 		return EXIT_FAILURE;
 	}
 	else
 	{
 		*pFileId = FileArrayNextIndex;
 		FileArrayNextIndex++;
-
+		printf("d");
 		return EXIT_SUCCESS;
 	}
 }

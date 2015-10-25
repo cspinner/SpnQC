@@ -22,8 +22,9 @@ static void userInputRestore(void);
 
 bool spnUserInputInit(void)
 {
-	const SpnQC_Config_Type* const pCfg = spnConfigGet();
+	PRINT("start spnUserInputInit");
 
+	const SpnQC_Config_Type* const pCfg = spnConfigGet();
 	useTerminal = pCfg->transceiver.useTerminal;
 	useNetwork = pCfg->transceiver.useNetworkInput;
 
