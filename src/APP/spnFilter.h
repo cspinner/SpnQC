@@ -17,6 +17,7 @@
 typedef enum
 {
 	FILT_LP_2P_7HZBR_200HZSMP,
+	FILT_ZERO_REJECT,
 	FILT_COUNT
 } SpnFilter_Select_Type;
 

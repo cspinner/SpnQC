@@ -41,21 +41,6 @@ const SpnQC_Config_Entry_Type configEntries[] = {
 		&spnQcConfig.spi.speed
 	},
 	{
-		"ACCFILTWD",
-		UINT_E,
-		&spnQcConfig.mpu9250.accelFilterWindow
-	},
-	{
-		"GYRFILTWD",
-		UINT_E,
-		&spnQcConfig.mpu9250.gyroFilterWindow
-	},
-	{
-		"MAGFILTWD",
-		UINT_E,
-		&spnQcConfig.mpu9250.magFilterWindow
-	},
-	{
 		"MAXSMPDIFF",
 		FLOAT_E,
 		&spnQcConfig.mpu9250.magOutlierThresh
@@ -141,22 +126,22 @@ const SpnQC_Config_Entry_Type configEntries[] = {
 		&spnQcConfig.transceiver.chanCount
 	},
 	{	
-        "TPIN1",
+        "THROTTLEPIN",
         UINT_E,
         &spnQcConfig.transceiver.gpioPin[0]
     },	
     {	
-        "TPIN2",
+        "ELEVATORPIN",
         UINT_E,
         &spnQcConfig.transceiver.gpioPin[1]
     },	
     {	
-        "TPIN3",
+        "AILERONPIN",
         UINT_E,
         &spnQcConfig.transceiver.gpioPin[2]
     },	
     {	
-        "TPIN4",
+        "RUDDERPIN",
         UINT_E,
         &spnQcConfig.transceiver.gpioPin[3]
     },	
@@ -185,6 +170,41 @@ const SpnQC_Config_Entry_Type configEntries[] = {
         INT_E,
         &spnQcConfig.transceiver.useTerminal
     },	
+    {
+        "TRANINPUT",
+        INT_E,
+        &spnQcConfig.transceiver.useTransmitter
+    },
+    {
+        "PWZERO",
+        INT_E,
+        &spnQcConfig.transceiver.pulseWidthZero
+    },
+    {
+        "PWFULL",
+        INT_E,
+        &spnQcConfig.transceiver.pulseWidthFull
+    },
+    {
+        "MAXTHRNG",
+        INT_E,
+        &spnQcConfig.transceiver.maxThrottleRngPct
+    },
+    {
+        "MAXELERNG",
+        INT_E,
+        &spnQcConfig.transceiver.maxElevatorRngDeg
+    },
+    {
+        "MAXAILRNG",
+        INT_E,
+        &spnQcConfig.transceiver.maxAileronRngDeg
+    },
+    {
+        "MAXRUDRNG",
+        INT_E,
+        &spnQcConfig.transceiver.maxRudderRngDeg
+    },
     {
         "NETINPUT",
         INT_E,

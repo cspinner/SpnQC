@@ -7,9 +7,34 @@
 
 #include "spnQC.h"
 #include "HAL.h"
+#include "spnFilter.h"
 #include <stdlib.h>
 
+#define PW2CMD(U,S) (((float32_t)U-S.intercept)/S.slope)
+
+// (y - b) / m = c  --- linear relationship between command and pulse width
+// command = (commanded pulse width - intercept) / slope
+typedef struct
+{
+	uint32_t pinIdx;
+	float32_t range;
+	float32_t slope;
+	float32_t intercept;
+	uint32_t widthUsec;
+} spnRxInputType;
+
+enum
+{
+	TXR_THROTTLE_PIN_E,
+	TXR_ELEVATOR_PIN_E,
+	TXR_AILERON_PIN_E,
+	TXR_RUDDER_PIN_E,
+	TXR_NUM_PIN_E
+};
+
 static bool overrideModeEnabled = false;
+static spnRxInputType txrCfg[TXR_NUM_PIN_E];
+static SpnFilter zrFilter[TXR_NUM_PIN_E];
 
 bool spnTransceiverInit(void)
 {
@@ -18,8 +43,28 @@ bool spnTransceiverInit(void)
     overrideModeEnabled = pCfg->transceiver.useTerminal ||
     				      pCfg->transceiver.useNetworkInput;
 
-    // Initialize servo inputs
-    HAL_SERVO_INPUT_INIT(pCfg->transceiver.chanCount, &pCfg->transceiver.gpioPin[0]);
+    if(!overrideModeEnabled)
+    {
+    	txrCfg[TXR_THROTTLE_PIN_E].range = pCfg->transceiver.maxThrottleRngPct;
+    	txrCfg[TXR_ELEVATOR_PIN_E].range = pCfg->transceiver.maxElevatorRngDeg;
+    	txrCfg[TXR_AILERON_PIN_E].range = pCfg->transceiver.maxAileronRngDeg;
+    	txrCfg[TXR_RUDDER_PIN_E].range = pCfg->transceiver.maxRudderRngDeg;
+
+    	txrCfg[TXR_THROTTLE_PIN_E].pinIdx = 0;
+    	txrCfg[TXR_ELEVATOR_PIN_E].pinIdx = 1;
+    	txrCfg[TXR_AILERON_PIN_E].pinIdx = 2;
+    	txrCfg[TXR_RUDDER_PIN_E].pinIdx = 3;
+
+		for(uint32_t i = 0; i < TXR_NUM_PIN_E; i++)
+		{
+			txrCfg[i].slope = (pCfg->transceiver.pulseWidthFull - pCfg->transceiver.pulseWidthZero)/txrCfg[i].range;
+			txrCfg[i].intercept = pCfg->transceiver.pulseWidthZero;
+			zrFilter[i].configure(FILT_ZERO_REJECT);
+		}
+
+		// Initialize servo inputs
+		HAL_SERVO_INPUT_INIT(pCfg->transceiver.chanCount, &pCfg->transceiver.gpioPin[0]);
+    }
 
 	return EXIT_SUCCESS;
 }
@@ -43,7 +88,12 @@ float32_t spnTransceiverGetThrottlePct(void)
     }
     else
     {
-        // tbd - use receiver
+    	HAL_SERVO_PULSE_WIDTH_GET(txrCfg[TXR_THROTTLE_PIN_E].pinIdx, &txrCfg[TXR_THROTTLE_PIN_E].widthUsec);
+
+    	txrCfg[TXR_THROTTLE_PIN_E].widthUsec =
+    			zrFilter[TXR_THROTTLE_PIN_E].update((float32_t*)&txrCfg[TXR_THROTTLE_PIN_E].widthUsec, 1);
+
+    	throttlePct = PW2CMD(txrCfg[TXR_THROTTLE_PIN_E].widthUsec, txrCfg[TXR_THROTTLE_PIN_E]);
     }
 
 	return throttlePct;
@@ -71,7 +121,12 @@ float32_t spnTransceiverGetElevatorAngle(void)
     }
     else
     {
-        // tbd - use receiver
+    	HAL_SERVO_PULSE_WIDTH_GET(txrCfg[TXR_ELEVATOR_PIN_E].pinIdx, &txrCfg[TXR_ELEVATOR_PIN_E].widthUsec);
+
+    	txrCfg[TXR_ELEVATOR_PIN_E].widthUsec =
+    			zrFilter[TXR_ELEVATOR_PIN_E].update((float32_t*)&txrCfg[TXR_ELEVATOR_PIN_E].widthUsec, 1);
+
+    	elevAngle = PW2CMD(txrCfg[TXR_ELEVATOR_PIN_E].widthUsec, txrCfg[TXR_ELEVATOR_PIN_E]) - txrCfg[TXR_ELEVATOR_PIN_E].range;
     }
 
 	return elevAngle;
@@ -99,7 +154,12 @@ float32_t spnTransceiverGetAileronAngle(void)
     }
     else
     {
-        // tbd - use receiver
+    	HAL_SERVO_PULSE_WIDTH_GET(txrCfg[TXR_AILERON_PIN_E].pinIdx, &txrCfg[TXR_AILERON_PIN_E].widthUsec);
+
+    	txrCfg[TXR_AILERON_PIN_E].widthUsec =
+    			zrFilter[TXR_AILERON_PIN_E].update((float32_t*)&txrCfg[TXR_AILERON_PIN_E].widthUsec, 1);
+
+    	ailAngle = PW2CMD(txrCfg[TXR_AILERON_PIN_E].widthUsec, txrCfg[TXR_AILERON_PIN_E]) - txrCfg[TXR_AILERON_PIN_E].range;
     }
 
 	return ailAngle;
@@ -125,8 +185,26 @@ float32_t spnTransceiverGetRudderAngle(void)
     }
     else
     {
-        // tbd - use receiver
+    	HAL_SERVO_PULSE_WIDTH_GET(txrCfg[TXR_RUDDER_PIN_E].pinIdx, &txrCfg[TXR_RUDDER_PIN_E].widthUsec);
+
+    	txrCfg[TXR_RUDDER_PIN_E].widthUsec =
+    			zrFilter[TXR_RUDDER_PIN_E].update((float32_t*)&txrCfg[TXR_RUDDER_PIN_E].widthUsec, 1);
+
+    	rudAngle = PW2CMD(txrCfg[TXR_RUDDER_PIN_E].widthUsec, txrCfg[TXR_RUDDER_PIN_E]) - txrCfg[TXR_RUDDER_PIN_E].range;
     }
     
 	return rudAngle;
+}
+
+bool spnTransceiverIsActive(void)
+{
+	for(uint32_t i = 0; i < TXR_NUM_PIN_E; i++)
+	{
+		if(txrCfg[i].widthUsec == 0.0)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }

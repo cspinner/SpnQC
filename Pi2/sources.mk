@@ -28,7 +28,4 @@ src/HAL/QC \
 src/APP \
 src/APP/SUPPORT \
 MinGW \
-Debug/src \
-Debug/src/SUPPORT \
-Debug/src/SENSE \
 

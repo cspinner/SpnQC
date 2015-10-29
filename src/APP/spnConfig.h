@@ -36,9 +36,6 @@ typedef struct
 		uint32_t accFsSel; // 0 - 3
 		uint32_t gyroFsSel; // 0 - 3
 		float32_t magOutlierThresh;
-		uint32_t accelFilterWindow; // 1 - 128
-		uint32_t gyroFilterWindow; // 1 - 128
-		uint32_t magFilterWindow; // 1 - 128
 	} mpu9250;
 
 	struct
@@ -46,10 +43,17 @@ typedef struct
 		uint32_t chanCount; // 0 - 32
 		uint32_t gpioPin[USER_GPIO_MAX]; // BCM number
         bool useTerminal; 
+        bool useTransmitter;
         bool useNetworkInput;
         bool outputToNetwork;
         uint16_t netPort;
         OSAL_Time_Type netHeartbeatInterval;
+        float32_t pulseWidthZero;
+		float32_t pulseWidthFull;
+		float32_t maxThrottleRngPct;
+		float32_t maxElevatorRngDeg;
+		float32_t maxAileronRngDeg;
+		float32_t maxRudderRngDeg;
 	} transceiver;
 
 	struct

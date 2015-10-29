@@ -235,9 +235,6 @@ bool NineAxisMotionSensor::configure(void* cfg)
 			spi_fd = wiringPiSPISetup(chipSelect, speed);
 		}
 
-//		accelFiltWindow = mpu9250_config->accelFilterWindow;
-//		gyroFiltWindow = mpu9250_config->gyroFilterWindow;
-//		magFiltWindow = mpu9250_config->magFilterWindow;
 		magOutlierThresh = mpu9250_config->magOutlierThresh;
 		accFsSel = mpu9250_config->accFsSel;
 		gyroFsSel = mpu9250_config->gyroFsSel;

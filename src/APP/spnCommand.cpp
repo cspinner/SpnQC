@@ -77,8 +77,7 @@ bool spnCommandInit(void)
             (yawRatePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, cmdInterval,
                     pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == EXIT_SUCCESS) &&
             (yawAnglePID.configure(pCfg->command.pidOutMin, pCfg->command.pidOutMax, cmdInterval,
-                    pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == EXIT_SUCCESS) &&
-            (spnTransceiverInit() == EXIT_SUCCESS))
+                    pCfg->command.pidYawKp, pCfg->command.pidYawKi, pCfg->command.pidYawKd) == EXIT_SUCCESS))
         {
         	for(uint32_t i = 0; i < pCfg->motor.chanCount; i++)
         	{

@@ -13,6 +13,7 @@
 
 static bool useTerminal = false;
 static bool useNetwork = false;
+static bool useTransmitter = false;
 static bool isCommEstablished = false;
 static char charInput = 0;
 static OSAL_Time_Type tsHeartbeatInterval;
@@ -27,6 +28,7 @@ bool spnUserInputInit(void)
 	const SpnQC_Config_Type* const pCfg = spnConfigGet();
 	useTerminal = pCfg->transceiver.useTerminal;
 	useNetwork = pCfg->transceiver.useNetworkInput;
+	useTransmitter = pCfg->transceiver.useTransmitter;
 
 	tsHeartbeatInterval.seconds = pCfg->transceiver.netHeartbeatInterval.seconds;
 	tsHeartbeatInterval.microSeconds = 0;
@@ -34,24 +36,46 @@ bool spnUserInputInit(void)
 	// Inputs come from RPI2 terminal
 	if(useTerminal)
 	{
-		// Set terminal to non-canonical mode, no echo
-		OSAL_INPUT_KB_INIT();
+		if(spnTransceiverInit() == EXIT_SUCCESS)
+		{
+			// Set terminal to non-canonical mode, no echo
+			OSAL_INPUT_KB_INIT();
 
-		atexit(&userInputRestore);
+			atexit(&userInputRestore);
 
-		isCommEstablished = true;
+			isCommEstablished = true;
 
-		return EXIT_SUCCESS;
+			return EXIT_SUCCESS;
+		}
+		else
+		{
+			printf("spnTransceiverInit failed.\n");
+			return EXIT_FAILURE;
+		}
 	}
 	// Inputs come from a networked ground station
 	else if(useNetwork)
 	{
-		if(spnServerInit(pCfg->transceiver.netPort) == EXIT_SUCCESS)
+		if((spnTransceiverInit() == EXIT_SUCCESS) &&
+		   (spnServerInit(pCfg->transceiver.netPort) == EXIT_SUCCESS))
 		{
 			return EXIT_SUCCESS;
 		}
 		else
 		{
+			printf("spnTransceiverInit or spnServerInit failed.\n");
+			return EXIT_FAILURE;
+		}
+	}
+	else if(useTransmitter)
+	{
+		if(spnTransceiverInit() == EXIT_SUCCESS)
+		{
+			return EXIT_SUCCESS;
+		}
+		else
+		{
+			printf("spnTransceiverInit failed.\n");
 			return EXIT_FAILURE;
 		}
 	}
@@ -85,6 +109,16 @@ void spnUserInputUpdate(void)
 			spnServerReadMessage(&charInput, 1);
 			spnUserInputCheckHeartbeat();
 		}
+	}
+	else if(useTransmitter)
+	{
+		// check for any activity from the transmitter/receiver
+		if(spnTransceiverIsActive())
+		{
+			charInput = 0xFF;
+		}
+
+		spnUserInputCheckHeartbeat();
 	}
 }
 

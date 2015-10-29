@@ -13,6 +13,9 @@
 // FILT_LP_2P_7HZBR_200HZSMP
 static float32_t lp2_7_200(float32_t rawData[], uint32_t dataCount, float32_t filtStateX[], float32_t filtStateY[]); // 200hz
 
+// FILT_ZERO_REJECT
+static float32_t zeroReject(float32_t rawData[], uint32_t dataCount, float32_t filtStateX[], float32_t filtStateY[]);
+
 SpnFilter::SpnFilter(void)
 {
 	pFilterFunc = NULL;
@@ -23,8 +26,15 @@ bool SpnFilter::configure(SpnFilter_Select_Type filterSel)
 	switch (filterSel)
 	{
 		case FILT_LP_2P_7HZBR_200HZSMP:
-		default:
 			pFilterFunc = &lp2_7_200;
+			break;
+
+		case FILT_ZERO_REJECT:
+			pFilterFunc = &zeroReject;
+			filtStateX[0] = 0;
+			break;
+
+		default:
 			break;
 	}
 
@@ -59,6 +69,33 @@ static float32_t lp2_7_200(float32_t rawData[], uint32_t dataCount, float32_t gx
 	{
 		filtData = gyv[2]; // maintain last value
 	}
+
+	return filtData;
+}
+
+// Zero reject filter
+static float32_t zeroReject(float32_t rawData[], uint32_t dataCount, float32_t gxv[], float32_t gyv[]) // 200hz
+{
+	float32_t filtData = 0.0;
+
+	// If current and previous data is zero
+	if((rawData[0] == 0) && (gxv[0] == 0))
+	{
+		filtData = 0.0;
+	}
+	// If current is zero, but previous is non-zero
+	else if((rawData[0] == 0) && (gxv[0] != 0))
+	{
+		filtData = gxv[0];
+	}
+	// If current is non-zero
+	else
+	{
+		filtData = rawData[0];
+	}
+
+	// Update previous data
+	gxv[0] = rawData[0];
 
 	return filtData;
 }
