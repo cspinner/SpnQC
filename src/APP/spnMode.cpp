@@ -66,7 +66,7 @@ void spnModeUpdate(void)
 			break;
 
 		case MODE_STANDBY_E:
-			if((userInput == 'z' ) || (userInput == 'Z'))
+			if((spnTransceiverIsEnableSet() == true) && (spnTransceiverGetThrottlePct() > 25.0))
 			{
 				spnGlobalMode = MODE_CALIBRATE_E;
 			}
@@ -90,9 +90,14 @@ void spnModeUpdate(void)
 			{
 				spnGlobalMode = MODE_STOP_E;
 			}
-			if((userInput == 'r' ) || (userInput == 'R'))
+			if((userInput == 'r' ) || (userInput == 'R') ||
+			  (spnTransceiverGetThrottlePct() < 1.0))
 			{
 				spnGlobalMode = MODE_RUN_E;
+			}
+			if(spnTransceiverIsEnableSet() == false)
+			{
+				spnGlobalMode = MODE_STANDBY_E;
 			}
 
 			// check for disconnection - error condition
@@ -109,12 +114,6 @@ void spnModeUpdate(void)
 		case MODE_STOP_E:
 		{
 			spnGlobalMode = MODE_STOP_E;
-
-			// check for disconnection - not necessarily an error
-			if(spnUserInputCommEstablished() == false)
-			{
-				spnGlobalMode = MODE_ESTABLISH_COMM_E;
-			}
 		}
 		break;
 

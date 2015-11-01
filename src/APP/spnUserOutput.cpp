@@ -88,7 +88,9 @@ void spnUserOutputUpdate(uint32_t frame)
 	// Output the data
 	if((frame % 2) == 0)
 	{
+#ifndef NOCONSOLE
 		userOutputConsole();
+#endif
 	}
 
 	userOutputFile();

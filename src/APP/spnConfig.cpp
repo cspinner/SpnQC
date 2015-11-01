@@ -146,7 +146,7 @@ const SpnQC_Config_Entry_Type configEntries[] = {
         &spnQcConfig.transceiver.gpioPin[3]
     },	
     {	
-        "TPIN5",
+        "ENABLEPIN",
         UINT_E,
         &spnQcConfig.transceiver.gpioPin[4]
     },	
@@ -177,32 +177,32 @@ const SpnQC_Config_Entry_Type configEntries[] = {
     },
     {
         "PWZERO",
-        INT_E,
+		FLOAT_E,
         &spnQcConfig.transceiver.pulseWidthZero
     },
     {
         "PWFULL",
-        INT_E,
+		FLOAT_E,
         &spnQcConfig.transceiver.pulseWidthFull
     },
     {
         "MAXTHRNG",
-        INT_E,
+		FLOAT_E,
         &spnQcConfig.transceiver.maxThrottleRngPct
     },
     {
         "MAXELERNG",
-        INT_E,
+		FLOAT_E,
         &spnQcConfig.transceiver.maxElevatorRngDeg
     },
     {
         "MAXAILRNG",
-        INT_E,
+		FLOAT_E,
         &spnQcConfig.transceiver.maxAileronRngDeg
     },
     {
         "MAXRUDRNG",
-        INT_E,
+		FLOAT_E,
         &spnQcConfig.transceiver.maxRudderRngDeg
     },
     {

@@ -10,6 +10,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define MAX_HISTORY (MAX_POLES_ZEROS+1) // for FILT_ZERO_REJECT
+
 // FILT_LP_2P_7HZBR_200HZSMP
 static float32_t lp2_7_200(float32_t rawData[], uint32_t dataCount, float32_t filtStateX[], float32_t filtStateY[]); // 200hz
 
@@ -31,7 +33,11 @@ bool SpnFilter::configure(SpnFilter_Select_Type filterSel)
 
 		case FILT_ZERO_REJECT:
 			pFilterFunc = &zeroReject;
-			filtStateX[0] = 0;
+			for(uint32_t i = 0; i < MAX_HISTORY; i++)
+			{
+				filtStateX[i] = 0;
+				filtStateY[i] = 0;
+			}
 			break;
 
 		default:
@@ -78,27 +84,85 @@ static float32_t zeroReject(float32_t rawData[], uint32_t dataCount, float32_t g
 {
 	float32_t filtData = 0.0;
 
-	// If current and previous data is zero
-	if((rawData[0] == 0) && (gxv[0] == 0))
-	{
-		filtData = 0.0;
-	}
-	// If current is zero, but previous is non-zero
-	else if((rawData[0] == 0) && (gxv[0] != 0))
+	if(rawData[0] == 0)
 	{
 		filtData = gxv[0];
+	}
+	else
+	{
+		filtData = rawData[0];
+		gxv[0] = rawData[0];
+	}
+
+	return filtData;
+}
+
+#if 0
+// Zero reject filter
+static float32_t zeroReject(float32_t rawData[], uint32_t dataCount, float32_t gxv[], float32_t gyv[]) // 200hz
+{
+	float32_t filtData = 0.0;
+
+	// Find out if any past values were non-zero
+	bool allPreviousAreZero = true;
+	for(uint32_t i = 0; i < MAX_HISTORY; i++)
+	{
+		if(gxv[i] != 0)
+		{
+			allPreviousAreZero = false;
+			filtData = gxv[i];
+			break;
+		}
+//		printf("gxv[%i] = %f\n", i, gxv[i]);
+	}
+	for(uint32_t i = 0; i < MAX_HISTORY; i++)
+	{
+		if(gyv[i] != 0)
+		{
+			allPreviousAreZero = false;
+			filtData = gyv[i];
+			break;
+		}
+//		printf("gyv[%i] = %f\n", i, gyv[i]);
+	}
+
+	// If current and previous data is zero
+	if((rawData[0] == 0) && allPreviousAreZero)
+	{
+		filtData = 0.0;
+//		printf("All Zero detect!\n");
+	}
+	// If current is zero, but at least one previous is non-zero
+	else if((rawData[0] == 0) && !allPreviousAreZero)
+	{
+//		printf("Zero filtered!\n");
 	}
 	// If current is non-zero
 	else
 	{
+//		printf("Good!\n");
 		filtData = rawData[0];
 	}
 
-	// Update previous data
+//	printf("rawData[0]: %f\n", rawData[0]);
+//	printf("gxv[0]: %f\n", gxv[0]);
+//	printf("\n\n\n\n\n\n\n");
+
+	// Shift previous data (y is older than x)
+	for(uint32_t i = (MAX_HISTORY-1); i > 0; i--)
+	{
+		gyv[i] = gyv[i-1];
+	}
+	gyv[0] = gxv[MAX_HISTORY-1];
+	for(uint32_t i = (MAX_HISTORY-1); i > 0; i--)
+	{
+		gxv[i] = gxv[i-1];
+	}
 	gxv[0] = rawData[0];
 
 	return filtData;
 }
+#endif
 //
 //// Low pass filter - 2 poles, cutoff @ 4Hz - use for Gyro
 //static void lp2_4(SpnNineAxisMotion_Raw_Data_Type rawData[], SpnNineAxisMotion_Raw_Data_Type* filtData, uint32_t dataCount)

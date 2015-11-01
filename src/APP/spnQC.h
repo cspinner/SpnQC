@@ -166,6 +166,7 @@ float32_t spnTransceiverGetThrottlePct(void);
 float32_t spnTransceiverGetElevatorAngle(void);
 float32_t spnTransceiverGetAileronAngle(void);
 float32_t spnTransceiverGetRudderAngle(void);
+bool spnTransceiverIsEnableSet(void);
 bool spnTransceiverIsActive(void);
 
 bool spnServerInit(uint16_t port);

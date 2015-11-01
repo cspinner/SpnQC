@@ -9,8 +9,10 @@
 #include "HAL.h"
 #include "spnFilter.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #define PW2CMD(U,S) (((float32_t)U-S.intercept)/S.slope)
+#define PW2BOOL(U) (U > 1400)
 
 // (y - b) / m = c  --- linear relationship between command and pulse width
 // command = (commanded pulse width - intercept) / slope
@@ -29,12 +31,14 @@ enum
 	TXR_ELEVATOR_PIN_E,
 	TXR_AILERON_PIN_E,
 	TXR_RUDDER_PIN_E,
+	TXR_ENABLE_PIN_E,
 	TXR_NUM_PIN_E
 };
 
 static bool overrideModeEnabled = false;
 static spnRxInputType txrCfg[TXR_NUM_PIN_E];
 static SpnFilter zrFilter[TXR_NUM_PIN_E];
+static SpnFilter lpFilter[TXR_NUM_PIN_E];
 
 bool spnTransceiverInit(void)
 {
@@ -49,17 +53,24 @@ bool spnTransceiverInit(void)
     	txrCfg[TXR_ELEVATOR_PIN_E].range = pCfg->transceiver.maxElevatorRngDeg;
     	txrCfg[TXR_AILERON_PIN_E].range = pCfg->transceiver.maxAileronRngDeg;
     	txrCfg[TXR_RUDDER_PIN_E].range = pCfg->transceiver.maxRudderRngDeg;
+    	txrCfg[TXR_ENABLE_PIN_E].range = 1;
 
     	txrCfg[TXR_THROTTLE_PIN_E].pinIdx = 0;
     	txrCfg[TXR_ELEVATOR_PIN_E].pinIdx = 1;
     	txrCfg[TXR_AILERON_PIN_E].pinIdx = 2;
     	txrCfg[TXR_RUDDER_PIN_E].pinIdx = 3;
+    	txrCfg[TXR_ENABLE_PIN_E].pinIdx = 4;
 
 		for(uint32_t i = 0; i < TXR_NUM_PIN_E; i++)
 		{
 			txrCfg[i].slope = (pCfg->transceiver.pulseWidthFull - pCfg->transceiver.pulseWidthZero)/txrCfg[i].range;
 			txrCfg[i].intercept = pCfg->transceiver.pulseWidthZero;
 			zrFilter[i].configure(FILT_ZERO_REJECT);
+			lpFilter[i].configure(FILT_LP_2P_7HZBR_200HZSMP);
+//			printf("%i slope: %f\n", i, txrCfg[i].slope);
+//			printf("%i intercept: %f\n", i, txrCfg[i].intercept);
+//			printf("%i range: %f\n", i, txrCfg[i].range);
+//			printf("%i pin: %i\n", i, txrCfg[i].pinIdx);
 		}
 
 		// Initialize servo inputs
@@ -88,12 +99,25 @@ float32_t spnTransceiverGetThrottlePct(void)
     }
     else
     {
+    	float32_t widthUsecFloat;
+
     	HAL_SERVO_PULSE_WIDTH_GET(txrCfg[TXR_THROTTLE_PIN_E].pinIdx, &txrCfg[TXR_THROTTLE_PIN_E].widthUsec);
 
-    	txrCfg[TXR_THROTTLE_PIN_E].widthUsec =
-    			zrFilter[TXR_THROTTLE_PIN_E].update((float32_t*)&txrCfg[TXR_THROTTLE_PIN_E].widthUsec, 1);
+    	widthUsecFloat = txrCfg[TXR_THROTTLE_PIN_E].widthUsec;
+
+    	widthUsecFloat = zrFilter[TXR_THROTTLE_PIN_E].update(&widthUsecFloat, 1);
+    	txrCfg[TXR_THROTTLE_PIN_E].widthUsec = lpFilter[TXR_THROTTLE_PIN_E].update(&widthUsecFloat, 1);
 
     	throttlePct = PW2CMD(txrCfg[TXR_THROTTLE_PIN_E].widthUsec, txrCfg[TXR_THROTTLE_PIN_E]);
+    	clamp(throttlePct, 0, txrCfg[TXR_THROTTLE_PIN_E].range);
+//    	throttlePct = txrCfg[TXR_THROTTLE_PIN_E].widthUsec;
+
+//    	printf("txrCfg[TXR_THROTTLE_PIN_E].pinIdx: %i\n", txrCfg[TXR_THROTTLE_PIN_E].pinIdx);
+//		printf("txrCfg[TXR_THROTTLE_PIN_E].widthUsec: %i\n", txrCfg[TXR_THROTTLE_PIN_E].widthUsec);
+//		printf("txrCfg[TXR_THROTTLE_PIN_E].slope: %f\n", txrCfg[TXR_THROTTLE_PIN_E].slope);
+//		printf("txrCfg[TXR_THROTTLE_PIN_E].intercept: %f\n", txrCfg[TXR_THROTTLE_PIN_E].intercept);
+//		printf("throttlePct: %f\n", throttlePct);
+//		printf("\n\n\n\n\n\n\n");
     }
 
 	return throttlePct;
@@ -121,12 +145,18 @@ float32_t spnTransceiverGetElevatorAngle(void)
     }
     else
     {
+    	float32_t widthUsecFloat;
+
     	HAL_SERVO_PULSE_WIDTH_GET(txrCfg[TXR_ELEVATOR_PIN_E].pinIdx, &txrCfg[TXR_ELEVATOR_PIN_E].widthUsec);
 
-    	txrCfg[TXR_ELEVATOR_PIN_E].widthUsec =
-    			zrFilter[TXR_ELEVATOR_PIN_E].update((float32_t*)&txrCfg[TXR_ELEVATOR_PIN_E].widthUsec, 1);
+    	widthUsecFloat = txrCfg[TXR_ELEVATOR_PIN_E].widthUsec;
 
-    	elevAngle = PW2CMD(txrCfg[TXR_ELEVATOR_PIN_E].widthUsec, txrCfg[TXR_ELEVATOR_PIN_E]) - txrCfg[TXR_ELEVATOR_PIN_E].range;
+    	widthUsecFloat = zrFilter[TXR_ELEVATOR_PIN_E].update(&widthUsecFloat, 1);
+    	txrCfg[TXR_ELEVATOR_PIN_E].widthUsec = lpFilter[TXR_ELEVATOR_PIN_E].update(&widthUsecFloat, 1);
+
+    	elevAngle = PW2CMD(txrCfg[TXR_ELEVATOR_PIN_E].widthUsec, txrCfg[TXR_ELEVATOR_PIN_E]) - (txrCfg[TXR_ELEVATOR_PIN_E].range/2);
+    	clamp(elevAngle, -txrCfg[TXR_ELEVATOR_PIN_E].range/2, txrCfg[TXR_ELEVATOR_PIN_E].range/2);
+//    	elevAngle = txrCfg[TXR_ELEVATOR_PIN_E].widthUsec;
     }
 
 	return elevAngle;
@@ -154,14 +184,20 @@ float32_t spnTransceiverGetAileronAngle(void)
     }
     else
     {
+    	float32_t widthUsecFloat;
+
     	HAL_SERVO_PULSE_WIDTH_GET(txrCfg[TXR_AILERON_PIN_E].pinIdx, &txrCfg[TXR_AILERON_PIN_E].widthUsec);
 
-    	txrCfg[TXR_AILERON_PIN_E].widthUsec =
-    			zrFilter[TXR_AILERON_PIN_E].update((float32_t*)&txrCfg[TXR_AILERON_PIN_E].widthUsec, 1);
+    	widthUsecFloat = txrCfg[TXR_AILERON_PIN_E].widthUsec;
 
-    	ailAngle = PW2CMD(txrCfg[TXR_AILERON_PIN_E].widthUsec, txrCfg[TXR_AILERON_PIN_E]) - txrCfg[TXR_AILERON_PIN_E].range;
+    	widthUsecFloat = zrFilter[TXR_AILERON_PIN_E].update(&widthUsecFloat, 1);
+    	txrCfg[TXR_AILERON_PIN_E].widthUsec = lpFilter[TXR_AILERON_PIN_E].update(&widthUsecFloat, 1);
+
+    	ailAngle = PW2CMD(txrCfg[TXR_AILERON_PIN_E].widthUsec, txrCfg[TXR_AILERON_PIN_E]) - (txrCfg[TXR_AILERON_PIN_E].range/2);
+    	clamp(ailAngle, -txrCfg[TXR_AILERON_PIN_E].range/2, txrCfg[TXR_AILERON_PIN_E].range/2);
+//    	ailAngle = txrCfg[TXR_AILERON_PIN_E].widthUsec;
     }
-
+    spnTransceiverIsEnableSet();
 	return ailAngle;
 }
 
@@ -185,15 +221,52 @@ float32_t spnTransceiverGetRudderAngle(void)
     }
     else
     {
+    	float32_t widthUsecFloat;
+
     	HAL_SERVO_PULSE_WIDTH_GET(txrCfg[TXR_RUDDER_PIN_E].pinIdx, &txrCfg[TXR_RUDDER_PIN_E].widthUsec);
 
-    	txrCfg[TXR_RUDDER_PIN_E].widthUsec =
-    			zrFilter[TXR_RUDDER_PIN_E].update((float32_t*)&txrCfg[TXR_RUDDER_PIN_E].widthUsec, 1);
+    	widthUsecFloat = txrCfg[TXR_RUDDER_PIN_E].widthUsec;
 
-    	rudAngle = PW2CMD(txrCfg[TXR_RUDDER_PIN_E].widthUsec, txrCfg[TXR_RUDDER_PIN_E]) - txrCfg[TXR_RUDDER_PIN_E].range;
+    	widthUsecFloat = zrFilter[TXR_RUDDER_PIN_E].update(&widthUsecFloat, 1);
+    	txrCfg[TXR_RUDDER_PIN_E].widthUsec = lpFilter[TXR_RUDDER_PIN_E].update(&widthUsecFloat, 1);
+
+    	rudAngle = PW2CMD(txrCfg[TXR_RUDDER_PIN_E].widthUsec, txrCfg[TXR_RUDDER_PIN_E]) - (txrCfg[TXR_RUDDER_PIN_E].range/2);
+    	clamp(rudAngle, -txrCfg[TXR_RUDDER_PIN_E].range/2, txrCfg[TXR_RUDDER_PIN_E].range/2);
+//    	rudAngle = txrCfg[TXR_RUDDER_PIN_E].widthUsec;
     }
-    
+
 	return rudAngle;
+}
+
+bool spnTransceiverIsEnableSet(void)
+{
+	static bool isEnabled = false;
+
+	if(overrideModeEnabled)
+    {
+        static bool ovrInput = false;
+
+        char userInput = spnUserInputCharGet(false);
+
+        if((userInput == 'z') || (userInput == 'Z')) ovrInput = true;
+
+        isEnabled = ovrInput;
+    }
+    else
+    {
+    	float32_t widthUsecFloat;
+
+    	HAL_SERVO_PULSE_WIDTH_GET(txrCfg[TXR_ENABLE_PIN_E].pinIdx, &txrCfg[TXR_ENABLE_PIN_E].widthUsec);
+
+    	widthUsecFloat = txrCfg[TXR_ENABLE_PIN_E].widthUsec;
+
+    	widthUsecFloat = zrFilter[TXR_ENABLE_PIN_E].update(&widthUsecFloat, 1);
+    	txrCfg[TXR_ENABLE_PIN_E].widthUsec = lpFilter[TXR_ENABLE_PIN_E].update(&widthUsecFloat, 1);
+
+    	isEnabled = PW2BOOL(txrCfg[TXR_ENABLE_PIN_E].widthUsec);
+    }
+
+	return isEnabled;
 }
 
 bool spnTransceiverIsActive(void)

@@ -140,6 +140,7 @@ static void setCommandMode(void)
 
 		case MODE_CALIBRATE_E:
 			if(previousMode != currentMode) commandMode = CMD_MODE_CALIBRATE_HIGH_E;
+			if((spnTransceiverGetThrottlePct() < 5.0)) commandMode = CMD_MODE_CALIBRATE_LOW_E;
 
 			switch(userInput)
 			{
@@ -201,7 +202,7 @@ static void processCommandMode(void)
 			break;
 
 		case CMD_MODE_CLOSED_LOOP_E:
-			if(throttlePct > 0.0)
+			if(throttlePct > 20.0)
 			{
 //				float32_t kp, ki, kd;
 //				char userInput = spnUserInputCharGet(false);
