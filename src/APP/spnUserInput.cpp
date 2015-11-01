@@ -112,6 +112,9 @@ void spnUserInputUpdate(void)
 	}
 	else if(useTransmitter)
 	{
+		// Acquire Transceiver Input Pulses
+		spnTransceiverUpdate();
+
 		// check for any activity from the transmitter/receiver
 		if(spnTransceiverIsActive())
 		{

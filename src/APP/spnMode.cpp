@@ -66,7 +66,7 @@ void spnModeUpdate(void)
 			break;
 
 		case MODE_STANDBY_E:
-			if((spnTransceiverIsEnableSet() == true) && (spnTransceiverGetThrottlePct() > 25.0))
+			if(spnTransceiverIsEnableSet() == true)
 			{
 				spnGlobalMode = MODE_CALIBRATE_E;
 			}
@@ -91,7 +91,7 @@ void spnModeUpdate(void)
 				spnGlobalMode = MODE_STOP_E;
 			}
 			if((userInput == 'r' ) || (userInput == 'R') ||
-			  (spnTransceiverGetThrottlePct() < 1.0))
+			  (spnTransceiverGetThrottlePct() < 0.5))
 			{
 				spnGlobalMode = MODE_RUN_E;
 			}
@@ -108,8 +108,28 @@ void spnModeUpdate(void)
 			break;
 
 		case MODE_LOST_COMM_E:
-			spnGlobalMode = MODE_LOST_COMM_E;
-			break;
+		{
+			static OSAL_Time_Type lossCommTimeStamp;
+			static OSAL_Time_Type lossCommeTimeOut;
+			static bool tsSet = false;
+
+			if(!tsSet)
+			{
+				spnUtilsMarkTimestamp(&lossCommTimeStamp);
+				lossCommeTimeOut = spnUtilsAddToTimestamp(&lossCommTimeStamp, 30, 0);
+				tsSet = true;
+			}
+
+			if(!spnUtilsTimedOut(&lossCommeTimeOut))
+			{
+				spnGlobalMode = MODE_LOST_COMM_E;
+			}
+			else
+			{
+				spnGlobalMode = MODE_STOP_E;
+			}
+		}
+		break;
 
 		case MODE_STOP_E:
 		{

@@ -162,6 +162,7 @@ void spnMotorsCalibrateDrive(uint32_t level);
 void spnMotorsStopAll(void);
 
 bool spnTransceiverInit(void);
+void spnTransceiverUpdate(void);
 float32_t spnTransceiverGetThrottlePct(void);
 float32_t spnTransceiverGetElevatorAngle(void);
 float32_t spnTransceiverGetAileronAngle(void);

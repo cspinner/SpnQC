@@ -80,6 +80,14 @@ bool spnTransceiverInit(void)
 	return EXIT_SUCCESS;
 }
 
+void spnTransceiverUpdate(void)
+{
+	for(uint32_t i = 0; i < TXR_NUM_PIN_E; i++)
+	{
+		HAL_SERVO_PULSE_SAMPLE(txrCfg[i].pinIdx);
+	}
+}
+
 float32_t spnTransceiverGetThrottlePct(void)
 {
     float32_t throttlePct = 0.0;
@@ -106,10 +114,15 @@ float32_t spnTransceiverGetThrottlePct(void)
     	widthUsecFloat = txrCfg[TXR_THROTTLE_PIN_E].widthUsec;
 
     	widthUsecFloat = zrFilter[TXR_THROTTLE_PIN_E].update(&widthUsecFloat, 1);
-    	txrCfg[TXR_THROTTLE_PIN_E].widthUsec = lpFilter[TXR_THROTTLE_PIN_E].update(&widthUsecFloat, 1);
+    	widthUsecFloat = lpFilter[TXR_THROTTLE_PIN_E].update(&widthUsecFloat, 1);
 
-    	throttlePct = PW2CMD(txrCfg[TXR_THROTTLE_PIN_E].widthUsec, txrCfg[TXR_THROTTLE_PIN_E]);
+    	throttlePct = PW2CMD(widthUsecFloat, txrCfg[TXR_THROTTLE_PIN_E]);
     	clamp(throttlePct, 0, txrCfg[TXR_THROTTLE_PIN_E].range);
+
+    	if(throttlePct < 0.5)
+    	{
+    		throttlePct = 0.0;
+    	}
 //    	throttlePct = txrCfg[TXR_THROTTLE_PIN_E].widthUsec;
 
 //    	printf("txrCfg[TXR_THROTTLE_PIN_E].pinIdx: %i\n", txrCfg[TXR_THROTTLE_PIN_E].pinIdx);
@@ -152,9 +165,9 @@ float32_t spnTransceiverGetElevatorAngle(void)
     	widthUsecFloat = txrCfg[TXR_ELEVATOR_PIN_E].widthUsec;
 
     	widthUsecFloat = zrFilter[TXR_ELEVATOR_PIN_E].update(&widthUsecFloat, 1);
-    	txrCfg[TXR_ELEVATOR_PIN_E].widthUsec = lpFilter[TXR_ELEVATOR_PIN_E].update(&widthUsecFloat, 1);
+    	widthUsecFloat = lpFilter[TXR_ELEVATOR_PIN_E].update(&widthUsecFloat, 1);
 
-    	elevAngle = PW2CMD(txrCfg[TXR_ELEVATOR_PIN_E].widthUsec, txrCfg[TXR_ELEVATOR_PIN_E]) - (txrCfg[TXR_ELEVATOR_PIN_E].range/2);
+    	elevAngle = PW2CMD(widthUsecFloat, txrCfg[TXR_ELEVATOR_PIN_E]) - (txrCfg[TXR_ELEVATOR_PIN_E].range/2);
     	clamp(elevAngle, -txrCfg[TXR_ELEVATOR_PIN_E].range/2, txrCfg[TXR_ELEVATOR_PIN_E].range/2);
 //    	elevAngle = txrCfg[TXR_ELEVATOR_PIN_E].widthUsec;
     }
@@ -191,11 +204,10 @@ float32_t spnTransceiverGetAileronAngle(void)
     	widthUsecFloat = txrCfg[TXR_AILERON_PIN_E].widthUsec;
 
     	widthUsecFloat = zrFilter[TXR_AILERON_PIN_E].update(&widthUsecFloat, 1);
-    	txrCfg[TXR_AILERON_PIN_E].widthUsec = lpFilter[TXR_AILERON_PIN_E].update(&widthUsecFloat, 1);
+    	widthUsecFloat = lpFilter[TXR_AILERON_PIN_E].update(&widthUsecFloat, 1);
 
-    	ailAngle = PW2CMD(txrCfg[TXR_AILERON_PIN_E].widthUsec, txrCfg[TXR_AILERON_PIN_E]) - (txrCfg[TXR_AILERON_PIN_E].range/2);
+    	ailAngle = PW2CMD(widthUsecFloat, txrCfg[TXR_AILERON_PIN_E]) - (txrCfg[TXR_AILERON_PIN_E].range/2);
     	clamp(ailAngle, -txrCfg[TXR_AILERON_PIN_E].range/2, txrCfg[TXR_AILERON_PIN_E].range/2);
-//    	ailAngle = txrCfg[TXR_AILERON_PIN_E].widthUsec;
     }
     spnTransceiverIsEnableSet();
 	return ailAngle;
@@ -228,11 +240,10 @@ float32_t spnTransceiverGetRudderAngle(void)
     	widthUsecFloat = txrCfg[TXR_RUDDER_PIN_E].widthUsec;
 
     	widthUsecFloat = zrFilter[TXR_RUDDER_PIN_E].update(&widthUsecFloat, 1);
-    	txrCfg[TXR_RUDDER_PIN_E].widthUsec = lpFilter[TXR_RUDDER_PIN_E].update(&widthUsecFloat, 1);
+    	widthUsecFloat = lpFilter[TXR_RUDDER_PIN_E].update(&widthUsecFloat, 1);
 
-    	rudAngle = PW2CMD(txrCfg[TXR_RUDDER_PIN_E].widthUsec, txrCfg[TXR_RUDDER_PIN_E]) - (txrCfg[TXR_RUDDER_PIN_E].range/2);
+    	rudAngle = PW2CMD(widthUsecFloat, txrCfg[TXR_RUDDER_PIN_E]) - (txrCfg[TXR_RUDDER_PIN_E].range/2);
     	clamp(rudAngle, -txrCfg[TXR_RUDDER_PIN_E].range/2, txrCfg[TXR_RUDDER_PIN_E].range/2);
-//    	rudAngle = txrCfg[TXR_RUDDER_PIN_E].widthUsec;
     }
 
 	return rudAngle;
@@ -261,9 +272,9 @@ bool spnTransceiverIsEnableSet(void)
     	widthUsecFloat = txrCfg[TXR_ENABLE_PIN_E].widthUsec;
 
     	widthUsecFloat = zrFilter[TXR_ENABLE_PIN_E].update(&widthUsecFloat, 1);
-    	txrCfg[TXR_ENABLE_PIN_E].widthUsec = lpFilter[TXR_ENABLE_PIN_E].update(&widthUsecFloat, 1);
+    	widthUsecFloat = lpFilter[TXR_ENABLE_PIN_E].update(&widthUsecFloat, 1);
 
-    	isEnabled = PW2BOOL(txrCfg[TXR_ENABLE_PIN_E].widthUsec);
+    	isEnabled = PW2BOOL(widthUsecFloat);
     }
 
 	return isEnabled;
@@ -273,11 +284,13 @@ bool spnTransceiverIsActive(void)
 {
 	for(uint32_t i = 0; i < TXR_NUM_PIN_E; i++)
 	{
-		if(txrCfg[i].widthUsec == 0.0)
+//		printf("txrCfg[%i].widthUsec: %u\n", i, txrCfg[i].widthUsec);
+		if(txrCfg[i].widthUsec == 0)
 		{
+//			printf("false\n");
 			return false;
 		}
 	}
-
+//	printf("true\n");
 	return true;
 }

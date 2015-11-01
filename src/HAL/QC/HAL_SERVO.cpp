@@ -159,7 +159,7 @@ static void servoOutOnExit(void)
 /*
  * INPUTS
  */
-bool HAL_SERVO_PULSE_WIDTH_GET(uint32_t gpioIndex, uint32_t* pPulseWidth)
+bool HAL_SERVO_PULSE_SAMPLE(uint32_t gpioIndex)
 {
     // Ensure that we've captured a complete pulse
     if(pulseRecords[gpioIndex].tickUsec[LEVEL_FALLING] > pulseRecords[gpioIndex].tickUsec[LEVEL_RISING])
@@ -167,12 +167,21 @@ bool HAL_SERVO_PULSE_WIDTH_GET(uint32_t gpioIndex, uint32_t* pPulseWidth)
         // 32-bit counter roll-over is OK since we're doing unsigned subtraction...     
         pulseRecords[gpioIndex].tickDiffUsec = pulseRecords[gpioIndex].tickUsec[LEVEL_FALLING] -
                                                pulseRecords[gpioIndex].tickUsec[LEVEL_RISING];
+
+        // Reset for next time
+        pulseRecords[gpioIndex].tickUsec[LEVEL_FALLING] = 0;
+        pulseRecords[gpioIndex].tickUsec[LEVEL_RISING] = 0;
     }
     else
     {
         pulseRecords[gpioIndex].tickDiffUsec = PI_SERVO_OFF;
     }
-    
+
+    return EXIT_SUCCESS;
+}
+
+bool HAL_SERVO_PULSE_WIDTH_GET(uint32_t gpioIndex, uint32_t* pPulseWidth)
+{
     *pPulseWidth = pulseRecords[gpioIndex].tickDiffUsec;
 
     return EXIT_SUCCESS;

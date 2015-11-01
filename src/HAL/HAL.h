@@ -33,6 +33,7 @@ bool HAL_IMU_TEMPERATURE_GET(float* temperature);
 
 bool HAL_SERVO_INPUT_INIT(uint32_t inputCount, const uint32_t* gpioInputList);
 bool HAL_SERVO_OUTPUT_INIT(uint32_t outputCount, const uint32_t* gpioOutputList);
+bool HAL_SERVO_PULSE_SAMPLE(uint32_t gpioIndex);
 bool HAL_SERVO_PULSE_WIDTH_GET(uint32_t gpioIndex, uint32_t* pPulseWidth);
 bool HAL_SERVO_PULSE_WIDTH_SET(uint32_t gpioIndex, uint32_t pulseWidthUsec);
 bool HAL_SERVO_GET_COMMANDED_PULSE_WIDTH(uint32_t gpioIndex, uint32_t* pPulseWidth);

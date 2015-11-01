@@ -15,8 +15,7 @@ typedef enum
 	CMD_MODE_OPEN_LOOP_E,
 	CMD_MODE_CLOSED_LOOP_E,
 	CMD_MODE_STOP_E,
-	CMD_MODE_CALIBRATE_HIGH_E,
-	CMD_MODE_CALIBRATE_LOW_E,
+	CMD_MODE_CALIBRATE_E,
 	CMD_MODE_EMERGENCY_LANDING_E,
 	CMD_MODE_COUNT_E
 } SpnCommand_Mode_Type;
@@ -32,11 +31,8 @@ const char* CMD_MODE_STRINGS[CMD_MODE_COUNT_E] =
 		//CMD_MODE_STOP_E:
 		"CMD STOP MODE",
 
-		//CMD_MODE_CALIBRATE_HIGH_E:
-		"CMD CAL HIGH MODE",
-
-		//CMD_MODE_CALIBRATE_LOW_E:
-		"CMD CAL LOW MODE",
+		//CMD_MODE_CALIBRATE_E:
+		"CMD CAL MODE",
 
 		//CMD_MODE_EMERGENCY_LANDING_E:
 		"CMD EMERGENCY LANDING"
@@ -139,24 +135,7 @@ static void setCommandMode(void)
 			break;
 
 		case MODE_CALIBRATE_E:
-			if(previousMode != currentMode) commandMode = CMD_MODE_CALIBRATE_HIGH_E;
-			if((spnTransceiverGetThrottlePct() < 5.0)) commandMode = CMD_MODE_CALIBRATE_LOW_E;
-
-			switch(userInput)
-			{
-				case 'l':
-				case 'L':
-					commandMode = CMD_MODE_CALIBRATE_LOW_E;
-					break;
-
-				case 'h':
-				case 'H':
-					commandMode = CMD_MODE_CALIBRATE_HIGH_E;
-					break;
-
-				default:
-					break;
-			}
+			if(previousMode != currentMode) commandMode = CMD_MODE_CALIBRATE_E;
 			break;
 
 		case MODE_LOST_COMM_E:
@@ -221,12 +200,13 @@ static void processCommandMode(void)
 			}
 			break;
 
-		case CMD_MODE_CALIBRATE_HIGH_E:
-			spnMotorsCalibrateDrive(0);
-			break;
-
-		case CMD_MODE_CALIBRATE_LOW_E:
-			spnMotorsCalibrateDrive(2);
+		case CMD_MODE_CALIBRATE_E:
+			// ESC's will only arm below a threshold. This just ensures that there isn't
+			//  a bug in the ESC that causes it to arm at a higher throttle.
+			if(throttlePct > 1.0)
+			{
+				spnMotorsStopAll();
+			}
 			break;
 
 		case CMD_MODE_EMERGENCY_LANDING_E:
@@ -236,19 +216,10 @@ static void processCommandMode(void)
 			rudderAngle = 0.0;
 			throttlePct = clamp(prevThrottlePct-5*cmdInterval, 0.0, 100.0);
 
-			// When throttle % nears zero, just transition to stop... we assume the craft is close/on
-			//  the ground at this point
-			if(throttlePct < 0.0001)
-			{
-				commandMode = CMD_MODE_STOP_E;
-			}
-			else
-			{
-				// Keep the craft level while decelerating.
-				pitchPidOut = pitchAnglePID.update(0.0, pitch);
-				rollPidOut = rollAnglePID.update(0.0, roll);
-				yawPidOut = 0.0; // do not care about yaw
-			}
+			// Keep the craft level while decelerating.
+			pitchPidOut = pitchAnglePID.update(0.0, pitch);
+			rollPidOut = rollAnglePID.update(0.0, roll);
+			yawPidOut = 0.0; // do not care about yaw
 			break;
 
 		case CMD_MODE_STOP_E:
