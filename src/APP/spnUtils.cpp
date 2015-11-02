@@ -85,7 +85,6 @@ bool spnUtilsTimeCompare(OSAL_Time_Type* pTsA, OSAL_Time_Type* pTsB)
 bool spnUtilsOpenFileForRead(uint32_t* pFileId, const char *pPathname)
 {
 	PRINT("start spnUtilsOpenFileForRead");
-	printf("az");
 
 	char path[128];
 	strcpy(path, WORKING_DIRECTORY);
@@ -163,7 +162,19 @@ bool spnUtilsOpenFileForAppend(uint32_t* pFileId, const char *pPathname)
 bool spnUtilsCreateFileForWrite(uint32_t* pFileId, const char *pPathname)
 {
 	char path[128];
+	char date[32];
+	char time[32];
+	uint32_t dateLen;
+	uint32_t timeLen;
+
+	OSAL_TIME_GET_DATE_STRING(&dateLen, date);
+	OSAL_TIME_GET_TIME_STRING(&timeLen, time);
+
 	strcpy(path, WORKING_DIRECTORY);
+	strncat(path, date, dateLen);
+	strcat(path, "_");
+	strncat(path, time, timeLen);
+	strcat(path, "_");
 	strcat(path, pPathname);
 
 	return OSAL_OUTPUT_FILE_OPEN(pFileId, path, OSAL_FILE_CREATE_E);

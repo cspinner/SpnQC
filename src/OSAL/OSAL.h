@@ -38,6 +38,8 @@ bool OSAL_TIME_OF_DAY(OSAL_Time_Type* pTimeOfDay);
 bool OSAL_TIME_INT_SET(uint32_t intervalUsec);
 bool OSAL_TIME_INT_START(void);
 bool OSAL_TIME_INT_STOP(void);
+bool OSAL_TIME_GET_DATE_STRING(uint32_t* pStrLen, char* pOutput);
+bool OSAL_TIME_GET_TIME_STRING(uint32_t* pStrLen, char* pOutput);
 
 bool OSAL_HANDLE_INIT(void);
 bool OSAL_HANDLE_SET_ITMR_CB(void (*pCb)(void));

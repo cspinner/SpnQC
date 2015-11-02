@@ -7,8 +7,10 @@
 
 #include "OSAL.h"
 #include <sys/time.h>
+#include <time.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #define OSAL2TV(d,s)                     \
 do                                        \
@@ -86,6 +88,24 @@ bool OSAL_TIME_INT_START(void)
 bool OSAL_TIME_INT_STOP(void)
 {
 	setitimer (ITIMER_REAL, NULL, NULL);
+
+	return EXIT_SUCCESS;
+}
+
+bool OSAL_TIME_GET_DATE_STRING(uint32_t* pStrLen, char* pOutput)
+{
+	time_t t = time(NULL);
+	struct tm tm = *localtime(&t);
+	*pStrLen = sprintf(pOutput, "%d-%d-%d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+
+	return EXIT_SUCCESS;
+}
+
+bool OSAL_TIME_GET_TIME_STRING(uint32_t* pStrLen, char* pOutput)
+{
+	time_t t = time(NULL);
+	struct tm tm = *localtime(&t);
+	*pStrLen = sprintf(pOutput, "%d-%d-%d", tm.tm_hour, tm.tm_min, tm.tm_sec);
 
 	return EXIT_SUCCESS;
 }
