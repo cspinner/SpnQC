@@ -157,6 +157,9 @@ static void setCommandMode(void)
 static void processCommandMode(void)
 {
 	static float32_t prevThrottlePct;
+	static float32_t yawSetPoint;
+	static bool isYawSetPointSet = false;
+
 	float32_t throttlePct = spnTransceiverGetThrottlePct();
 	float32_t elevatorAngle = spnTransceiverGetElevatorAngle();
 	float32_t aileronAngle = spnTransceiverGetAileronAngle();
@@ -194,9 +197,23 @@ static void processCommandMode(void)
 //				if(userInput == '9') { kd += 0.001; }
 //				rollAnglePID.setGains(kp, ki, kd);
 
+				// Set current yaw angle as the "zero" position
+				if(!isYawSetPointSet)
+				{
+					yawSetPoint = yaw;
+					isYawSetPointSet = true;
+				}
+
+				// Adjust set point based on receiver angle
+				yawSetPoint = yawSetPoint + rudderAngle;
+
 				pitchPidOut = pitchAnglePID.update(elevatorAngle, pitch);
 				rollPidOut = rollAnglePID.update(aileronAngle, roll);
-				yawPidOut = yawAnglePID.update(rudderAngle, yaw);
+				yawPidOut = yawAnglePID.update(yawSetPoint, yaw);
+			}
+			else
+			{
+				isYawSetPointSet = false;
 			}
 			break;
 
@@ -213,7 +230,7 @@ static void processCommandMode(void)
 			// reduce previous throttle by 5% per second
 			elevatorAngle = 0.0;
 			aileronAngle = 0.0;
-			rudderAngle = 0.0;
+			rudderAngle = yaw;
 			throttlePct = clamp(prevThrottlePct-5*cmdInterval, 0.0, 100.0);
 
 			// Keep the craft level while decelerating.
