@@ -7,6 +7,7 @@
 
 #include "spnQC.h"
 #include "HAL.h"
+#include "spnFilter.h"
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
@@ -19,6 +20,7 @@ extern "C"
 using namespace std;
 
 static float32_t Pitch, Yaw, Roll;
+static SpnFilter yawFilter;
 
 static void quaternionToEuler(float32_t* quat0, float32_t* quat1, float32_t* quat2, float32_t* quat3,
 						      float32_t* yawRad, float32_t* pitchRad, float32_t* rollRad)
@@ -84,6 +86,9 @@ bool spnSensorManagerInit(void)
 	// Configure sensors
 	status = HAL_IMU_INIT();
 
+	// Configure Yaw Filter
+	yawFilter.configure(FILT_LP_2P_7HZBR_200HZSMP);
+
 	// Set beta used in Madgwick
 	beta = pCfg->mpu9250.beta;
 
@@ -108,8 +113,9 @@ void spnSensorManagerProcessData(void)
 	// MADGWICK
 	//
 	// Update quaternions
-	MadgwickAHRSupdateIMU(gyroIn[X_AXIS], gyroIn[Y_AXIS], gyroIn[Z_AXIS],
-						  accelIn[X_AXIS], accelIn[Y_AXIS], accelIn[Z_AXIS]);
+	MadgwickAHRSupdate(gyroIn[X_AXIS], gyroIn[Y_AXIS], gyroIn[Z_AXIS],
+						  accelIn[X_AXIS], accelIn[Y_AXIS], accelIn[Z_AXIS],
+						  magIn[X_AXIS], magIn[Y_AXIS], magIn[Z_AXIS]);
 
 	// Define output variables from updated quaternion---these are Tait-Bryan angles, commonly used in aircraft orientation.
 	// In this coordinate system, the positive z-axis is down toward Earth.
@@ -124,7 +130,8 @@ void spnSensorManagerProcessData(void)
 
 	// Radians to Degrees
 //	Pitch = pitchRad * 180.0 / PI;
-	Yaw   = yawRad * 180.0 / PI;
+	Yaw = yawRad * 180.0 / PI;
+	Yaw = yawFilter.update(&Yaw, 1);
 //	Roll  = rollRad * 180.0 / PI;
 //
 //	// In this installation, roll is situated at exactly 180 degrees at rest which causes the

@@ -182,17 +182,17 @@ static void userOutputFile(void)
 	if(isFirstOutput)
 	{
 		// write all headings and units
-		sprintf(tempBuf, "SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,TEMP_F,MOTCMD0,MOTCMD1,MOTCMD2,MOTCMD3,THROT,ELEV,AILER,RUDD,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US,GYROX,GYROY,GYROZ,ACCELX,ACCELY,ACCELZ\n");
+		sprintf(tempBuf, "SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,TEMP_F,MOTCMD0,MOTCMD1,MOTCMD2,MOTCMD3,THROT,ELEV,AILER,RUDD,FRAME_TIME_S,FRAME_TIME_MS,FRAME_TIME_US,INT_TIME_S,INT_TIME_MS,INT_TIME_US,GYROX,GYROY,GYROZ,ACCELX,ACCELY,ACCELZ,MAGX,MAGY,MAGZ\n");
 		spnUtilsWriteToFile(OutputFile, tempBuf);
 
-		sprintf(tempBuf, ",,,DEGREES,DEGREES,DEGREES,DEG_F,PCT,PCT,PCT,PCT,PCT,DEGREES,DEGREES,DEGREES,SEC,MSEC,USEC,SEC,MSEC,USEC,DEG/S,DEG/S,DEG/S,G,G,G\n");
+		sprintf(tempBuf, ",,,DEGREES,DEGREES,DEGREES,DEG_F,PCT,PCT,PCT,PCT,PCT,DEGREES,DEGREES,DEGREES,SEC,MSEC,USEC,SEC,MSEC,USEC,DEG/S,DEG/S,DEG/S,G,G,G,uT,uT,uT\n");
 		spnUtilsWriteToFile(OutputFile, tempBuf);
 
 		isFirstOutput = false;
 	}
 
 	// write data to file
-	sprintf(tempBuf, "%s,%s,%i,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%u,%u,%u,%u,%u,%u,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f\n",
+	sprintf(tempBuf, "%s,%s,%i,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%u,%u,%u,%u,%u,%u,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f\n",
 			spnModeGetString(),
 			spnCommandGetModeString(),
 			spnSchedulerGetFrameCount(),
@@ -219,7 +219,14 @@ static void userOutputFile(void)
 			GyroIn[Z_AXIS],
 			AccelIn[X_AXIS],
 			AccelIn[Y_AXIS],
-			AccelIn[Z_AXIS]);
+			AccelIn[Z_AXIS],
+			MagIn[X_AXIS],
+			MagIn[Y_AXIS],
+			MagIn[Z_AXIS]);
+
+
+
+
 
 	spnUtilsWriteToFile(OutputFile, tempBuf);
 }
@@ -232,16 +239,16 @@ static void userOutputSensorDataFile(void)
 	{
 		// write all headings and units
 		spnUtilsWriteToFile(OutputSensorFile,
-				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,GYROX,GYROY,GYROZ,ACCX,ACCY,ACCZ,SEN_TIME_MS,SEN_TIME_US,SEN_S2S_TIME_MS,SEN_S2S_TIME_US\n");
+				"SYSMODE,CMDMODE,FRAME,YAW,PITCH,ROLL,GYROX,GYROY,GYROZ,ACCX,ACCY,ACCZ,MAGX,MAGY,MAGZ,SEN_TIME_MS,SEN_TIME_US,SEN_S2S_TIME_MS,SEN_S2S_TIME_US\n");
 		spnUtilsWriteToFile(OutputSensorFile,
-				",,,DEGREES,DEGREES,DEGREES,DEG/S,DEG/S,DEG/S,G,G,G,MSEC,USEC,MSEC,USEC\n");
+				",,,DEGREES,DEGREES,DEGREES,DEG/S,DEG/S,DEG/S,G,G,G,uT,uT,uT,MSEC,USEC,MSEC,USEC\n");
 
 		isFirstOutput = false;
 	}
 
 	// write data to file
 	char buf[1024];
-	sprintf(buf, "%s,%s,%i,%.1f,%.1f,%.1f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%u,%u,%u,%u\n",
+	sprintf(buf, "%s,%s,%i,%.1f,%.1f,%.1f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%u,%u,%u,%u\n",
 			spnModeGetString(),
 			spnCommandGetModeString(),
 			spnSchedulerGetFrameCount(),
@@ -254,6 +261,9 @@ static void userOutputSensorDataFile(void)
 			AccelInRaw[X_AXIS],
 			AccelInRaw[Y_AXIS],
 			AccelInRaw[Z_AXIS],
+			MagIn[X_AXIS],
+			MagIn[Y_AXIS],
+			MagIn[Z_AXIS],
 			senElapsedMSec,
 			senElapsedUSec,
 			senS2SElapsedMSec,

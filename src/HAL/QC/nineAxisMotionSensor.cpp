@@ -241,6 +241,7 @@ bool NineAxisMotionSensor::configure(void* cfg)
 		calData = mpu9250_config->calibration;
 		acquireCount = 0;
 
+
 		for(uint32_t axis = X_AXIS; axis < NUM_AXIS; axis++)
 		{
 			accelDataFilter[axis].configure(FILT_LP_2P_7HZBR_200HZSMP);
@@ -340,6 +341,11 @@ bool NineAxisMotionSensor::configure(void* cfg)
 			writeMagRegister(AK8963_CNTL1_ADDR, 0x00); // Enter power down mode
 			spnUtilsWaitUsec(100); // Wait the required time before exiting power down
 			writeMagRegister(AK8963_CNTL1_ADDR, 0x16); // Continuous Measurement Mode 2 (100Hz), 16-bit mode
+
+//			for(int i= 16; i < 19; i++)
+//			{
+//				printf("%i\n", mag_registers.regByIndex[i])
+//;			}
 		}
 	}
 	else
@@ -367,34 +373,22 @@ void NineAxisMotionSensor::acquireData(void)
 
 	temperatureData = ((int16_t)((readRegister(MPU9250_TEMP_OUT_H_ADDR) << 8)|readRegister(MPU9250_TEMP_OUT_L_ADDR)))*1.0;
 
+	readMagRegisterSet(AK8963_HXL_ADDR, 12, (char*)&mag_registers.regByIndex[3]);
+//	for(int i= 13; i < 16; i++)
+//	{
+//		printf("%i\n", mag_registers.regByIndex[i])
+//;			}
+	// perform sensitivity adjustment
+//	float32_t rawMagDataTemp[NUM_AXIS];
+//	rawMagDataTemp[X_AXIS] = ((int16_t)((mag_registers.regByName.HXH << 8)|mag_registers.regByName.HXL))*1.0;
+//	rawMagDataTemp[Y_AXIS] = ((int16_t)((mag_registers.regByName.HYH << 8)|mag_registers.regByName.HYL))*1.0;
+//	rawMagDataTemp[Z_AXIS] = ((int16_t)((mag_registers.regByName.HZH << 8)|mag_registers.regByName.HZL))*1.0;
+
+	rawMagData[X_AXIS][acquireCount] = ((int16_t)((mag_registers.regByName.HXH << 8)|mag_registers.regByName.HXL))*1.0;
+    rawMagData[Y_AXIS][acquireCount] = ((int16_t)((mag_registers.regByName.HYH << 8)|mag_registers.regByName.HYL))*1.0;
+	rawMagData[Z_AXIS][acquireCount] = ((int16_t)((mag_registers.regByName.HZH << 8)|mag_registers.regByName.HZL))*1.0;
+
 	acquireCount++;
-
-//	readMagRegisterSet(AK8963_HXL_ADDR, 12, (char*)&mag_registers.regByIndex[3]);
-//
-//	// perform sensitivity adjustment
-//	pMagUnfiltered->x_raw = ((int16_t)((mag_registers.regByName.HXH << 8)|mag_registers.regByName.HXL))*1.0;
-//	pMagUnfiltered->y_raw = ((int16_t)((mag_registers.regByName.HYH << 8)|mag_registers.regByName.HYL))*1.0;
-//	pMagUnfiltered->z_raw = ((int16_t)((mag_registers.regByName.HZH << 8)|mag_registers.regByName.HZL))*1.0;
-
-
-//  //
-//	// APPLY CALIBRATION
-//	//
-//
-//	// Apply factory sensitivity adjustment
-//	filtMagData[X_AXIS] = filtMagData[X_AXIS] * (((mag_registers.regByName.ASAX - 128) * 0.5)/128.0 + 1.0);
-//	filtMagData[Y_AXIS] = filtMagData[Y_AXIS] * (((mag_registers.regByName.ASAY - 128) * 0.5)/128.0 + 1.0);
-//	filtMagData[Z_AXIS] = filtMagData[Z_AXIS] * (((mag_registers.regByName.ASAZ - 128) * 0.5)/128.0 + 1.0);
-//
-//	// Apply bias to compensate for hard errors (note bias is in mG, need to convert back to uT):
-//	filtMagData[X_AXIS] -= calData.magb[X_AXIS] / 10.0;
-//	filtMagData[Y_AXIS] -= calData.magb[Y_AXIS] / 10.0;
-//	filtMagData[Z_AXIS] -= calData.magb[Z_AXIS] / 10.0;
-//
-//	// Apply scale to compensate for soft errors:
-//	filtMagData[X_AXIS] *= calData.mags[X_AXIS];
-//	filtMagData[Y_AXIS] *= calData.mags[Y_AXIS];
-//  filtMagData[Z_AXIS] *= calData.mags[Z_AXIS];
 }
 
 bool NineAxisMotionSensor::retrieveData(void* opt, uint32_t* size, void* data)
@@ -434,6 +428,8 @@ bool NineAxisMotionSensor::retrieveData(uint32_t* size, void* data)
 		//
 		float32_t gyroNewRaw[NUM_AXIS][16];
 		float32_t accelNewRaw[NUM_AXIS][16];
+		float32_t magNewRaw[NUM_AXIS][16];
+
 		uint32_t newindex;
 
 		// Average every pair of samples
@@ -445,6 +441,7 @@ bool NineAxisMotionSensor::retrieveData(uint32_t* size, void* data)
 			{
 				gyroNewRaw[axis][newindex] = (rawGyroData[axis][i*2] + rawGyroData[axis][i*2+1])/2;
 				accelNewRaw[axis][newindex] = (rawAccelData[axis][i*2] + rawAccelData[axis][i*2+1])/2;
+				magNewRaw[axis][newindex] = (rawMagData[axis][i*2] + rawMagData[axis][i*2+1])/2;
 				newindex++;
 
 			}
@@ -457,6 +454,7 @@ bool NineAxisMotionSensor::retrieveData(uint32_t* size, void* data)
 			{
 				gyroNewRaw[axis][newindex] = rawGyroData[axis][acquireCount-1];
 				accelNewRaw[axis][newindex] = rawAccelData[axis][acquireCount-1];
+				magNewRaw[axis][newindex] = rawMagData[axis][acquireCount-1];
 			}
 		}
 
@@ -466,7 +464,7 @@ bool NineAxisMotionSensor::retrieveData(uint32_t* size, void* data)
 			filtAccelData[axis] = accelDataFilter[axis].update(accelNewRaw[axis],  (acquireCount/2)+(acquireCount%2));
 //			if(acquireCount>0)printf("%f\n",filtAccelData[2]);
 			filtGyroData[axis] = gyroDataFilter[axis].update(gyroNewRaw[axis], (acquireCount/2)+(acquireCount%2));
-//			filtMagData[axis] = magDataFilter[axis].update(magNewRaw[axis], &filtMagData[axis], (acquireCount/2)+(acquireCount%2));
+			filtMagData[axis] = magDataFilter[axis].update(magNewRaw[axis], (acquireCount/2)+(acquireCount%2));
 		}
 
 //		// RAW DATA PASSTHROUGH
@@ -474,9 +472,29 @@ bool NineAxisMotionSensor::retrieveData(uint32_t* size, void* data)
 //		{
 //			filtAccelData[axis] = rawAccelData[axis][0]; // raw pass through
 //			filtGyroData[axis] = rawGyroData[axis][0]; // raw pass through
+//			filtMagData[axis] = rawMagData[axis][0]; // raw pass through
 //		}
 
 		acquireCount = 0;
+
+		//
+		// APPLY CALIBRATION
+		//
+
+		// Apply factory sensitivity adjustment
+		filtMagData[X_AXIS] = filtMagData[X_AXIS] * (((mag_registers.regByName.ASAX - 128) * 0.5)/128.0 + 1.0);
+		filtMagData[Y_AXIS] = filtMagData[Y_AXIS] * (((mag_registers.regByName.ASAY - 128) * 0.5)/128.0 + 1.0);
+		filtMagData[Z_AXIS] = filtMagData[Z_AXIS] * (((mag_registers.regByName.ASAZ - 128) * 0.5)/128.0 + 1.0);
+
+		// Apply bias to compensate for hard errors (note bias is in mG, need to convert back to uT):
+		filtMagData[X_AXIS] -= calData.magb[X_AXIS] / 10.0;
+		filtMagData[Y_AXIS] -= calData.magb[Y_AXIS] / 10.0;
+		filtMagData[Z_AXIS] -= calData.magb[Z_AXIS] / 10.0;
+
+		// Apply scale to compensate for soft errors:
+		filtMagData[X_AXIS] *= calData.mags[X_AXIS];
+		filtMagData[Y_AXIS] *= calData.mags[Y_AXIS];
+		filtMagData[Z_AXIS] *= calData.mags[Z_AXIS];
 
 		//
 		// CONVERT TO ENGINEERING UNITS

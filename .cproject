@@ -62,7 +62,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/OSAL}&quot;"/>
 									<listOptionValue builtIn="false" value="/Volumes/xtools/arm-none-linux-gnueabi/arm-none-linux-gnueabi/include/c++/4.8.2"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.1258049645" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1258049645" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="NOCONSOLE"/>
+								</option>
 								<option id="gnu.cpp.compiler.option.dialect.std.717173716" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.335797857" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
